@@ -1,5 +1,7 @@
 # SUMD v1 Specification
 
+> [README](./README.md) | [CHANGELOG](./CHANGELOG.md) | [TODO](./TODO.md) | [docs/USAGE.md](./docs/USAGE.md)
+
 ## Overview
 
 SUMD (Structured Unified Markdown Descriptor) is a semantic project descriptor format in Markdown that defines intent, structure, execution entry points, and mental model of a system for both humans and LLMs.

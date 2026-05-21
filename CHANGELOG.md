@@ -37,6 +37,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added support for standard gitignore patterns including wildcards, directory patterns, and negation
 - Improved file collection performance by skipping ignored files and directories
 
+## [0.3.47] - 2026-05-21
+
+### Docs
+- Update CHANGELOG.md
+- Update README.md
+- Update SPEC.md
+- Update SUMD.md
+- Update TODO.md
+- Update docs/USAGE.md
+- Update project/README.md
+- Update project/context.md
+- Update sumd_logic_validator/README.md
+
+### Test
+- Update testql-scenarios/sumd-cli.testql.toon.yaml
+- Update tests/test_architectural_logic.py
+
+### Other
+- Update TODO.txt
+- Update print_errors.py
+- Update project.sh
+- Update project/analysis.toon.yaml
+- Update project/logic.logicml
+- Update project/logic.pl
+- Update project/map.toon.yaml
+- Update sumd/__main__.py
+- Update sumd/cli.py
+- Update sumd/extractor.py
+- ... and 19 more files
+
 ## [0.3.46] - 2026-05-02
 
 ### Docs
@@ -600,6 +630,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 88 unit tests across `test_pipeline.py`, `test_sections.py` (30), `test_extractor.py` (37)
 - `--cov-branch` added to pytest `addopts` for accurate branch+statement coverage reporting
 - pyqual gates: `coverage_min: 35`, `vallm_pass_min: 60`
+- **PyPI Release**: Published to PyPI: https://pypi.org/project/sumd/0.2.0rc1/
 
 ### Fixed
 - Single `.venv`: removed dual-venv split (`.venv` vs `venv`), all tasks use `{{.VENV_PY}} = .venv/bin/python`
@@ -630,6 +661,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - `generate_sumd_content` refactored to 4-line shim delegating to `RenderPipeline` (fan-out: 34→2)
+- Extracted core logic into separate modular files: `sumd/extractor.py`, `sumd/renderer.py`, and `sumd/toon_parser.py`
+- Replaced `sumd/generator.py` with an 18-line shim re-exporting `extractor.py` and `renderer.py`
 - `_render_code_analysis` accepts `skip_files` param to avoid duplicating call graph data
 - Parser `_VALID_MARKPACT_KINDS` whitelist extended with 6 new semantic kinds
 

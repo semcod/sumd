@@ -2,13 +2,13 @@
 
 ## AI Cost Tracking
 
-![PyPI](https://img.shields.io/badge/pypi-costs-blue) ![Version](https://img.shields.io/badge/version-0.1.31-blue) ![Python](https://img.shields.io/badge/python-3.9+-blue) ![License](https://img.shields.io/badge/license-Apache--2.0-green)
+![PyPI](https://img.shields.io/badge/pypi-costs-blue) ![Version](https://img.shields.io/badge/version-0.3.47-blue) ![Python](https://img.shields.io/badge/python-3.9+-blue) ![License](https://img.shields.io/badge/license-Apache--2.0-green)
 ![AI Cost](https://img.shields.io/badge/AI%20Cost-$7.50-orange) ![Human Time](https://img.shields.io/badge/Human%20Time-33.0h-blue) ![Model](https://img.shields.io/badge/Model-openrouter%2Fqwen%2Fqwen3--coder--next-lightgrey)
 
-- 🤖 **LLM usage:** $7.5000 (85 commits)
+- 🤖 **LLM usage:** $7.5000 (86 commits)
 - 👤 **Human dev:** ~$3300 (33.0h @ $100/h, 30min dedup)
 
-Generated on 2026-05-02 using [openrouter/qwen/qwen3-coder-next](https://openrouter.ai/qwen/qwen3-coder-next)
+Generated on 2026-05-21 using [openrouter/qwen/qwen3-coder-next](https://openrouter.ai/qwen/qwen3-coder-next)
 
 ---
 
@@ -534,6 +534,16 @@ task test:report
 sumd scaffold ./my-project --type smoke
 sumd scaffold ./my-project --type crud
 ```
+
+## Dokumentacja
+
+- **[CHANGELOG.md](./CHANGELOG.md)** — Historia zmian i wydania
+- **[TODO.md](./TODO.md)** — Aktualne zadania i planowane funkcje
+- **[docs/USAGE.md](./docs/USAGE.md)** — Szczegółowa dokumentacja użycia
+- **[docs/TESTQL_AUTOLOOP_ONBOARDING.md](./docs/TESTQL_AUTOLOOP_ONBOARDING.md)** — Onboarding dla TestQL + MCP + aider loops
+- **[SPEC.md](./SPEC.md)** — Specyfikacja formatu SUMD
+- **[SUMD.md](./SUMD.md)** — Dokumentacja projektu sumd (wygenerowana)
+- **[SUMR.md](./SUMR.md)** — Raport refaktoryzacji (wygenerowany)
 
 ## License
 

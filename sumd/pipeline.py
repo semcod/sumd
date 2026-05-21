@@ -45,6 +45,7 @@ from sumd.extractor import (
     extract_swop,
     extract_taskfile,
     generate_map_toon,
+    generate_project_logic,
     required_tools_for_profile,
 )
 from sumd.sections import PROFILES, SECTION_REGISTRY
@@ -53,23 +54,30 @@ from sumd.toon_parser import extract_testql_scenarios
 
 
 def _refresh_map_toon(proj_dir: Path) -> None:
-    """Regenerate project/map.toon.yaml from current source before embedding.
+    """Regenerate project/map.toon.yaml and project/logic.pl from current source before embedding.
 
     Called automatically by RenderPipeline._collect() so that every
-    `sumd scan` / `sumd .` / `sumr .` embeds an up-to-date map regardless
-    of whether the user ran `sumd map` manually beforehand.
+    `sumd scan` / `sumd .` / `sumr .` embeds up-to-date analysis and Prolog logic files.
 
-    Silently skips if generation fails (e.g. no Python sources found).
+    Silently skips if generation fails.
     """
     try:
         content = generate_map_toon(proj_dir)
-        if not content:
-            return
-        map_path = proj_dir / "project" / "map.toon.yaml"
-        map_path.parent.mkdir(parents=True, exist_ok=True)
-        map_path.write_text(content, encoding="utf-8")
+        if content:
+            map_path = proj_dir / "project" / "map.toon.yaml"
+            map_path.parent.mkdir(parents=True, exist_ok=True)
+            map_path.write_text(content, encoding="utf-8")
     except Exception:  # noqa: BLE001
-        pass  # non-fatal — embed will use the previous file if it exists
+        pass
+
+    try:
+        logic_content = generate_project_logic(proj_dir)
+        if logic_content:
+            logic_path = proj_dir / "project" / "logic.pl"
+            logic_path.parent.mkdir(parents=True, exist_ok=True)
+            logic_path.write_text(logic_content, encoding="utf-8")
+    except Exception:  # noqa: BLE001
+        pass
 
 
 def _find_tools_bin_dir(proj_dir: Path) -> Path | None:

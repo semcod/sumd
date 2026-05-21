@@ -913,6 +913,210 @@ def generate_map_toon(proj_dir: Path) -> str:
     return "\n".join(L) + "\n"
 
 
+def generate_project_logic(proj_dir: Path) -> str:
+    """Generate project/logic.pl containing Prolog facts representing the project structure."""
+    proj_dir = proj_dir.resolve()
+    proj_name = proj_dir.name
+    
+    # 1. Project metadata
+    version = "0.0.0"
+    project_type = "python"
+    try:
+        pyproj = extract_pyproject(proj_dir)
+        version = pyproj.get("version", "0.0.0")
+        if not pyproj:
+            pkg_json = extract_package_json(proj_dir)
+            if pkg_json:
+                version = pkg_json.get("version", "0.0.0")
+                project_type = "javascript"
+    except Exception:
+        pass
+        
+    facts = []
+    facts.append("% ── Project Metadata ─────────────────────────────────────")
+    facts.append(f"project_metadata('{proj_name}', '{version}', '{project_type}').\n")
+    
+    # 2. Files
+    facts.append("% ── Project Files ────────────────────────────────────────")
+    lang_counts, modules = _collect_map_files(proj_dir)
+    for rel_path, lines, lang in modules:
+        rel_clean = str(rel_path).replace("'", "\\'")
+        facts.append(f"project_file('{rel_clean}', {lines}, '{lang}').")
+    facts.append("")
+    
+    # 3. Python Analysis (functions, classes, methods)
+    py_modules, all_funcs, all_classes, total_cls = _render_map_detail(proj_dir, modules)
+    
+    facts.append("% ── Python Functions ─────────────────────────────────────")
+    for f in all_funcs:
+        mod_clean = f["mod"].replace("'", "\\'")
+        func_clean = f["name"].replace("'", "\\'")
+        arity = len(f["args"])
+        cc = f["cc"]
+        fan = f["fan"]
+        facts.append(f"python_function('{mod_clean}', '{func_clean}', {arity}, {cc}, {fan}).")
+    facts.append("")
+    
+    facts.append("% ── Python Classes ───────────────────────────────────────")
+    for cls in all_classes:
+        mod_clean = cls["mod"].replace("'", "\\'")
+        cls_clean = cls["name"].replace("'", "\\'")
+        facts.append(f"python_class('{mod_clean}', '{cls_clean}').")
+        for m in cls["methods"]:
+            m_clean = m["name"].replace("'", "\\'")
+            arity = len(m["args"])
+            cc = m["cc"]
+            fan = m["fan"]
+            facts.append(f"python_method('{cls_clean}', '{m_clean}', {arity}, {cc}, {fan}).")
+    facts.append("")
+    
+    # 4. Dependencies
+    facts.append("% ── Dependencies ─────────────────────────────────────────")
+    try:
+        reqs = extract_requirements(proj_dir)
+        for req in reqs:
+            src_file = req["file"].replace("'", "\\'")
+            for dep in req["deps"]:
+                dep_clean = dep.replace("'", "\\'")
+                facts.append(f"project_dependency('{dep_clean}', '{src_file}').")
+    except Exception:
+        pass
+    facts.append("")
+    
+    # 5. Makefile
+    facts.append("% ── Makefile Targets ─────────────────────────────────────")
+    try:
+        makefile = extract_makefile(proj_dir)
+        for target in makefile:
+            tgt_clean = target["target"].replace("'", "\\'")
+            desc_clean = target["desc"].replace("'", "\\'").replace("\n", " ")
+            facts.append(f"makefile_target('{tgt_clean}', '{desc_clean}').")
+    except Exception:
+        pass
+    facts.append("")
+    
+    # 6. Taskfile
+    facts.append("% ── Taskfile Tasks ───────────────────────────────────────")
+    try:
+        tasks = extract_taskfile(proj_dir)
+        for task in tasks:
+            name_clean = task.get("task", "").replace("'", "\\'")
+            desc_clean = task.get("desc", "").replace("'", "\\'").replace("\n", " ")
+            facts.append(f"taskfile_task('{name_clean}', '{desc_clean}').")
+    except Exception:
+        pass
+    facts.append("")
+    
+    # 7. Environment Variables
+    facts.append("% ── Environment Variables ────────────────────────────────")
+    try:
+        env_vars = extract_env(proj_dir)
+        for ev in env_vars:
+            k_clean = ev["key"].replace("'", "\\'")
+            d_clean = ev["default"].replace("'", "\\'")
+            c_clean = ev["comment"].replace("'", "\\'").replace("\n", " ")
+            facts.append(f"env_variable('{k_clean}', '{d_clean}', '{c_clean}').")
+    except Exception:
+        pass
+    facts.append("")
+    
+    # 8. TestQL Scenarios
+    facts.append("% ── TestQL Scenarios ─────────────────────────────────────")
+    try:
+        from sumd.toon_parser import extract_testql_scenarios
+        scenarios = extract_testql_scenarios(proj_dir)
+        for sc in scenarios:
+            file_clean = sc.get("file", "").replace("'", "\\'")
+            type_clean = sc.get("type", "generic").replace("'", "\\'")
+            facts.append(f"testql_scenario('{file_clean}', '{type_clean}').")
+    except Exception:
+        pass
+    facts.append("")
+
+    # 9. Semantic Facts from SUMD.md and app.doql.less
+    facts.append("% ── Semantic Facts from SUMD.md ──────────────────────────")
+    try:
+        semantic_facts = _extract_sumd_semantic_facts(proj_dir)
+        facts.extend(semantic_facts)
+    except Exception:
+        pass
+    facts.append("")
+
+    return "\n".join(facts) + "\n"
+
+
+def _extract_sumd_semantic_facts(proj_dir: Path) -> list[str]:
+    facts = []
+    sumd_path = proj_dir / "SUMD.md"
+    if not sumd_path.exists():
+        return facts
+    
+    content = sumd_path.read_text(encoding="utf-8")
+    
+    # 1. Parse declared files from markpact codeblocks
+    pattern = r"^```(?P<lang>\w+)[ \t]+markpact:(?P<kind>\w+)(?:[ \t]+(?P<attrs>[^\n]*))?$"
+    for m in re.finditer(pattern, content, re.MULTILINE):
+        kind = m.group("kind")
+        attrs = m.group("attrs") or ""
+        # Extract path=...
+        pm = re.search(r"path=([^\s]+)", attrs)
+        if pm:
+            path_val = pm.group(1).strip("'\"")
+            facts.append(f"sumd_declared_file('{path_val}', '{kind}').")
+            
+    # 2. Parse app.doql.less if it exists
+    doql_path = proj_dir / "app.doql.less"
+    if doql_path.exists():
+        doql_content = doql_path.read_text(encoding="utf-8")
+        # Extract interfaces
+        for m in re.finditer(r"interface\[type=\"(?P<type>[^\"]+)\"\](?:\s*\{\s*framework:\s*(?P<fw>[^;]+);)?", doql_content):
+            itype = m.group("type").replace("'", "\\'")
+            if m.group("fw"):
+                ifw = m.group("fw").strip().replace("'", "\\'")
+                facts.append(f"sumd_interface('{itype}', '{ifw}').")
+            else:
+                facts.append(f"sumd_interface('{itype}', '').")
+                
+        # Extract workflows
+        workflow_blocks = re.finditer(r"workflow\[name=\"(?P<name>[^\"]+)\"\]\s*\{(?P<body>[\s\S]*?)\}", doql_content)
+        for wb in workflow_blocks:
+            w_name = wb.group("name").replace("'", "\\'")
+            body = wb.group("body")
+            # Extract trigger
+            trig_m = re.search(r"trigger:\s*([^;]+);", body)
+            w_trig = trig_m.group(1).strip().replace("'", "\\'") if trig_m else ""
+            facts.append(f"sumd_workflow('{w_name}', '{w_trig}').")
+            
+            # If it's a quality workflow, extract the gate name
+            if w_name.startswith("quality:"):
+                gate_name = w_name.split(":", 1)[1]
+                facts.append(f"sumd_quality_workflow('{w_name}', '{gate_name}').")
+                
+            # Extract steps
+            steps = re.finditer(r"step-(?P<idx>\d+):\s*run\s+cmd=(?P<cmd>[^;\n]+);", body)
+            for st in steps:
+                s_idx = st.group("idx")
+                s_cmd = st.group("cmd").strip().replace("'", "\\'")
+                facts.append(f"sumd_workflow_step('{w_name}', {s_idx}, '{s_cmd}').")
+
+    # 3. Parse deployment targets from SUMD.md or compose files
+    compose_path = proj_dir / "docker-compose.yml"
+    if compose_path.exists():
+        facts.append("sumd_deploy_target('docker_compose').")
+        facts.append("sumd_deploy_compose_file('docker-compose.yml').")
+        
+    # 4. Parse pyqual.yaml gates
+    pyqual_path = proj_dir / "pyqual.yaml"
+    if pyqual_path.exists():
+        pyqual_content = pyqual_path.read_text(encoding="utf-8")
+        # Extract gate names
+        for m in re.finditer(r"gate:\s*([^\s\n]+)", pyqual_content):
+            g_name = m.group(1).strip().replace("'", "\\'")
+            facts.append(f"sumd_gate('{g_name}').")
+            
+    return facts
+
+
 # ---------------------------------------------------------------------------
 # Project analysis files
 # ---------------------------------------------------------------------------
@@ -920,6 +1124,7 @@ def generate_map_toon(proj_dir: Path) -> str:
 _PROJECT_ANALYSIS_FILES = [
     ("map.toon.yaml", "toon"),
     ("calls.toon.yaml", "toon"),
+    ("logic.pl", "prolog"),
 ]
 
 # Files loaded only for the 'refactor' profile (pre-refactoring analysis).

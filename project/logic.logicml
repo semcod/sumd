@@ -1,0 +1,3578 @@
+# print_errors.py | 7 lines
+# Re-export module
+type: re-export
+exports:
+  - pathlib.Path
+  - sumd.validator.validate_project_architecture
+
+# __main__.py | 6 lines
+# Re-export module
+type: re-export
+exports:
+  - sumd.cli.main
+
+# prolog_engine.py | Variable, Term, Rule +3 | 431 lines
+
+imports:
+  stdlib: [os, re, subprocess, pathlib.Path, typing]
+  third_party: [pyswip]
+
+Variable:
+  doc: "Represents a logical variable in our pure Python engine."
+  attrs:
+    name: str
+  methods:
+    __init__:
+      sig: (name:str) -> None
+      does: "creates"
+    __repr__:
+      sig: () -> str
+      does: "repr"
+    __eq__:
+      sig: (other) -> bool
+      does: "eq"
+    __hash__:
+      sig: () -> int
+      does: "hash"
+
+Term:
+  doc: "Represents a Prolog term (e.g."
+  attrs:
+    op: str
+  methods:
+    __init__:
+      sig: (op:str) -> None
+      does: "creates"
+    __repr__:
+      sig: () -> str
+      does: "repr"
+    __eq__:
+      sig: (other) -> bool
+      does: "eq"
+
+Rule:
+  doc: "Represents a Prolog rule Head :- Body."
+  attrs:
+    head: Term
+    body: Optional[List[Term]]=None
+  methods:
+    __init__:
+      sig: (head:Term, body:Optional[List[Term]]=None) -> None
+      does: "creates"
+    __repr__:
+      sig: () -> str
+      does: "repr"
+
+PythonPrologDB:
+  doc: "In-memory Prolog database for pure Python execution."
+  methods:
+    __init__:
+      sig: () -> None
+      does: "creates"
+    add_fact:
+      sig: (op:str) -> None
+      does: "creates fact"
+      side: "Adds element"
+    add_rule:
+      sig: (head:Term, body:List[Term]) -> None
+      does: "creates rule"
+      side: "Adds element"
+    parse_and_load:
+      sig: (prolog_text:str) -> None
+      does: "Parses a simple Prolog file into rules/facts."
+      side: "Modifies list"
+
+PythonPrologEngine:
+  doc: "SLD Resolution Logic Interpreter."
+  attrs:
+    db: PythonPrologDB
+  methods:
+    __init__:
+      sig: (db:PythonPrologDB) -> None
+      does: "creates"
+    query:
+      sig: (goal_str:str) -> List[Dict[str, Any]]
+      does: "retrieves"
+      side: "Modifies list"
+    _find_vars:
+      sig: (term:Any) -> List[Variable]
+      does: "retrieves vars"
+      side: "Sets value"
+    _resolve:
+      sig: (goals:List[Any], subst:Dict[Variable,Any]) -> Generator[Dict[Variable, Any], None, None]
+      does: "resolve"
+
+HybridPrologEngine:
+  doc: "Hybrid Logic Engine delegating queries based on backend a..."
+  attrs:
+    prolog_file_path: Union[str,Path]
+  methods:
+    __init__:
+      sig: (prolog_file_path:Union[str,Path]) -> None
+      does: "creates"
+      edge: "error → raise FileNotFoundError"
+    query:
+      sig: (query_str:str) -> List[Dict[str, Any]]
+      does: "Runs query against the best available Prolog backend."
+    _query_pyswip:
+      sig: (query_str:str) -> List[Dict[str, Any]]
+      does: "Executes query using the PySwip wrapper."
+      side: "Modifies list"
+    _query_subprocess:
+      sig: (query_str:str) -> List[Dict[str, Any]]
+      does: "Executes query by spawning a swipl process."
+      side: "Sets value"
+    _query_python:
+      sig: (query_str:str) -> List[Dict[str, Any]]
+      does: "Pure Python fallback logic query."
+    _swipl_executable_exists:
+      sig: () -> bool
+      does: "swipl executable exists"
+
+functions:
+  is_variable:
+    sig: (x:Any) -> bool
+    does: "checks variable"
+  to_term:
+    sig: (x:Any) -> Any
+    does: "converts term"
+  _split_body_terms:
+    sig: (body_str:str) -> List[str]
+    does: "splits body terms"
+    side: "Modifies list"
+  unify:
+    sig: (x:Any, y:Any, subst:Dict[Variable,Any]) -> Optional[Dict[Variable, Any]]
+    does: "Logical unification of x and y under substitution subst."
+  resolve_val:
+    sig: (x:Any, subst:Dict[Variable,Any]) -> Any
+    does: "resolve val"
+  deep_resolve:
+    sig: (x:Any, subst:Dict[Variable,Any]) -> Any
+    does: "deep resolve"
+  extend_subst:
+    sig: (v:Variable, val:Any, subst:Dict[Variable,Any]) -> Optional[Dict[Variable, Any]]
+    does: "extend subst"
+  occurs_check:
+    sig: (v:Variable, val:Any, subst:Dict[Variable,Any]) -> bool
+    does: "occurs check"
+  rename_variables:
+    sig: (rule:Rule, suffix:int) -> Rule
+    does: "Rename variables in rule to avoid collisions in resolution."
+
+# __init__.py | 2 lines
+
+# __init__.py | 4 lines
+
+# cli.py | 115 lines
+
+imports:
+  stdlib: [pathlib.Path]
+  third_party: [click, engine.{HybridPrologEngine,PYSWIP_AVAILABLE}, rich.console.Console, rich.panel.Panel, rich.table.Table]
+
+functions:
+  get_engine:
+    sig: () -> HybridPrologEngine
+    does: "retrieves engine"
+    side: "Writes data"
+  main:
+    sig: () -> None
+    does: "🧠 Hybrid Python-Prolog logic runner CLI."
+  info:
+    sig: () -> None
+    does: "Display information about the available Prolog backends."
+  query:
+    sig: (query_str:str) -> None
+    does: "Query the logic rules."
+    side: "Adds element"
+  shell:
+    sig: () -> None
+    does: "Start interactive logic query shell."
+
+# engine.py | Variable, Term, Rule +3 | 435 lines
+
+imports:
+  stdlib: [os, re, subprocess, pathlib.Path, typing]
+  third_party: [pyswip]
+
+Variable:
+  doc: "Represents a logical variable in our pure Python engine."
+  attrs:
+    name: str
+  methods:
+    __init__:
+      sig: (name:str) -> None
+      does: "creates"
+    __repr__:
+      sig: () -> str
+      does: "repr"
+    __eq__:
+      sig: (other) -> bool
+      does: "eq"
+    __hash__:
+      sig: () -> int
+      does: "hash"
+
+Term:
+  doc: "Represents a Prolog term (e.g."
+  attrs:
+    op: str
+  methods:
+    __init__:
+      sig: (op:str) -> None
+      does: "creates"
+    __repr__:
+      sig: () -> str
+      does: "repr"
+    __eq__:
+      sig: (other) -> bool
+      does: "eq"
+
+Rule:
+  doc: "Represents a Prolog rule Head :- Body."
+  attrs:
+    head: Term
+    body: Optional[List[Term]]=None
+  methods:
+    __init__:
+      sig: (head:Term, body:Optional[List[Term]]=None) -> None
+      does: "creates"
+    __repr__:
+      sig: () -> str
+      does: "repr"
+
+PythonPrologDB:
+  doc: "In-memory Prolog database for pure Python execution."
+  methods:
+    __init__:
+      sig: () -> None
+      does: "creates"
+    add_fact:
+      sig: (op:str) -> None
+      does: "creates fact"
+      side: "Adds element"
+    add_rule:
+      sig: (head:Term, body:List[Term]) -> None
+      does: "creates rule"
+      side: "Adds element"
+    parse_and_load:
+      sig: (prolog_text:str) -> None
+      does: "Parses a simple Prolog file into rules/facts."
+      side: "Adds element"
+
+PythonPrologEngine:
+  doc: "SLD Resolution Logic Interpreter."
+  attrs:
+    db: PythonPrologDB
+  methods:
+    __init__:
+      sig: (db:PythonPrologDB) -> None
+      does: "creates"
+    query:
+      sig: (goal_str:str) -> List[Dict[str, Any]]
+      does: "retrieves"
+      side: "Modifies list"
+    _find_vars:
+      sig: (term:Any) -> List[Variable]
+      does: "retrieves vars"
+      side: "Sets value"
+    _resolve:
+      sig: (goals:List[Any], subst:Dict[Variable,Any]) -> Generator[Dict[Variable, Any], None, None]
+      does: "resolve"
+
+HybridPrologEngine:
+  doc: "Hybrid Logic Engine delegating queries based on backend a..."
+  attrs:
+    prolog_file_path: Union[str,Path]
+  methods:
+    __init__:
+      sig: (prolog_file_path:Union[str,Path]) -> None
+      does: "creates"
+      edge: "error → raise FileNotFoundError"
+    query:
+      sig: (query_str:str) -> List[Dict[str, Any]]
+      does: "Runs query against the best available Prolog backend."
+    _query_pyswip:
+      sig: (query_str:str) -> List[Dict[str, Any]]
+      does: "Executes query using the PySwip wrapper."
+      side: "Modifies list"
+    _query_subprocess:
+      sig: (query_str:str) -> List[Dict[str, Any]]
+      does: "Executes query by spawning a swipl process."
+      side: "Sets value"
+    _query_python:
+      sig: (query_str:str) -> List[Dict[str, Any]]
+      does: "Pure Python fallback logic query."
+    _swipl_executable_exists:
+      sig: () -> bool
+      does: "swipl executable exists"
+
+functions:
+  is_variable:
+    sig: (x:Any) -> bool
+    does: "checks variable"
+  to_term:
+    sig: (x:Any) -> Any
+    does: "converts term"
+  _split_body_terms:
+    sig: (body_str:str) -> List[str]
+    does: "Splits comma-separated Prolog rule body into distinct term strings,"
+    side: "Modifies list"
+  unify:
+    sig: (x:Any, y:Any, subst:Dict[Variable,Any]) -> Optional[Dict[Variable, Any]]
+    does: "Logical unification of x and y under substitution subst."
+  resolve_val:
+    sig: (x:Any, subst:Dict[Variable,Any]) -> Any
+    does: "resolve val"
+  deep_resolve:
+    sig: (x:Any, subst:Dict[Variable,Any]) -> Any
+    does: "deep resolve"
+  extend_subst:
+    sig: (v:Variable, val:Any, subst:Dict[Variable,Any]) -> Optional[Dict[Variable, Any]]
+    does: "extend subst"
+  occurs_check:
+    sig: (v:Variable, val:Any, subst:Dict[Variable,Any]) -> bool
+    does: "occurs check"
+  rename_variables:
+    sig: (rule:Rule, suffix:int) -> Rule
+    does: "Rename variables in rule to avoid collisions in resolution."
+
+# __init__.py | 2 lines
+
+# main.py | 5 lines
+# Re-export module
+type: re-export
+exports:
+  - cli.main
+
+# __init__.py | 1 lines
+
+# test_engine.py | 29 lines
+
+imports:
+  stdlib: [pathlib.Path]
+  third_party: [pytest, sumd_logic_validator.engine.{HybridPrologEngine,PythonPrologDB,PythonPrologEngine}]
+
+functions:
+  engine:
+    sig: () -> None
+    does: "engine"
+  test_detects_architectural_inconsistencies:
+    sig: (engine) -> None
+    does: "checks detects architectural inconsistencies"
+  test_project_structure_facts:
+    sig: (engine) -> None
+    does: "checks project structure facts"
+
+# test_architectural_logic.py | 167 lines
+
+imports:
+  stdlib: [pathlib.Path, textwrap.dedent]
+  third_party: [pytest, sumd.prolog_engine.{PythonPrologDB,PythonPrologEngine}, sumd.validator.{validate_project_architecture,validate_sumd_file}]
+
+functions:
+  test_pure_python_prolog_basic:
+    sig: () -> None
+    does: "Test the zero-dependency pure-Python Prolog SLD engine on basic facts."
+  test_architectural_validation_missing_file:
+    sig: (tmp_path) -> None
+    does: "Test Layer 3 consistency: declared file is missing from filesystem."
+    side: "Writes data"
+  test_architectural_validation_aligned:
+    sig: (tmp_path) -> None
+    does: "Test that an entirely consistent project reports no errors."
+    side: "Writes data"
+  test_architectural_validation_missing_automation:
+    sig: (tmp_path) -> None
+    does: "Test Layer 3: workflow exists but Makefile / Taskfile has no matching automat..."
+    side: "Writes data"
+  test_architectural_validation_missing_gate:
+    sig: (tmp_path) -> None
+    does: "Test Layer 2: quality workflow exists but no matching pyqual gate is declared."
+    side: "Writes data"
+
+# anthropic_example.py | 61 lines
+
+imports:
+  stdlib: [argparse, pathlib.Path]
+  third_party: [anthropic, sumd.parse_file]
+
+functions:
+  ask:
+    sig: (sumd_path:Path, question:str, model:str='claude-opus-4-5') -> str
+    does: "ask"
+  main:
+    sig: () -> None
+    does: "main"
+    edge: "error → raise SystemExit"
+    side: "Adds element"
+
+# openai_example.py | 89 lines
+
+imports:
+  stdlib: [argparse, pathlib.Path]
+  third_party: [openai, sumd.parse_file]
+
+functions:
+  build_context:
+    sig: (sumd_path:Path) -> str
+    does: "Return a focused context string from SUMD.md."
+    side: "Modifies list"
+  ask:
+    sig: (sumd_path:Path, question:str, model:str='gpt-4o') -> str
+    does: "ask"
+  main:
+    sig: () -> None
+    does: "main"
+    edge: "error → raise SystemExit"
+    side: "Adds element"
+
+# mcp_client.py | 139 lines
+
+imports:
+  stdlib: [argparse, json, sys, pathlib.Path]
+  third_party: [asyncio]
+
+functions:
+  run:
+    sig: async (sumd_file:Path, single_tool:Any=None, tool_args:Any=None) -> None
+    does: "starts"
+  main:
+    sig: () -> None
+    does: "main"
+    side: "Adds element"
+
+# __init__.py | 36 lines
+# Re-export module
+type: re-export
+exports:
+  - sumd.models.SUMDDocument
+  - sumd.parser.SUMDParser
+  - sumd.parser.parse
+  - sumd.parser.parse_file
+  - sumd.parser.validate
+  - sumd.validator.CodeBlockIssue
+  - sumd.validator.validate_codeblocks
+  - sumd.validator.validate_markdown
+  - sumd.validator.validate_sumd_file
+  - sumd.generator.generate_sumd_content
+
+# cli.py | 2000 lines
+
+imports:
+  stdlib: [json, re, subprocess, sys, pathlib.Path, typing.Optional]
+  third_party: [click, sumd.__version__, sumd.extractor.{extract_package_json,extract_pyproject}, sumd.generator.generate_map_toon, sumd.parser.{SUMDParser,parse_file,validate_sumd_file}, sumd.pipeline.RenderPipeline]
+
+functions:
+  _detect_project_type:
+    sig: (proj_dir:Path) -> str
+    does: "Return a coarse project-type tag (python, node, rust, …) or 'generic'."
+  _render_doql_boilerplate:
+    sig: (project_name:str, spec:dict[str,str], extra_workflows:dict[str, str] | None=None) -> str
+    does: "Render a full app.doql.less boilerplate from a language spec."
+    side: "Modifies list"
+  _node_framework:
+    sig: (deps:set[str]) -> str
+    does: "Derive a framework label for a Node project from its dep set."
+  _node_spec_from_package_json:
+    sig: (pkg_json:dict) -> tuple[dict[str, str], dict[str, str]]
+    does: "Return (spec, extra_workflows) tailored to an actual package.json."
+    side: "Sets value"
+  _build_doql_spec:
+    sig: (proj_dir:Path, project_type:str) -> tuple[dict[str, str], dict[str, str]]
+    does: "Return (spec, extra_workflows) for the given project type."
+  _generate_doql_less:
+    sig: (proj_dir:Path, project_name:str, version:str='0.1.0', force:bool=False, project_type:str='python') -> Path | None
+    does: "Generate or refresh app.doql.less file."
+    side: "Writes data"
+  cli:
+    sig: () -> None
+    does: "SUMD - Structured Unified Markdown Descriptor CLI."
+  validate:
+    sig: (file:Path) -> None
+    does: "Validate a SUMD document."
+  export:
+    sig: (file:Path, format:str, output:Optional[Path]) -> None
+    does: "Export a SUMD document to structured format."
+    side: "Writes data"
+  info:
+    sig: (file:Path) -> None
+    does: "Display information about a SUMD document."
+  generate:
+    sig: (file:Path, format:str, output:Optional[Path]) -> None
+    does: "Generate a SUMD document from structured format."
+    side: "Modifies list"
+  extract:
+    sig: (file:Path, section:str) -> None
+    does: "Extract content from a SUMD document."
+  _is_project_dir:
+    sig: (d:Path) -> bool
+    does: "Return True if *d* contains any known project-marker file."
+  _walk_projects:
+    sig: (path:Path, projects:list[Path], max_depth:Any, depth:int) -> None
+    does: "Recursively collect project directories (containing any known marker)."
+    side: "Modifies list"
+  _detect_projects:
+    sig: (workspace:Path, max_depth:Any=None) -> list[Path]
+    does: "Return sorted list of subdirectories that look like project roots."
+  _ensure_venv:
+    sig: (tools_dir:Path, venv_dir:Path, tool_list:list[str]) -> None
+    does: "Create virtual env and install tools if not already present."
+  _tool_bin:
+    sig: (bin_dir:Path, name:str) -> Path
+    does: "Return path to *name* executable, preferring non-.exe variant."
+  _run_one_tool:
+    sig: (tool:str, bin_dir:Path, proj_dir:Path, project_output:Path) -> None
+    does: "Run a single analysis tool if its arg template is known."
+  _run_analysis_tools:
+    sig: (proj_dir:Path, tool_list:list[str], skip_tools:set[str] | None=None) -> None
+    does: "Install and run code2llm/redup/vallm analysis tools for a project."
+    side: "Sets value"
+  _export_sumd_json:
+    sig: (proj_dir:Path, doc) -> None
+    does: "Write sumd.json for a project."
+    side: "Writes data"
+
+# __init__.py | 19 lines
+# Re-export module
+type: re-export
+exports:
+  - events.Event
+  - events.EventStore
+  - commands.Command
+  - commands.CommandHandler
+  - queries.Query
+  - queries.QueryHandler
+  - aggregates.AggregateRoot
+  - sumd_aggregate.SumdAggregate
+
+# aggregates.py | AggregateRoot, EntityState, Entity +3 | 221 lines
+
+imports:
+  stdlib: [abc.{ABC,abstractmethod}, dataclasses.{dataclass,field}, typing.{Any,Dict,List,Optional}]
+  third_party: [events.{Event,EventStore}]
+
+AggregateRoot:
+  doc: "Base aggregate root for event sourcing."
+  bases: [ABC]
+  abstract: true
+  attrs:
+    aggregate_id: str
+  methods:
+    __init__:
+      sig: (aggregate_id:str) -> None
+      does: "creates"
+    aggregate_id:
+      sig: @property () -> str
+      does: "Get the aggregate ID."
+      decorators: [property]
+    version:
+      sig: @property () -> int
+      does: "Get the current version of the aggregate."
+      decorators: [property]
+    uncommitted_events:
+      sig: @property () -> List[Event]
+      does: "Get uncommitted events."
+      decorators: [property]
+    set_event_store:
+      sig: (event_store:EventStore) -> None
+      does: "Set the event store for this aggregate."
+      side: "Sets value"
+    apply_event:
+      sig: (event:Event) -> None
+      does: "Apply an event to the aggregate."
+      edge: "error → raise ValueError"
+      side: "Modifies list"
+    mark_events_as_committed:
+      sig: () -> None
+      does: "Mark all uncommitted events as committed."
+      side: "Clears collection"
+    load_from_history:
+      sig: (events:List[Event]) -> None
+      does: "Load aggregate state from event history."
+      edge: "error → raise ValueError"
+    _when:
+      sig: (event:Event) -> None
+      does: "Apply event-specific logic to update aggregate state."
+      decorators: [abstractmethod]
+    commit:
+      sig: () -> None
+      does: "Commit uncommitted events to the event store."
+      edge: "error → raise ValueError"
+      side: "Saves data"
+    get_state:
+      sig: () -> Dict[str, Any]
+      does: "Get the current state of the aggregate."
+
+EntityState:
+  doc: "Base entity state for aggregates."
+
+Entity:
+  doc: "Base entity for domain objects."
+  bases: [ABC]
+  abstract: true
+  attrs:
+    entity_id: str
+  methods:
+    __init__:
+      sig: (entity_id:str) -> None
+      does: "creates"
+    id:
+      sig: @property () -> str
+      does: "Get the entity ID."
+      decorators: [property]
+    domain_events:
+      sig: @property () -> List[Event]
+      does: "Get domain events."
+      decorators: [property]
+    add_domain_event:
+      sig: (event:Event) -> None
+      does: "Add a domain event."
+      side: "Adds element"
+    clear_domain_events:
+      sig: () -> None
+      does: "Clear domain events."
+      side: "Clears collection"
+    get_state:
+      sig: () -> Dict[str, Any]
+      does: "Get the current state of the entity."
+
+ValueObject:
+  doc: "Base value object."
+  bases: [ABC]
+  abstract: true
+  methods:
+    __eq__:
+      sig: (other:object) -> bool
+      does: "Value objects are equal if their attributes are equal."
+    __hash__:
+      sig: () -> int
+      does: "Value objects should be hashable."
+    get_state:
+      sig: () -> Dict[str, Any]
+      does: "Get the current state of the value object."
+
+Repository:
+  doc: "Base repository for aggregates."
+  bases: [ABC]
+  abstract: true
+  methods:
+    get_by_id:
+      sig: async (aggregate_id:str) -> Optional[AggregateRoot]
+      does: "Get an aggregate by its ID."
+      decorators: [abstractmethod]
+    save:
+      sig: async (aggregate:AggregateRoot) -> None
+      does: "Save an aggregate."
+      side: "Saves data"
+      decorators: [abstractmethod]
+    delete:
+      sig: async (aggregate_id:str) -> None
+      does: "Delete an aggregate."
+      side: "Deletes data"
+      decorators: [abstractmethod]
+
+EventSourcedRepository:
+  doc: "Event-sourced repository implementation."
+  bases: [Repository]
+  attrs:
+    event_store: EventStore
+    aggregate_factory: Any
+  methods:
+    __init__:
+      sig: (event_store:EventStore, aggregate_factory) -> None
+      does: "creates"
+    get_by_id:
+      sig: async (aggregate_id:str) -> Optional[AggregateRoot]
+      does: "Get an aggregate by its ID from event store."
+      side: "Sets value"
+    save:
+      sig: async (aggregate:AggregateRoot) -> None
+      does: "Save an aggregate to the event store."
+      side: "Saves data"
+    delete:
+      sig: async (aggregate_id:str) -> None
+      does: "Delete an aggregate (remove from cache)."
+      side: "Deletes data"
+    clear_cache:
+      sig: () -> None
+      does: "Clear the repository cache."
+      side: "Clears collection"
+
+# commands.py | Command, CommandHandler, CommandBus +9 | 266 lines
+
+imports:
+  stdlib: [datetime, abc.{ABC,abstractmethod}, dataclasses.{dataclass,field}, typing.{Any,Dict,List,Optional}]
+  third_party: [uuid, events.{Event,EventStore}]
+
+Command:
+  doc: "Base command class for CQRS pattern."
+
+CommandHandler:
+  doc: "Base command handler interface."
+  bases: [ABC]
+  abstract: true
+  methods:
+    handle:
+      sig: async (command:Command) -> List[Event]
+      does: "Handle a command and return resulting events."
+      decorators: [abstractmethod]
+    can_handle:
+      sig: (command_type:str) -> bool
+      does: "Check if this handler can handle the given command type."
+      decorators: [abstractmethod]
+
+CommandBus:
+  doc: "Command bus for dispatching commands to appropriate handl..."
+  attrs:
+    event_store: EventStore
+  methods:
+    __init__:
+      sig: (event_store:EventStore) -> None
+      does: "creates"
+    register_handler:
+      sig: (command_type:str, handler:CommandHandler) -> None
+      does: "Register a command handler for a specific command type."
+    dispatch:
+      sig: async (command:Command) -> List[Event]
+      does: "Dispatch a command to the appropriate handler."
+      edge: "error → raise ValueError"
+      side: "Saves data"
+
+CreateSumdDocument:
+  doc: "Command to create a new SUMD document."
+  bases: [Command]
+
+UpdateSumdDocument:
+  doc: "Command to update an existing SUMD document."
+  bases: [Command]
+
+AddSumdSection:
+  doc: "Command to add a section to a SUMD document."
+  bases: [Command]
+
+RemoveSumdSection:
+  doc: "Command to remove a section from a SUMD document."
+  bases: [Command]
+
+ValidateSumdDocument:
+  doc: "Command to validate a SUMD document."
+  bases: [Command]
+
+ScanProject:
+  doc: "Command to scan a project and generate SUMD."
+  bases: [Command]
+
+GenerateMap:
+  doc: "Command to generate project map."
+  bases: [Command]
+
+ExecuteDslCommand:
+  doc: "Command to execute DSL command."
+  bases: [Command]
+
+SumdCommandHandler:
+  doc: "Base handler for SUMD commands."
+  bases: [CommandHandler]
+  attrs:
+    event_store: EventStore
+  methods:
+    __init__:
+      sig: (event_store:EventStore) -> None
+      does: "creates"
+    can_handle:
+      sig: (command_type:str) -> bool
+      does: "Check if this handler can handle SUMD commands."
+    handle:
+      sig: async (command:Command) -> List[Event]
+      does: "Handle SUMD commands."
+      side: "Modifies list"
+
+# events.py | Event, EventStore, SumdDocumentCreated +5 | 185 lines
+
+imports:
+  stdlib: [dataclasses, datetime, json, dataclasses.{dataclass,field}, pathlib.Path, typing.{Any,Dict,List,Optional}]
+  third_party: [uuid]
+
+Event:
+  doc: "Base event class for event sourcing."
+  methods:
+    to_dict:
+      sig: () -> Dict[str, Any]
+      does: "Convert event to dictionary for serialization."
+    from_dict:
+      sig: (data:Dict[str,Any]) -> Event
+      does: "Create event from dictionary."
+      decorators: [classmethod]
+
+EventStore:
+  doc: "In-memory event store with optional file persistence."
+  attrs:
+    storage_path: Optional[Path]=None
+  methods:
+    __init__:
+      sig: (storage_path:Optional[Path]=None) -> None
+      does: "creates"
+    save_event:
+      sig: (event:Event) -> None
+      does: "Save an event to the store."
+      side: "Saves data"
+    get_events:
+      sig: (aggregate_id:str, from_version:int=0) -> List[Event]
+      does: "Get all events for an aggregate from a specific version."
+    get_all_events:
+      sig: () -> List[Event]
+      does: "Get all events from the store."
+    _persist_event:
+      sig: (event:Event) -> None
+      does: "Persist event to file storage."
+      side: "Writes data"
+    _load_events:
+      sig: () -> None
+      does: "Load events from file storage."
+      side: "Modifies list"
+
+SumdDocumentCreated:
+  doc: "Event fired when a SUMD document is created."
+  bases: [Event]
+
+SumdDocumentUpdated:
+  doc: "Event fired when a SUMD document is updated."
+  bases: [Event]
+
+SumdSectionAdded:
+  doc: "Event fired when a section is added to SUMD document."
+  bases: [Event]
+
+SumdSectionRemoved:
+  doc: "Event fired when a section is removed from SUMD document."
+  bases: [Event]
+
+SumdDocumentValidated:
+  doc: "Event fired when a SUMD document is validated."
+  bases: [Event]
+
+SumdCommandExecuted:
+  doc: "Event fired when a SUMD command is executed."
+  bases: [Event]
+
+# queries.py | Query, QueryHandler, QueryBus +10 | 420 lines
+
+imports:
+  stdlib: [datetime, abc.{ABC,abstractmethod}, dataclasses.{dataclass,field}, typing.{Any,Dict,List,Optional}]
+  third_party: [uuid, events.EventStore]
+
+Query:
+  doc: "Base query class for CQRS pattern."
+
+QueryHandler:
+  doc: "Base query handler interface."
+  bases: [ABC]
+  abstract: true
+  methods:
+    handle:
+      sig: async (query:Query) -> Any
+      does: "Handle a query and return results."
+      decorators: [abstractmethod]
+    can_handle:
+      sig: (query_type:str) -> bool
+      does: "Check if this handler can handle the given query type."
+      decorators: [abstractmethod]
+
+QueryBus:
+  doc: "Query bus for dispatching queries to appropriate handlers."
+  attrs:
+    event_store: EventStore
+  methods:
+    __init__:
+      sig: (event_store:EventStore) -> None
+      does: "creates"
+    register_handler:
+      sig: (query_type:str, handler:QueryHandler) -> None
+      does: "Register a query handler for a specific query type."
+    dispatch:
+      sig: async (query:Query) -> Any
+      does: "Dispatch a query to the appropriate handler."
+      edge: "error → raise ValueError"
+
+GetSumdDocument:
+  doc: "Query to get a SUMD document."
+  bases: [Query]
+
+ListSumdSections:
+  doc: "Query to list sections in a SUMD document."
+  bases: [Query]
+
+GetSumdSection:
+  doc: "Query to get a specific section from a SUMD document."
+  bases: [Query]
+
+GetProjectInfo:
+  doc: "Query to get project information."
+  bases: [Query]
+
+GetEventHistory:
+  doc: "Query to get event history for an aggregate."
+  bases: [Query]
+
+GetAllEvents:
+  doc: "Query to get all events from the event store."
+  bases: [Query]
+
+SearchDocuments:
+  doc: "Query to search SUMD documents."
+  bases: [Query]
+
+GetValidationResults:
+  doc: "Query to get validation results for a document."
+  bases: [Query]
+
+ExecuteDslQuery:
+  doc: "Query to execute DSL query."
+  bases: [Query]
+
+SumdQueryHandler:
+  doc: "Handler for SUMD queries."
+  bases: [QueryHandler]
+  attrs:
+    event_store: EventStore
+  methods:
+    __init__:
+      sig: (event_store:EventStore) -> None
+      does: "creates"
+    can_handle:
+      sig: (query_type:str) -> bool
+      does: "Check if this handler can handle SUMD queries."
+    handle:
+      sig: async (query:Query) -> Any
+      does: "Handle SUMD queries."
+      edge: "error → raise ValueError"
+    _handle_get_sumd_document:
+      sig: async (query:Query) -> Dict[str, Any]
+      does: "Handle get SUMD document query."
+    _handle_list_sumd_sections:
+      sig: async (query:Query) -> Dict[str, Any]
+      does: "Handle list SUMD sections query."
+    _handle_get_sumd_section:
+      sig: async (query:Query) -> Dict[str, Any]
+      does: "Handle get SUMD section query."
+    _handle_get_project_info:
+      sig: async (query:Query) -> Dict[str, Any]
+      does: "Handle get project info query."
+    _handle_get_event_history:
+      sig: async (query:Query) -> Dict[str, Any]
+      does: "Handle get event history query."
+    _handle_get_all_events:
+      sig: async (query:Query) -> Dict[str, Any]
+      does: "Handle get all events query."
+    _handle_search_documents:
+      sig: async (query:Query) -> Dict[str, Any]
+      does: "Handle search documents query."
+      side: "Modifies list"
+    _handle_get_validation_results:
+      sig: async (query:Query) -> Dict[str, Any]
+      does: "Handle get validation results query."
+    _handle_execute_dsl_query:
+      sig: async (query:Query) -> Dict[str, Any]
+      does: "Handle execute DSL query."
+
+# sumd_aggregate.py | SumdSection, SumdDocumentState, SumdAggregate | 345 lines
+
+imports:
+  stdlib: [datetime, dataclasses.{dataclass,field}, pathlib.Path, typing.{Any,Dict,List,Optional}]
+  third_party: [aggregates.AggregateRoot, events]
+
+SumdSection:
+  doc: "Represents a section in a SUMD document."
+  methods:
+    to_dict:
+      sig: () -> Dict[str, Any]
+      does: "Convert section to dictionary."
+    from_dict:
+      sig: (data:Dict[str,Any]) -> SumdSection
+      does: "Create section from dictionary."
+      decorators: [classmethod]
+
+SumdDocumentState:
+  doc: "State of a SUMD document aggregate."
+
+SumdAggregate:
+  doc: "SUMD document aggregate root."
+  bases: [AggregateRoot]
+  attrs:
+    aggregate_id: str
+  methods:
+    __init__:
+      sig: (aggregate_id:str) -> None
+      does: "creates"
+    state:
+      sig: @property () -> SumdDocumentState
+      does: "Get the current state of the SUMD document."
+      decorators: [property]
+    _when:
+      sig: (event:Event) -> None
+      does: "Apply event-specific logic to update aggregate state."
+      side: "Updates state"
+    _when_document_created:
+      sig: (event:SumdDocumentCreated) -> None
+      does: "Handle SumdDocumentCreated event."
+    _when_document_updated:
+      sig: (event:SumdDocumentUpdated) -> None
+      does: "Handle SumdDocumentUpdated event."
+      side: "Updates state"
+    _when_section_added:
+      sig: (event:SumdSectionAdded) -> None
+      does: "Handle SumdSectionAdded event."
+      side: "Adds element"
+    _when_section_removed:
+      sig: (event:SumdSectionRemoved) -> None
+      does: "Handle SumdSectionRemoved event."
+      side: "Removes element"
+    _when_document_validated:
+      sig: (event:SumdDocumentValidated) -> None
+      does: "Handle SumdDocumentValidated event."
+    create_document:
+      sig: (project_name:str, description:str, file_path:str, profile:str='rich') -> None
+      does: "Create a new SUMD document."
+      edge: "error → raise ValueError"
+    update_document:
+      sig: (changes:Dict[str,Any]) -> None
+      does: "Update the SUMD document."
+      edge: "error → raise ValueError"
+      side: "Updates state"
+    add_section:
+      sig: (section_name:str, section_type:str, content:str, level:int=2, metadata:Optional[Dict[str,Any]]=None) -> None
+      does: "Add a section to the document."
+      edge: "error → raise ValueError"
+      side: "Adds element"
+    remove_section:
+      sig: (section_name:str) -> None
+      does: "Remove a section from the document."
+      edge: "error → raise ValueError"
+      side: "Removes element"
+    validate_document:
+      sig: (validation_result:str, errors:List[str]) -> None
+      does: "Record document validation results."
+      edge: "error → raise ValueError"
+    get_section:
+      sig: (section_name:str) -> Optional[SumdSection]
+      does: "Get a specific section by name."
+    has_section:
+      sig: (section_name:str) -> bool
+      does: "Check if a section exists."
+    get_state:
+      sig: () -> Dict[str, Any]
+      does: "Get the complete state of the aggregate."
+      side: "Updates state"
+    create_from_file:
+      sig: (file_path:Path) -> SumdAggregate
+      does: "Create a SUMD aggregate from an existing file."
+      edge: "error → raise ValueError"
+      side: "Adds element"
+      decorators: [classmethod]
+
+# __init__.py | 15 lines
+# Re-export module
+type: re-export
+exports:
+  - parser.DSLParser
+  - parser.DSLExpression
+  - engine.DSLEngine
+  - commands.DSLCommandRegistry
+  - shell.DSLShell
+
+# commands.py | DSLCommand, DSLCommandRegistry | 657 lines
+
+imports:
+  stdlib: [dataclasses.dataclass, pathlib.Path, typing]
+  third_party: [asyncio, engine.{DSLContext,DSLEngine}]
+
+DSLCommand:
+  doc: "DSL command definition."
+  methods:
+    __post_init__:
+      sig: () -> None
+      does: "creates init"
+
+DSLCommandRegistry:
+  doc: "Registry for DSL commands."
+  methods:
+    __init__:
+      sig: () -> None
+      does: "creates"
+    register:
+      sig: (command:DSLCommand) -> None
+      does: "Register a DSL command."
+      side: "Modifies list"
+    get_command:
+      sig: (name:str) -> Optional[DSLCommand]
+      does: "Get a command by name or alias."
+    list_commands:
+      sig: (category:Optional[str]=None) -> List[DSLCommand]
+      does: "List all commands, optionally filtered by category."
+    list_categories:
+      sig: () -> List[str]
+      does: "List all command categories."
+    get_help:
+      sig: (command_name:Optional[str]=None) -> str
+      does: "Get help for commands."
+
+functions:
+  create_builtin_registry:
+    sig: () -> DSLCommandRegistry
+    does: "Create registry with built-in commands."
+  _cmd_cat:
+    sig: async (context:DSLContext, args:List[str]) -> str
+    does: "Display file contents."
+    edge: "error → raise ValueError"
+  _cmd_ls:
+    sig: async (context:DSLContext, args:List[str]) -> List[str]
+    does: "List directory contents."
+    edge: "error → raise ValueError"
+    side: "Modifies list"
+  _cmd_edit:
+    sig: async (context:DSLContext, args:List[str]) -> str
+    does: "Edit a file."
+    edge: "error → raise ValueError"
+    side: "Writes data"
+  _cmd_mkdir:
+    sig: async (context:DSLContext, args:List[str]) -> str
+    does: "Create directory."
+    edge: "error → raise ValueError"
+  _cmd_rm:
+    sig: async (context:DSLContext, args:List[str]) -> str
+    does: "Remove file or directory."
+    edge: "error → raise ValueError"
+  _cmd_sumd_scan:
+    sig: async (context:DSLContext, args:List[str]) -> Dict[str, Any]
+    does: "Scan project and generate SUMD."
+    side: "Writes data"
+  _cmd_sumd_map:
+    sig: async (context:DSLContext, args:List[str]) -> Dict[str, Any]
+    does: "Generate project map."
+    side: "Writes data"
+  _cmd_sumd_validate:
+    sig: async (context:DSLContext, args:List[str]) -> Dict[str, Any]
+    does: "Validate SUMD document."
+    edge: "error → raise ValueError"
+  _cmd_sumd_info:
+    sig: async (context:DSLContext, args:List[str]) -> Dict[str, Any]
+    does: "Show SUMD document info."
+    edge: "error → raise ValueError"
+  _cmd_find:
+    sig: async (context:DSLContext, args:List[str]) -> List[str]
+    does: "Find files matching pattern."
+    edge: "error → raise ValueError"
+    side: "Modifies list"
+  _cmd_grep:
+    sig: async (context:DSLContext, args:List[str]) -> List[Dict[str, Any]]
+    does: "Search for text in files."
+    edge: "error → raise ValueError"
+    side: "Modifies list"
+  _cmd_echo:
+    sig: async (context:DSLContext, args:List[str]) -> str
+    does: "Display message."
+  _cmd_pwd:
+    sig: async (context:DSLContext, args:List[str]) -> str
+    does: "Print working directory."
+  _cmd_cd:
+    sig: async (context:DSLContext, args:List[str]) -> str
+    does: "Change directory."
+    edge: "error → raise ValueError"
+  _cmd_help:
+    sig: async (context:DSLContext, args:List[str]) -> str
+    does: "Show help information."
+  _cmd_clear:
+    sig: async (context:DSLContext, args:List[str]) -> str
+    does: "Clear screen."
+    side: "Clears collection"
+  _cmd_set:
+    sig: async (context:DSLContext, args:List[str]) -> str
+    does: "Set variable."
+    edge: "error → raise ValueError"
+    side: "Sets value"
+  _cmd_get:
+    sig: async (context:DSLContext, args:List[str]) -> str
+    does: "Get variable value."
+    edge: "error → raise ValueError"
+  _cmd_unset:
+    sig: async (context:DSLContext, args:List[str]) -> str
+    does: "Remove variable."
+    edge: "error → raise ValueError"
+    side: "Sets value"
+
+# engine.py | DSLContext, DSLEngine | 595 lines
+
+imports:
+  stdlib: [dataclasses.dataclass, pathlib.Path, typing]
+  third_party: [asyncio, cqrs.commands.{Command,CommandBus}, cqrs.queries.{Query,QueryBus}, parser.{DSLExpression,DSLExpressionType,parse_dsl}, schema.{DEFAULT_PROJECT_SCHEMA,DSLProjectSchema}]
+
+DSLContext:
+  doc: "Execution context for DSL expressions."
+  attrs:
+    working_directory: Path=None
+  methods:
+    __init__:
+      sig: (working_directory:Path=None) -> None
+      does: "creates"
+    set_variable:
+      sig: (name:str, value:Any) -> None
+      does: "Set a variable in the context."
+      side: "Sets value"
+    get_variable:
+      sig: (name:str) -> Any
+      does: "Get a variable from the context."
+    register_function:
+      sig: (name:str, func:Callable) -> None
+      does: "Register a function in the context."
+    get_function:
+      sig: (name:str) -> Optional[Callable]
+      does: "Get a function from the context."
+
+DSLEngine:
+  doc: "Engine for executing DSL expressions."
+  attrs:
+    command_bus: Optional[CommandBus]=None
+    query_bus: Optional[QueryBus]=None
+    project_schema: Optional[DSLProjectSchema]=None
+  methods:
+    __init__:
+      sig: (command_bus:Optional[CommandBus]=None, query_bus:Optional[QueryBus]=None, project_schema:Optional[DSLProjectSchema]=None) -> None
+      does: "creates"
+    execute:
+      sig: async (expression:DSLExpression, context:DSLContext) -> Any
+      does: "Execute a DSL expression in the given context."
+    execute_text:
+      sig: async (text:str, context:DSLContext) -> Any
+      does: "Parse and execute DSL text."
+    _is_natural_language:
+      sig: (text:str) -> bool
+      does: "Check if input is natural language rather than DSL."
+    process_natural_language:
+      sig: async (text:str) -> Any
+      does: "Process natural language input."
+    get_suggestions:
+      sig: (partial_input:str) -> List[str]
+      does: "Get command suggestions."
+    _execute_expression:
+      sig: async (expression:DSLExpression, context:DSLContext) -> Any
+      does: "Execute a single DSL expression."
+      edge: "error → raise ValueError"
+    _execute_assignment:
+      sig: async (expression:DSLExpression, context:DSLContext) -> Any
+      does: "Execute assignment expression."
+      edge: "error → raise ValueError"
+      side: "Sets value"
+    _execute_command:
+      sig: async (expression:DSLExpression, context:DSLContext) -> Any
+      does: "Execute command expression."
+      edge: "error → raise ValueError"
+      side: "Modifies list"
+    _execute_function_call:
+      sig: async (expression:DSLExpression, context:DSLContext) -> Any
+      does: "Execute function call expression."
+      edge: "error → raise ValueError"
+      side: "Modifies list"
+    _execute_property_access:
+      sig: async (expression:DSLExpression, context:DSLExpression) -> Any
+      does: "Execute property access expression."
+      edge: "error → raise ValueError"
+    _execute_comparison:
+      sig: async (expression:DSLExpression, context:DSLContext) -> bool
+      does: "Execute comparison expression."
+      edge: "error → raise ValueError"
+    _execute_logical:
+      sig: async (expression:DSLExpression, context:DSLContext) -> bool
+      does: "Execute logical expression."
+      edge: "error → raise ValueError"
+    _execute_arithmetic:
+      sig: async (expression:DSLExpression, context:DSLContext) -> Union[int, float]
+      does: "Execute arithmetic expression."
+      edge: "error → raise ValueError"
+    _execute_pipeline:
+      sig: async (expression:DSLExpression, context:DSLContext) -> Any
+      does: "Execute pipeline expression."
+      side: "Sets value"
+    _execute_list:
+      sig: async (expression:DSLExpression, context:DSLContext) -> List[Any]
+      does: "Execute list expression."
+      side: "Modifies list"
+    _execute_dict:
+      sig: async (expression:DSLExpression, context:DSLContext) -> Dict[str, Any]
+      does: "Execute dictionary expression."
+    _execute_block:
+      sig: async (expression:DSLExpression, context:DSLContext) -> Any
+      does: "Execute block expression."
+    _execute_sumd_command:
+      sig: async (command_name:str, args:List[Any], context:DSLContext) -> Any
+      does: "Execute SUMD command via command bus."
+      edge: "error → raise ValueError"
+    _call_function:
+      sig: async (func:Callable, args:List[Any], context:DSLContext) -> Any
+      does: "Call a function with arguments."
+
+# nlp.py | NLPProcessor, NLPIntegration, SimpleNLPModel | 448 lines
+
+imports:
+  stdlib: [json, re, pathlib.Path, typing.{Any,Dict,List,Optional,Tuple}]
+  third_party: [schema]
+
+NLPProcessor:
+  doc: "Natural Language Processor for DSL commands."
+  attrs:
+    project_schema: DSLProjectSchema
+  methods:
+    __init__:
+      sig: (project_schema:DSLProjectSchema) -> None
+      does: "Initialize NLP processor with project schema."
+    _initialize_default_intents:
+      sig: () -> None
+      does: "Initialize default NLP intents."
+    _initialize_default_entities:
+      sig: () -> None
+      does: "Initialize default NLP entities."
+    parse_natural_language:
+      sig: (text:str) -> Tuple[str, Dict[str, Any]]
+      does: "Parse natural language input and return intent and entities."
+    _text_matches_intent:
+      sig: (text:str, example:str) -> bool
+      does: "Check if text matches intent example."
+      side: "Sets value"
+    _extract_entities:
+      sig: (text:str, intent:NLPIntent) -> Dict[str, Any]
+      does: "Extract entities from text based on intent."
+    _extract_entity_value:
+      sig: (text:str, entity:NLPEntity) -> Optional[str]
+      does: "Extract entity value from text."
+    _extract_command_fallback:
+      sig: (text:str) -> Tuple[str, Dict[str, Any]]
+      does: "Fallback command extraction."
+    _extract_entities_fallback:
+      sig: (text:str) -> Dict[str, Any]
+      does: "Fallback entity extraction."
+    generate_dsl_command:
+      sig: (intent:str, entities:Dict[str,Any]) -> str
+      does: "Generate DSL command from intent and entities."
+      side: "Modifies list"
+    suggest_commands:
+      sig: (partial_input:str) -> List[str]
+      does: "Suggest commands based on partial input."
+      side: "Modifies list"
+
+NLPIntegration:
+  doc: "NLP integration for DSL engine."
+  attrs:
+    project_schema: DSLProjectSchema
+  methods:
+    __init__:
+      sig: (project_schema:DSLProjectSchema) -> None
+      does: "Initialize NLP integration."
+    process_natural_language:
+      sig: (text:str) -> DSLCommandResult
+      does: "Process natural language input and return DSL command."
+    get_suggestions:
+      sig: (partial_input:str) -> List[str]
+      does: "Get command suggestions based on partial input."
+    add_custom_intent:
+      sig: (intent:NLPIntent) -> None
+      does: "Add custom intent to NLP processor."
+      side: "Adds element"
+    add_custom_entity:
+      sig: (entity:NLPEntity) -> None
+      does: "Add custom entity to NLP processor."
+      side: "Adds element"
+    get_available_intents:
+      sig: () -> List[str]
+      does: "Get list of available intents."
+    get_intent_examples:
+      sig: (intent_name:str) -> List[str]
+      does: "Get example phrases for an intent."
+
+SimpleNLPModel:
+  doc: "Simple NLP model implementation for basic functionality."
+  methods:
+    __init__:
+      sig: () -> None
+      does: "Initialize simple NLP model."
+    predict_intent:
+      sig: (text:str) -> Tuple[str, float]
+      does: "Predict intent with confidence score."
+    extract_entities:
+      sig: (text:str, intent:str) -> Dict[str, Any]
+      does: "Extract entities based on intent."
+
+# parser.py | DSLTokenType, DSLToken, DSLLexer +3 | 667 lines
+
+imports:
+  stdlib: [re, dataclasses.{dataclass,field}, enum.Enum, typing.{Any,Dict,List,Optional,Union}]
+
+DSLTokenType:
+  doc: "Token types for DSL parsing."
+  bases: [Enum]
+
+DSLToken:
+  doc: "Token in DSL."
+
+DSLLexer:
+  doc: "Lexer for tokenizing DSL expressions."
+  attrs:
+    text: str
+  methods:
+    __init__:
+      sig: (text:str) -> None
+      does: "creates"
+    tokenize:
+      sig: () -> List[DSLToken]
+      does: "Tokenize the input text."
+      edge: "error → raise ValueError"
+      side: "Modifies list"
+
+DSLExpressionType:
+  doc: "Types of DSL expressions."
+  bases: [Enum]
+
+DSLExpression:
+  doc: "Expression in DSL."
+  methods:
+    __str__:
+      sig: () -> str
+      does: "String representation of the expression."
+
+DSLParser:
+  doc: "Parser for DSL expressions."
+  attrs:
+    tokens: List[DSLToken]
+  methods:
+    __init__:
+      sig: (tokens:List[DSLToken]) -> None
+      does: "creates"
+    parse:
+      sig: () -> DSLExpression
+      does: "Parse tokens into DSL expression."
+      edge: "error → raise ValueError"
+      side: "Modifies list"
+    _parse_statement:
+      sig: () -> Optional[DSLExpression]
+      does: "Parse a statement."
+      side: "Modifies list"
+    _parse_pipeline:
+      sig: () -> DSLExpression
+      does: "Parse a pipeline expression."
+    _parse_assignment:
+      sig: () -> DSLExpression
+      does: "Parse assignment expression."
+    _parse_logical_or:
+      sig: () -> DSLExpression
+      does: "Parse logical OR expression."
+    _parse_logical_and:
+      sig: () -> DSLExpression
+      does: "Parse logical AND expression."
+    _parse_comparison:
+      sig: () -> DSLExpression
+      does: "Parse comparison expression."
+    _parse_arithmetic:
+      sig: () -> DSLExpression
+      does: "Parse arithmetic expression."
+    _parse_term:
+      sig: () -> DSLExpression
+      does: "Parse term expression."
+    _parse_factor:
+      sig: () -> DSLExpression
+      does: "Parse factor expression."
+    _parse_primary:
+      sig: () -> DSLExpression
+      does: "Parse primary expression."
+      edge: "error → raise ValueError"
+    _parse_command:
+      sig: () -> DSLExpression
+      does: "Parse command expression."
+      side: "Modifies list"
+    _parse_function_call:
+      sig: () -> DSLExpression
+      does: "Parse function call expression."
+      side: "Modifies list"
+    _parse_property_access:
+      sig: () -> DSLExpression
+      does: "Parse property access expression."
+    _parse_list:
+      sig: () -> DSLExpression
+      does: "Parse list literal."
+      side: "Modifies list"
+    _parse_dict:
+      sig: () -> DSLExpression
+      does: "Parse dictionary literal."
+      side: "Modifies list"
+    _is_at_end:
+      sig: () -> bool
+      does: "Check if we're at the end of tokens."
+    _peek:
+      sig: () -> DSLToken
+      does: "Get current token without consuming it."
+    _previous:
+      sig: () -> DSLToken
+      does: "Get previous token."
+
+functions:
+  parse_dsl:
+    sig: (text:str) -> DSLExpression
+    does: "Parse DSL text into expression."
+
+# schema.py | DSLDataType, DSLCommandType, DSLActionType +11 | 352 lines
+
+imports:
+  stdlib: [datetime, enum.Enum, pathlib.Path, typing.{Any,Dict,List,Optional,Union}]
+  third_party: [pydantic.{BaseModel,ConfigDict,Field,validator}]
+
+DSLDataType:
+  doc: "Supported data types in DSL."
+  bases: [str, Enum]
+
+DSLCommandType:
+  doc: "Supported command types in DSL."
+  bases: [str, Enum]
+
+DSLActionType:
+  doc: "Supported action types in DSL."
+  bases: [str, Enum]
+
+DSLParameter:
+  doc: "DSL parameter definition."
+  bases: [BaseModel]
+  attrs:
+    name: str
+    data_type: DSLDataType
+    required: bool
+    default: Optional[Any]
+    description: Optional[str]
+    validation: Optional[Dict[str, Any]]
+
+DSLCommandSchema:
+  doc: "DSL command schema definition."
+  bases: [BaseModel]
+  attrs:
+    name: str
+    command_type: DSLCommandType
+    action_type: DSLActionType
+    description: str
+    parameters: List[DSLParameter]
+    returns: DSLDataType
+    examples: List[str]
+    aliases: List[str]
+
+DSLProjectSchema:
+  doc: "DSL project schema definition."
+  bases: [BaseModel]
+  attrs:
+    name: str
+    version: str
+    description: Optional[str]
+    created_at: datetime
+    updated_at: datetime
+    root_path: Path
+    config_files: List[str]
+    source_dirs: List[str]
+    ignore_patterns: List[str]
+    commands: List[DSLCommandSchema]
+
+DSLExpression:
+  doc: "DSL expression model."
+  bases: [BaseModel]
+  attrs:
+    type: str
+    value: Any
+    children: List["DSLExpression"]
+    metadata: Dict[str, Any]
+
+DSLStatement:
+  doc: "DSL statement model."
+  bases: [BaseModel]
+  attrs:
+    expression: DSLExpression
+    context: Dict[str, Any]
+    result: Optional[Any]
+    error: Optional[str]
+    timestamp: datetime
+
+DSLScript:
+  doc: "DSL script model."
+  bases: [BaseModel]
+  attrs:
+    name: str
+    description: Optional[str]
+    statements: List[DSLStatement]
+    variables: Dict[str, Any]
+    imports: List[str]
+    metadata: Dict[str, Any]
+    created_at: datetime
+    updated_at: datetime
+
+NLPIntent:
+  doc: "NLP intent model."
+  bases: [BaseModel]
+  attrs:
+    name: str
+    description: str
+    examples: List[str]
+    entities: Dict[str, str]
+    dsl_mapping: str
+
+NLPEntity:
+  doc: "NLP entity model."
+  bases: [BaseModel]
+  attrs:
+    name: str
+    type: str
+    values: List[str]
+    patterns: List[str]
+
+NLPModel:
+  doc: "NLP model configuration."
+  bases: [BaseModel]
+  attrs:
+    name: str
+    type: str
+    version: str
+    intents: List[NLPIntent]
+    entities: List[NLPEntity]
+    confidence_threshold: float
+
+DSLContext:
+  doc: "DSL execution context model."
+  bases: [BaseModel]
+  attrs:
+    variables: Dict[str, Any]
+    functions: Dict[str, Any]
+    working_directory: Path
+    project_schema: Optional[DSLProjectSchema]
+    nlp_model: Optional[NLPModel]
+    metadata: Dict[str, Any]
+  methods:
+    set_variable:
+      sig: (name:str, value:Any) -> None
+      does: "Set a variable in the context."
+      side: "Sets value"
+    get_variable:
+      sig: (name:str) -> Any
+      does: "Get a variable from the context."
+    register_function:
+      sig: (name:str, func:Any) -> None
+      does: "Register a function in the context."
+
+DSLCommandResult:
+  doc: "DSL command execution result."
+  bases: [BaseModel]
+  attrs:
+    success: bool
+    result: Optional[Any]
+    error: Optional[str]
+    metadata: Dict[str, Any]
+    execution_time: float
+    timestamp: datetime
+
+# schema_commands.py | SchemaCommandRegistry, SchemaBasedCommands | 518 lines
+
+imports:
+  stdlib: [time, pathlib.Path, typing.{Any,Dict,List,Optional,Union}]
+  third_party: [asyncio, nlp.{NLPIntegration,SimpleNLPModel}, schema]
+
+SchemaCommandRegistry:
+  doc: "Registry for schema-based DSL commands."
+  attrs:
+    project_schema: DSLProjectSchema
+  methods:
+    __init__:
+      sig: (project_schema:DSLProjectSchema) -> None
+      does: "Initialize command registry with project schema."
+    _register_commands:
+      sig: () -> None
+      does: "Register all commands from project schema."
+    get_command:
+      sig: (name:str) -> Optional[DSLCommandSchema]
+      does: "Get command schema by name or alias."
+    list_commands:
+      sig: (command_type:Optional[DSLCommandType]=None) -> List[DSLCommandSchema]
+      does: "List commands, optionally filtered by type."
+    validate_command_call:
+      sig: (command_name:str, args:Dict[str,Any]) -> DSLCommandResult
+      does: "Validate command call against schema."
+    _validate_parameter_type:
+      sig: (value:Any, expected_type:DSLDataType) -> bool
+      does: "Validate parameter type."
+    process_natural_language:
+      sig: (text:str) -> DSLCommandResult
+      does: "Process natural language input."
+    get_suggestions:
+      sig: (partial_input:str) -> List[str]
+      does: "Get command suggestions."
+
+SchemaBasedCommands:
+  doc: "Implementation of schema-based DSL commands."
+  attrs:
+    context: DSLContext
+    registry: SchemaCommandRegistry
+  methods:
+    __init__:
+      sig: (context:DSLContext, registry:SchemaCommandRegistry) -> None
+      does: "Initialize schema-based commands."
+    execute_command:
+      sig: async (command_name:str, args:Dict[str,Any]) -> DSLCommandResult
+      does: "Execute a schema-based command."
+    _execute_sumd_command:
+      sig: async (command:DSLCommandSchema, args:Dict[str,Any]) -> Any
+      does: "Execute SUMD command."
+    _execute_file_command:
+      sig: async (command:DSLCommandSchema, args:Dict[str,Any]) -> Any
+      does: "Execute file command."
+    _execute_search_command:
+      sig: async (command:DSLCommandSchema, args:Dict[str,Any]) -> Any
+      does: "Execute search command."
+    _execute_utility_command:
+      sig: async (command:DSLCommandSchema, args:Dict[str,Any]) -> Any
+      does: "Execute utility command."
+    _execute_nlp_command:
+      sig: async (command:DSLCommandSchema, args:Dict[str,Any]) -> Any
+      does: "Execute NLP command."
+    _execute_schema_command:
+      sig: async (command:DSLCommandSchema, args:Dict[str,Any]) -> Any
+      does: "Execute schema command."
+    _cmd_sumd_scan:
+      sig: async (args:Dict[str,Any]) -> Any
+      does: "Scan project and generate SUMD documentation."
+    _cmd_sumd_validate:
+      sig: async (args:Dict[str,Any]) -> Any
+      does: "Validate SUMD document."
+    _cmd_sumd_info:
+      sig: async (args:Dict[str,Any]) -> Any
+      does: "Get SUMD document information."
+    _cmd_cat:
+      sig: async (args:Dict[str,Any]) -> Any
+      does: "Display file contents."
+    _cmd_ls:
+      sig: async (args:Dict[str,Any]) -> Any
+      does: "List directory contents."
+    _cmd_edit:
+      sig: async (args:Dict[str,Any]) -> Any
+      does: "Edit file contents."
+      side: "Writes data"
+    _cmd_find:
+      sig: async (args:Dict[str,Any]) -> Any
+      does: "Find files matching pattern."
+    _cmd_grep:
+      sig: async (args:Dict[str,Any]) -> Any
+      does: "Search text in files."
+      side: "Modifies list"
+    _cmd_echo:
+      sig: async (args:Dict[str,Any]) -> Any
+      does: "Display message."
+    _cmd_pwd:
+      sig: async (args:Dict[str,Any]) -> Any
+      does: "Print working directory."
+    _cmd_cd:
+      sig: async (args:Dict[str,Any]) -> Any
+      does: "Change directory."
+    _cmd_ask:
+      sig: async (args:Dict[str,Any]) -> Any
+      does: "Ask natural language question."
+
+# shell.py | DSLShell, DSLShellServer | 360 lines
+
+imports:
+  stdlib: [sys, pathlib.Path, typing.{Any,Dict,List,Optional}]
+  third_party: [asyncio, readline, commands.{DSLCommandRegistry,create_builtin_registry}, engine.{DSLContext,DSLEngine}, parser.parse_dsl]
+
+DSLShell:
+  doc: "Interactive shell for SUMD DSL."
+  attrs:
+    engine: Optional[DSLEngine]=None
+    command_registry: Optional[DSLCommandRegistry]=None
+    working_directory: Optional[Path]=None
+  methods:
+    __init__:
+      sig: (engine:Optional[DSLEngine]=None, command_registry:Optional[DSLCommandRegistry]=None, working_directory:Optional[Path]=None) -> None
+      does: "creates"
+      side: "Sets value"
+    _setup_readline:
+      sig: () -> None
+      does: "Setup readline for command history and completion."
+      side: "Sets value"
+    _completer:
+      sig: (text:str, state:int) -> Optional[str]
+      does: "Tab completion for DSL commands."
+      side: "Modifies list"
+    _register_commands:
+      sig: () -> None
+      does: "Register command functions in the DSL context."
+    run:
+      sig: async () -> None
+      does: "Run the interactive shell."
+      side: "Writes data"
+    _get_prompt:
+      sig: () -> str
+      does: "Get the current prompt."
+    _handle_shell_command:
+      sig: async (command:str) -> None
+      does: "Handle shell commands (prefixed with !)."
+    _execute_line:
+      sig: async (line:str) -> None
+      does: "Execute a DSL line."
+      side: "Modifies list"
+    execute_script:
+      sig: async (script_path:Path) -> None
+      does: "Execute a DSL script file."
+      edge: "error → raise ValueError"
+    execute_command:
+      sig: async (command:str) -> Any
+      does: "Execute a single DSL command."
+      edge: "error → raise ValueError"
+
+DSLShellServer:
+  doc: "Server for DSL shell operations (for MCP integration)."
+  attrs:
+    working_directory: Optional[Path]=None
+  methods:
+    __init__:
+      sig: (working_directory:Optional[Path]=None) -> None
+      does: "creates"
+    execute_dsl:
+      sig: async (dsl_expression:str, context_vars:Optional[Dict[str,Any]]=None) -> Dict[str, Any]
+      does: "Execute DSL expression and return result."
+      side: "Sets value"
+    get_shell_info:
+      sig: async () -> Dict[str, Any]
+      does: "Get shell information."
+
+functions:
+  main:
+    sig: async () -> None
+    does: "Main entry point for DSL shell."
+    side: "Adds element"
+
+# extractor.py | 1283 lines
+
+imports:
+  stdlib: [ast, re, datetime.date, pathlib.Path, typing.Any]
+  third_party: [fnmatch, yaml]
+
+functions:
+  _read_toml:
+    sig: (path:Path) -> dict
+    does: "retrieves toml"
+  extract_pyproject:
+    sig: (proj_dir:Path) -> dict[str, Any]
+    does: "parses pyproject"
+  _first_task_cmd:
+    sig: (cmds:list) -> str
+    does: "Extract the first command string from a task's cmds list."
+  extract_taskfile:
+    sig: (proj_dir:Path) -> list[dict[str, str]]
+    does: "parses taskfile"
+    side: "Modifies list"
+  _parse_openapi_endpoints:
+    sig: (paths:dict) -> list[dict]
+    does: "Extract endpoint dicts from the paths section of an OpenAPI spec."
+    side: "Sets value"
+  extract_openapi:
+    sig: (proj_dir:Path) -> dict[str, Any]
+    does: "parses openapi"
+  _parse_doql_entities:
+    sig: (content:str) -> list[dict[str, Any]]
+    does: "Parse entity blocks from DOQL content."
+    side: "Modifies list"
+  _parse_doql_interfaces:
+    sig: (content:str) -> list[dict[str, Any]]
+    does: "Parse interface and integration blocks from DOQL content."
+    side: "Updates state"
+  _parse_doql_workflows:
+    sig: (content:str) -> list[dict[str, Any]]
+    does: "Parse workflow blocks from DOQL content, deduplicated by name."
+    side: "Modifies list"
+  _parse_doql_content:
+    sig: (content:str) -> dict[str, Any]
+    does: "Parse DOQL content from .less or .css file into structured data."
+    side: "Modifies list"
+  extract_doql:
+    sig: (proj_dir:Path) -> dict[str, Any]
+    does: "Read app.doql.less (preferred) or app.doql.css as fallback."
+  extract_pyqual:
+    sig: (proj_dir:Path) -> dict[str, Any]
+    does: "parses pyqual"
+  extract_python_modules:
+    sig: (proj_dir:Path, pkg_name:str) -> list[str]
+    does: "parses python modules"
+  extract_readme_title:
+    sig: (proj_dir:Path) -> str
+    does: "parses readme title"
+  extract_requirements:
+    sig: (proj_dir:Path) -> list[dict[str, str]]
+    does: "Parse requirements*.txt files — return list of {file, deps[]}."
+    side: "Modifies list"
+  extract_makefile:
+    sig: (proj_dir:Path) -> list[dict[str, str]]
+    does: "Parse Makefile — return list of {target, comment}."
+    side: "Modifies list"
+  extract_goal:
+    sig: (proj_dir:Path) -> dict[str, Any]
+    does: "Parse goal.yaml — versioning strategy, git conventions, build strategies."
+  extract_env:
+    sig: (proj_dir:Path) -> list[dict[str, str]]
+    does: "Parse .env.example — return list of {key, default, comment}."
+    side: "Modifies list"
+  _parse_dockerfile_line:
+    sig: (line:str, parsed:dict) -> None
+    does: "Update *parsed* dict in-place with one Dockerfile instruction."
+  extract_dockerfile:
+    sig: (proj_dir:Path) -> dict[str, Any]
+    does: "Parse Dockerfile — base image, exposed ports, entrypoint, labels."
+
+# generator.py | 16 lines
+
+# mcp_server.py | 715 lines
+
+imports:
+  stdlib: [json, os, pathlib.Path, typing.Any]
+  third_party: [mcp.types, mcp.server.{Server,stdio}, sumd.cqrs.aggregates.EventSourcedRepository, sumd.cqrs.commands.{CommandBus,SumdCommandHandler}, sumd.cqrs.events.EventStore, sumd.cqrs.queries.{QueryBus,SumdQueryHandler}, sumd.cqrs.sumd_aggregate.SumdAggregate]
+
+functions:
+  _doc_to_dict:
+    sig: (doc) -> dict[str, Any]
+    does: "doc to dict"
+  _resolve_path:
+    sig: (path:str) -> Path
+    does: "Resolve path; if relative, resolve from CWD."
+  list_tools:
+    sig: async () -> list[types.Tool]
+    does: "list tools"
+  _tool_parse_sumd:
+    sig: async (arguments:dict) -> list[types.TextContent]
+    does: "tool parse sumd"
+  _tool_validate_sumd:
+    sig: async (arguments:dict) -> list[types.TextContent]
+    does: "tool validate sumd"
+  _tool_export_sumd:
+    sig: async (arguments:dict) -> list[types.TextContent]
+    does: "tool export sumd"
+    side: "Writes data"
+  _tool_list_sections:
+    sig: async (arguments:dict) -> list[types.TextContent]
+    does: "tool list sections"
+  _tool_get_section:
+    sig: async (arguments:dict) -> list[types.TextContent]
+    does: "tool get section"
+  _tool_info_sumd:
+    sig: async (arguments:dict) -> list[types.TextContent]
+    does: "tool info sumd"
+  _tool_generate_sumd:
+    sig: async (arguments:dict) -> list[types.TextContent]
+    does: "tool generate sumd"
+    side: "Writes data"
+  _tool_execute_command:
+    sig: async (arguments:dict) -> list[types.TextContent]
+    does: "Execute CQRS command."
+  _tool_execute_query:
+    sig: async (arguments:dict) -> list[types.TextContent]
+    does: "Execute CQRS query."
+  _tool_get_events:
+    sig: async (arguments:dict) -> list[types.TextContent]
+    does: "Get event history."
+  _tool_get_aggregate:
+    sig: async (arguments:dict) -> list[types.TextContent]
+    does: "Get aggregate state."
+  _tool_execute_dsl:
+    sig: async (arguments:dict) -> list[types.TextContent]
+    does: "Execute DSL expression."
+  _tool_dsl_shell_info:
+    sig: async (arguments:dict) -> list[types.TextContent]
+    does: "Get DSL shell info."
+  call_tool:
+    sig: async (name:str, arguments:dict[str,Any]) -> list[types.TextContent]
+    does: "call tool"
+  main:
+    sig: async () -> None
+    does: "main"
+
+# models.py | SectionType, Section, SUMDDocument | 46 lines
+
+imports:
+  stdlib: [dataclasses.{dataclass,field}, enum.Enum, typing.{Any,Dict,List}]
+
+SectionType:
+  doc: "SUMD section types."
+  bases: [Enum]
+
+Section:
+  doc: "Represents a SUMD section."
+
+SUMDDocument:
+  doc: "Represents a parsed SUMD document."
+
+# parser.py | SUMDParser | 196 lines
+
+imports:
+  stdlib: [re, pathlib.Path, typing.{List,Optional}]
+  third_party: [sumd.models.{SUMDDocument,Section,SectionType}, sumd.validator.{CodeBlockIssue,validate_codeblocks,validate_markdown,validate_sumd_file}]
+
+SUMDParser:
+  doc: "Parser for SUMD markdown documents."
+  methods:
+    __init__:
+      sig: () -> None
+      does: "creates"
+    parse:
+      sig: (content:str) -> SUMDDocument
+      does: "Parse a SUMD markdown document."
+    parse_file:
+      sig: (path:Path) -> SUMDDocument
+      does: "Parse a SUMD file."
+    _parse_header:
+      sig: (lines:List[str]) -> None
+      does: "Parse the project header (H1)."
+    _parse_sections:
+      sig: (lines:List[str]) -> None
+      does: "Parse all sections in the document."
+      side: "Modifies list"
+    validate:
+      sig: (document:SUMDDocument) -> List[str]
+      does: "Validate a SUMD document against the specification."
+      side: "Modifies list"
+
+functions:
+  parse:
+    sig: (content:str) -> SUMDDocument
+    does: "Parse a SUMD markdown document."
+  parse_file:
+    sig: (path:Path) -> SUMDDocument
+    does: "Parse a SUMD file."
+  validate:
+    sig: (document:SUMDDocument) -> List[str]
+    does: "Validate a SUMD document."
+
+# pipeline.py | RenderPipeline | 452 lines
+
+imports:
+  stdlib: [subprocess, pathlib.Path]
+  third_party: [sumd.extractor]
+
+RenderPipeline:
+  doc: "Collect project data → build sections → render → inject TOC."
+  attrs:
+    proj_dir: Path
+    raw_sources: bool=True
+  methods:
+    __init__:
+      sig: (proj_dir:Path, raw_sources:bool=True) -> None
+      does: "creates"
+    _collect:
+      sig: () -> RenderContext
+      does: "Extract all project data and build RenderContext."
+    _build_registered_sections:
+      sig: (ctx:RenderContext, profile:str) -> list[list[str]]
+      does: "Run all registered Section classes that match the profile."
+      side: "Sets value"
+    _render_legacy_sections:
+      sig: (ctx:RenderContext) -> list[list[str]]
+      does: "All sections have been migrated to Section classes."
+    _assemble:
+      sig: (ctx:RenderContext, profile:str) -> str
+      does: "Assemble all section lines into final markdown."
+    run:
+      sig: (profile:str='rich', return_sources:bool=False) -> str | tuple[str, list[str]]
+      does: "Run the full pipeline and return rendered SUMD content."
+
+functions:
+  _refresh_map_toon:
+    sig: (proj_dir:Path) -> None
+    does: "Regenerate project/map.toon.yaml and project/logic.pl from current source bef..."
+    side: "Writes data"
+  _find_tools_bin_dir:
+    sig: (proj_dir:Path) -> Path | None
+    does: "Return the venv bin directory for .sumd-tools, or None if not installed."
+  _run_tool_if_present:
+    sig: (bin_dir:Path, name:str, args:list, proj_dir:Path) -> None
+    does: "Run *name* executable with *args* if it exists in *bin_dir*."
+  _refresh_analysis_files:
+    sig: (proj_dir:Path, profile:str) -> None
+    does: "Run only the external tools required for the given profile."
+  _collect_tool_sources:
+    sig: (pyproj:dict, reqs:list, tasks:list, makefile:list, scenarios:list) -> list[str]
+    does: "Collect source labels for file-based tool inputs."
+    side: "Modifies list"
+  _doql_sources:
+    sig: (doql:dict) -> list[str]
+    does: "Return doql source labels if any doql content is present."
+  _collect_pkg_sources:
+    sig: (pyproj:dict, reqs:list, tasks:list, makefile:list, scenarios:list, openapi:dict, doql:dict, pyqual:dict) -> list[str]
+    does: "Collect source labels for code/pipeline sources."
+    side: "Modifies list"
+  _collect_infra_sources:
+    sig: (dockerfile:dict, compose:dict, pkg_json:dict, modules:list, project_analysis:list) -> list[str]
+    does: "Collect source labels for infra/module sources."
+    side: "Modifies list"
+  _collect_sources:
+    sig: (pyproj:dict, reqs:list, tasks:list, makefile:list, scenarios:list, openapi:dict, doql:dict, pyqual:dict) -> list[str]
+    does: "Build the list of source labels that contributed data to this SUMD."
+  _inject_toc:
+    sig: (content:str) -> str
+    does: "Inject a ## Contents TOC block before ## Metadata."
+    side: "Modifies list"
+
+# renderer.py | 30 lines
+
+imports:
+  stdlib: [pathlib.Path]
+
+functions:
+  generate_sumd_content:
+    sig: (proj_dir:Path, return_sources:bool=False, raw_sources:bool=True, profile:str='rich') -> str | tuple[str, list[str]]
+    does: "Generate SUMD.md content from a project directory."
+
+# __init__.py | 107 lines
+# Re-export module
+type: re-export
+exports:
+  - SECTION_REGISTRY
+  - PROFILES
+
+# api_stubs.py | ApiStubsSection | 77 lines
+
+imports:
+  third_party: [sumd.sections.base.{RenderContext,Section}, sumd.sections.utils.render.call_with_ctx]
+
+ApiStubsSection:
+  methods:
+    should_render:
+      sig: (ctx:RenderContext) -> bool
+      does: "checks render"
+
+functions:
+  _render_api_stubs:
+    sig: (openapi:dict) -> list[str]
+    does: "Render OpenAPI endpoints as Python-like typed stubs for LLM orientation."
+    side: "Modifies list"
+
+# architecture.py | ArchitectureSection | 171 lines
+
+imports:
+  stdlib: [pathlib.Path]
+  third_party: [sumd.sections.base.{RenderContext,Section}, sumd.sections.utils.render.call_with_ctx, sumd.sections.utils.should_render.always]
+
+ArchitectureSection:
+
+functions:
+  _render_architecture_doql_section:
+    sig: (doql:dict, proj_dir:Path, raw_sources:bool, L:list[str]) -> None
+    does: "formats architecture doql section"
+  _render_architecture_modules:
+    sig: (modules:list[str], name:str, L:list[str]) -> None
+    does: "formats architecture modules"
+  _render_doql_app:
+    sig: (doql:dict, L:list[str]) -> None
+    does: "formats doql app"
+  _render_doql_entities:
+    sig: (doql:dict, L:list[str]) -> None
+    does: "formats doql entities"
+  _render_doql_interfaces:
+    sig: (doql:dict, L:list[str]) -> None
+    does: "formats doql interfaces"
+  _render_doql_integrations:
+    sig: (doql:dict, L:list[str]) -> None
+    does: "formats doql integrations"
+  _render_architecture_doql_parsed:
+    sig: (doql:dict, L:list[str]) -> None
+    does: "Render parsed DOQL blocks into L (mutates in place)."
+  _render_architecture_rules:
+    sig: (proj_dir:Path, L:list[str]) -> None
+    does: "formats architecture rules"
+  _render_architecture:
+    sig: (doql:dict, modules:list[str], name:str, proj_dir:Path, raw_sources:bool) -> list[str]
+    does: "formats architecture"
+
+# base.py | RenderContext, Section | 95 lines
+
+imports:
+  stdlib: [dataclasses.{dataclass,field}, pathlib.Path, typing.{Protocol,runtime_checkable}]
+
+RenderContext:
+  doc: "All extracted data for a project, passed to every Section..."
+
+Section:
+  doc: "Protocol for all SUMD section renderers."
+  bases: [Protocol]
+  attrs:
+    name: str
+    level: int
+    profiles: frozenset[str]
+  methods:
+    should_render:
+      sig: (ctx:RenderContext) -> bool
+      does: "checks render"
+    render:
+      sig: (ctx:RenderContext) -> list[str]
+      does: "formats"
+
+# call_graph.py | CallGraphSection | 157 lines
+
+imports:
+  stdlib: [re]
+  third_party: [sumd.sections.base.{RenderContext,Section}, sumd.sections.utils.render.call_with_ctx]
+
+CallGraphSection:
+  methods:
+    should_render:
+      sig: (ctx:RenderContext) -> bool
+      does: "checks render"
+
+functions:
+  _parse_calls_header:
+    sig: (lines:list[str]) -> dict
+    does: "Parse node/edge/module counts and CC average from header comments."
+  _parse_hub_stat_line:
+    sig: (line:str) -> dict | None
+    does: "Extract CC/in/out/total metrics from a hub stats line, or return None."
+  _process_in_hubs_line:
+    sig: (line:str, hubs:list, current_hub:dict) -> dict
+    does: "Process a single indented line while inside the HUBS block."
+    side: "Updates state"
+  _parse_calls_hubs:
+    sig: (lines:list[str]) -> list[dict]
+    does: "Parse HUBS section into list of hub dicts."
+    side: "Modifies list"
+  _parse_calls_toon:
+    sig: (content:str) -> dict
+    does: "Parse calls.toon.yaml text into structured dict for rendering."
+  _render_call_graph:
+    sig: (project_analysis:list) -> list[str]
+    does: "Render call graph summary from calls.toon.yaml in project_analysis."
+
+# code_analysis.py | CodeAnalysisSection | 69 lines
+
+imports:
+  third_party: [sumd.sections.base.{RenderContext,Section}]
+
+CodeAnalysisSection:
+  methods:
+    should_render:
+      sig: (ctx:RenderContext) -> bool
+      does: "checks render"
+    render:
+      sig: (ctx:RenderContext) -> list[str]
+      does: "formats"
+
+functions:
+  _render_code_analysis:
+    sig: (project_analysis:list, skip_files:Any=None) -> list[str]
+    does: "Render Code Analysis section, optionally skipping files handled by other sect..."
+    side: "Sets value"
+
+# configuration.py | ConfigurationSection | 44 lines
+
+imports:
+  third_party: [sumd.sections.base.{RenderContext,Section}, sumd.sections.utils.render.call_with_ctx, sumd.sections.utils.should_render.always]
+
+ConfigurationSection:
+
+functions:
+  _render_configuration_section:
+    sig: (name:str, version:str) -> list[str]
+    does: "formats configuration section"
+
+# dependencies.py | DependenciesSection | 98 lines
+
+imports:
+  third_party: [sumd.sections.base.{RenderContext,Section}, sumd.sections.utils.render.call_with_ctx]
+
+DependenciesSection:
+  methods:
+    should_render:
+      sig: (ctx:RenderContext) -> bool
+      does: "checks render"
+
+functions:
+  _render_deps_runtime:
+    sig: (deps:list, node_deps:list, L:list[str]) -> None
+    does: "formats deps runtime"
+  _render_deps_dev:
+    sig: (dev_deps:list, node_dev:list, L:list[str]) -> None
+    does: "formats deps dev"
+  _render_dependencies:
+    sig: (deps:list, dev_deps:list, pkg_json:Any=None) -> list[str]
+    does: "formats dependencies"
+
+# deployment.py | DeploymentSection | 111 lines
+
+imports:
+  third_party: [sumd.sections.base.{RenderContext,Section}, sumd.sections.utils.render.call_with_ctx, sumd.sections.utils.should_render.always]
+
+DeploymentSection:
+
+functions:
+  _render_deployment_install:
+    sig: (pkg_json:dict, name:str, L:list[str]) -> None
+    does: "formats deployment install"
+  _render_deployment_reqs:
+    sig: (reqs:list, L:list[str]) -> None
+    does: "formats deployment reqs"
+  _render_dockerfile_info:
+    sig: (dockerfile:dict, a) -> None
+    does: "Append Dockerfile section lines to output via *a*."
+  _render_deployment_docker:
+    sig: (dockerfile:dict, compose:dict, L:list[str]) -> None
+    does: "formats deployment docker"
+  _render_deployment:
+    sig: (pkg_json:dict, name:str, reqs:list, dockerfile:dict, compose:dict) -> list[str]
+    does: "formats deployment"
+
+# environment.py | EnvironmentSection | 73 lines
+
+imports:
+  third_party: [sumd.sections.base.{RenderContext,Section}]
+
+EnvironmentSection:
+  methods:
+    should_render:
+      sig: (ctx:RenderContext) -> bool
+      does: "checks render"
+    render:
+      sig: (ctx:RenderContext) -> list[str]
+      does: "formats"
+
+functions:
+  _render_env_section:
+    sig: (env_vars:list) -> list[str]
+    does: "formats env section"
+  _render_goal_section:
+    sig: (goal:dict) -> list[str]
+    does: "formats goal section"
+
+# extras.py | ExtrasSection | 73 lines
+
+imports:
+  third_party: [sumd.sections.base.{RenderContext,Section}, sumd.sections.utils.render.call_with_ctx]
+
+ExtrasSection:
+  methods:
+    should_render:
+      sig: (ctx:RenderContext) -> bool
+      does: "checks render"
+
+functions:
+  _render_makefile_targets:
+    sig: (makefile:list, a) -> None
+    does: "Append Makefile targets section via *a*."
+  _render_pkg_json_scripts:
+    sig: (pkg_json:dict, a) -> None
+    does: "Append Node.js scripts section via *a*."
+  _render_extras:
+    sig: (makefile:list, pkg_json:dict) -> list[str]
+    does: "formats extras"
+
+# interfaces.py | InterfacesSection | 158 lines
+
+imports:
+  stdlib: [pathlib.Path]
+  third_party: [sumd.sections.base.{RenderContext,Section}, sumd.sections.utils.render.call_with_ctx]
+
+InterfacesSection:
+  methods:
+    should_render:
+      sig: (ctx:RenderContext) -> bool
+      does: "checks render"
+
+functions:
+  _render_interfaces_openapi:
+    sig: (openapi:dict, proj_dir:Path, raw_sources:bool, L:list[str]) -> None
+    does: "Render REST API section into L (mutates in place)."
+  _render_testql_raw:
+    sig: (scenarios:list, proj_dir:Path, L:list[str]) -> None
+    does: "formats testql raw"
+    side: "Sets value"
+  _render_testql_endpoint:
+    sig: (ep:dict, L:list[str]) -> None
+    does: "Render one endpoint line for a testql scenario."
+    side: "Modifies list"
+  _render_testql_extras:
+    sig: (sc:dict, L:list[str]) -> None
+    does: "Render performance / navigate / gui blocks for a testql scenario."
+  _render_testql_one_structured:
+    sig: (sc:dict, L:list[str]) -> None
+    does: "formats testql one structured"
+  _render_interfaces_testql:
+    sig: (scenarios:list, proj_dir:Path, raw_sources:bool, L:list[str]) -> None
+    does: "Render testql scenarios section into L (mutates in place)."
+  _render_interfaces:
+    sig: (scripts:list, openapi:dict, scenarios:list, proj_dir:Path, raw_sources:bool) -> list[str]
+    does: "formats interfaces"
+
+# metadata.py | MetadataSection | 52 lines
+
+imports:
+  third_party: [sumd.sections.base.{RenderContext,Section}, sumd.sections.utils.should_render.always]
+
+MetadataSection:
+  doc: "Render ## Metadata — always present, all profiles."
+  attrs:
+    name: str
+    level: int
+    profiles: frozenset[str]
+  methods:
+    render:
+      sig: (ctx:RenderContext) -> list[str]
+      does: "formats"
+
+# quality.py | QualitySection | 82 lines
+
+imports:
+  stdlib: [pathlib.Path]
+  third_party: [sumd.sections.base.{RenderContext,Section}, sumd.sections.utils.render.call_with_ctx, sumd.sections.utils.should_render.has_attr]
+
+QualitySection:
+
+functions:
+  _render_quality_raw:
+    sig: (proj_dir:Path, L:list[str]) -> None
+    does: "formats quality raw"
+  _render_quality_parsed:
+    sig: (pyqual:dict, L:list[str]) -> None
+    does: "formats quality parsed"
+  _render_quality:
+    sig: (pyqual:dict, proj_dir:Path, raw_sources:bool) -> list[str]
+    does: "formats quality"
+
+# refactor_analysis.py | RefactorAnalysisSection | 69 lines
+
+imports:
+  third_party: [sumd.sections.base.{RenderContext,Section}, sumd.sections.utils.should_render.has_attr]
+
+RefactorAnalysisSection:
+  methods:
+    render:
+      sig: (ctx:RenderContext) -> list[str]
+      does: "formats"
+
+# source_snippets.py | SourceSnippetsSection | 69 lines
+
+imports:
+  third_party: [sumd.sections.base.{RenderContext,Section}, sumd.sections.utils.render.call_with_ctx, sumd.sections.utils.should_render.has_attr]
+
+SourceSnippetsSection:
+
+functions:
+  _render_source_snippets:
+    sig: (source_snippets:list, top_n:int=5) -> list[str]
+    does: "Render top-N modules with function/class signatures for LLM orientation."
+
+# swop.py | SwopSection | 69 lines
+
+imports:
+  third_party: [sumd.sections.base.{RenderContext,Section}, sumd.sections.utils.render.call_with_ctx]
+
+SwopSection:
+  methods:
+    should_render:
+      sig: (ctx:RenderContext) -> bool
+      does: "checks render"
+
+functions:
+  _render_swop_section:
+    sig: (swop:dict, raw_sources:bool) -> list[str]
+    does: "Render SWOP manifest section."
+
+# test_contracts.py | TestContractsSection | 78 lines
+
+imports:
+  third_party: [sumd.sections.base.{RenderContext,Section}, sumd.sections.utils.render.call_with_ctx, sumd.sections.utils.should_render.has_attr]
+
+TestContractsSection:
+
+functions:
+  _render_scenario_contract:
+    sig: (sc:dict, a) -> None
+    does: "Append contract lines for a single scenario to the output via *a*."
+  _render_test_contracts:
+    sig: (scenarios:list) -> list[str]
+    does: "Render test scenarios as contract signatures — endpoint + key assertions."
+    side: "Modifies list"
+
+# __init__.py | 13 lines
+# Re-export module
+type: re-export
+exports:
+  - sumd.sections.utils.render.call_with_ctx
+  - sumd.sections.utils.should_render.always
+  - sumd.sections.utils.should_render.has_attr
+
+# render.py | 26 lines
+
+imports:
+  stdlib: [typing.Callable]
+  third_party: [sumd.sections.base.RenderContext]
+
+functions:
+  call_with_ctx:
+    sig: (render_fn:Callable) -> None
+    does: "Return a ``render`` method that calls *render_fn* with ctx attributes."
+
+# should_render.py | 26 lines
+
+imports:
+  third_party: [sumd.sections.base.RenderContext]
+
+functions:
+  always:
+    sig: (_self:object, _ctx:RenderContext) -> bool
+    does: "Always render the section."
+  has_attr:
+    sig: (attr:str) -> None
+    does: "Return a ``should_render`` that checks ``bool(ctx.<attr>)``."
+
+# workflows.py | WorkflowsSection | 87 lines
+
+imports:
+  stdlib: [pathlib.Path]
+  third_party: [sumd.sections.base.{RenderContext,Section}, sumd.sections.utils.render.call_with_ctx]
+
+WorkflowsSection:
+  methods:
+    should_render:
+      sig: (ctx:RenderContext) -> bool
+      does: "checks render"
+
+functions:
+  _render_workflows_doql:
+    sig: (doql:dict, L:list[str]) -> None
+    does: "formats workflows doql"
+  _render_workflows_taskfile:
+    sig: (tasks:list, proj_dir:Path, raw_sources:bool, L:list[str]) -> None
+    does: "formats workflows taskfile"
+  _render_workflows:
+    sig: (doql:dict, tasks:list, proj_dir:Path, raw_sources:bool) -> list[str]
+    does: "formats workflows"
+
+# toon_parser.py | 174 lines
+
+imports:
+  stdlib: [re, pathlib.Path, typing.Any]
+
+functions:
+  _parse_toon_block_config:
+    sig: (lines:list[str]) -> dict[str, str]
+    does: "Extract CONFIG key-value pairs from toon file lines."
+  _parse_toon_block_api:
+    sig: (content:str) -> list[dict[str, Any]]
+    does: "Extract API endpoint rows from toon content."
+    side: "Modifies list"
+  _parse_toon_block_assert:
+    sig: (lines:list[str]) -> list[dict[str, str]]
+    does: "Extract ASSERT rows from toon file lines."
+    side: "Modifies list"
+  _parse_toon_block_performance:
+    sig: (lines:list[str]) -> list[dict[str, str]]
+    does: "Extract PERFORMANCE rows from toon file lines."
+    side: "Modifies list"
+  _parse_toon_block_navigate:
+    sig: (lines:list[str]) -> list[str]
+    does: "Extract NAVIGATE url rows from toon file lines."
+    side: "Modifies list"
+  _parse_toon_block_gui:
+    sig: (lines:list[str]) -> list[dict[str, str]]
+    does: "Extract GUI action rows from toon file lines."
+    side: "Modifies list"
+  _parse_toon_file:
+    sig: (f:Path) -> dict[str, Any]
+    does: "Parse a single *.testql.toon.yaml file into a scenario dict."
+  extract_testql_scenarios:
+    sig: (proj_dir:Path) -> list[dict[str, Any]]
+    does: "Scan all *.testql.toon.yaml and testql-scenarios/*.yaml files in project."
+    side: "Modifies list"
+
+# validator.py | CodeBlockIssue | 384 lines
+
+imports:
+  stdlib: [re, dataclasses.dataclass, pathlib.Path]
+
+CodeBlockIssue:
+
+functions:
+  _validate_yaml_body:
+    sig: (body:str, path:str) -> list[str]
+    does: "Check YAML body is parseable."
+  _validate_less_css_body:
+    sig: (body:str, path:str) -> list[str]
+    does: "Basic sanity: balanced braces."
+  _validate_mermaid_body:
+    sig: (body:str, path:str) -> list[str]
+    does: "Check mermaid block starts with a valid diagram type."
+  _validate_toon_body:
+    sig: (body:str, path:str) -> list[str]
+    does: "Check toon block has at least one recognised section header."
+  _validate_bash_body:
+    sig: (body:str, path:str) -> list[str]
+    does: "Check bash block is non-empty and doesn't contain obvious placeholders."
+  _validate_deps_body:
+    sig: (body:str, path:str) -> list[str]
+    does: "Each line of a deps block should be a valid pip requirement or empty."
+    side: "Modifies list"
+  _validate_markpact_meta:
+    sig: (mp:Any, line_no:int, lang:str, meta:str, issues:list) -> None
+    does: "Check markpact annotation kind and required attributes."
+    side: "Modifies list"
+  validate_codeblocks:
+    sig: (content:str, source:str='SUMD.md') -> list[CodeBlockIssue]
+    does: "Validate all fenced code blocks in *content*."
+    side: "Modifies list"
+  _check_h1:
+    sig: (lines:list[str], source:str) -> list[str]
+    does: "Return error if H1 title is missing."
+  _check_required_sections:
+    sig: (lines:list[str], source:str, profile:str='rich') -> list[str]
+    does: "Return errors for any missing required H2 sections."
+  _check_metadata_fields:
+    sig: (lines:list[str], source:str) -> list[str]
+    does: "Return errors for missing required metadata bullet fields."
+    side: "Sets value"
+  _check_unclosed_fences:
+    sig: (lines:list[str], source:str) -> list[str]
+    does: "Return error if there is an odd number of ``` fence markers."
+  _check_empty_links:
+    sig: (content:str, source:str) -> list[str]
+    does: "Return errors for markdown links with empty href."
+  validate_markdown:
+    sig: (content:str, source:str='SUMD.md', profile:str='rich') -> list[str]
+    does: "Validate SUMD markdown structure."
+  validate_project_architecture:
+    sig: (proj_dir:Path) -> list[str]
+    does: "Run Prolog-based architectural consistency checks on the project."
+    side: "Modifies list"
+  validate_sumd_file:
+    sig: (path:Path, profile:str='rich') -> dict
+    does: "Run all validators on a SUMD.md file."
+
+# test_gitignore.py | 1 lines
+
+# test_ignore.py | 1 lines
+
+# test_cli.py | TestValidateCommand, TestInfoCommand, TestExportCommand +5 | 348 lines
+
+imports:
+  stdlib: [json, textwrap, pathlib.Path]
+  third_party: [pytest, click.testing.CliRunner, sumd.cli, sumd.cli]
+
+TestValidateCommand:
+  methods:
+    test_valid_file_exits_zero:
+      sig: (sumd_file) -> None
+      does: "checks valid file exits zero"
+    test_valid_file_prints_ok:
+      sig: (sumd_file) -> None
+      does: "checks valid file prints ok"
+    test_missing_file_exits_nonzero:
+      sig: (tmp_path) -> None
+      does: "checks missing file exits nonzero"
+
+TestInfoCommand:
+  methods:
+    test_info_runs:
+      sig: (sumd_file) -> None
+      does: "checks info runs"
+
+TestExportCommand:
+  methods:
+    test_export_json:
+      sig: (sumd_file) -> None
+      does: "checks export json"
+    test_export_to_output_file:
+      sig: (sumd_file, tmp_path) -> None
+      does: "checks export to output file"
+    test_export_markdown:
+      sig: (sumd_file) -> None
+      does: "checks export markdown"
+
+TestCliVersion:
+  methods:
+    test_version_option:
+      sig: () -> None
+      does: "checks version option"
+
+TestCliHelp:
+  methods:
+    test_help:
+      sig: () -> None
+      does: "checks help"
+    test_validate_help:
+      sig: () -> None
+      does: "checks validate help"
+    test_export_help:
+      sig: () -> None
+      does: "checks export help"
+    test_scan_help:
+      sig: () -> None
+      does: "checks scan help"
+
+TestProjectDetection:
+  doc: "Detection must work across all supported languages/projec..."
+  methods:
+    test_is_project_dir_accepts_language_marker:
+      sig: (tmp_path:Path, marker:str, expected:str) -> None
+      does: "checks is project dir accepts language marker"
+      side: "Writes data"
+    test_is_project_dir_accepts_glob_markers:
+      sig: (tmp_path:Path, glob_name:str, expected:str) -> None
+      does: "checks is project dir accepts glob markers"
+      side: "Writes data"
+    test_empty_dir_is_not_project:
+      sig: (tmp_path:Path) -> None
+      does: "checks empty dir is not project"
+    test_detect_projects_finds_mixed_languages:
+      sig: (tmp_path:Path) -> None
+      does: "checks detect projects finds mixed languages"
+      side: "Writes data"
+    test_detect_projects_non_recursive_skips_nested:
+      sig: (tmp_path:Path) -> None
+      does: "checks detect projects non recursive skips nested"
+      side: "Writes data"
+    test_detect_projects_recursive_finds_nested:
+      sig: (tmp_path:Path) -> None
+      does: "checks detect projects recursive finds nested"
+      side: "Writes data"
+
+TestNodeSpecFromPackageJson:
+  doc: "Node DOQL spec must mirror real package.json (scripts + f..."
+  methods:
+    test_framework_detection:
+      sig: (deps:set[str], expected:str) -> None
+      does: "checks framework detection"
+    test_spec_uses_real_scripts_and_extras:
+      sig: () -> None
+      does: "checks spec uses real scripts and extras"
+    test_spec_falls_back_without_scripts:
+      sig: () -> None
+      does: "checks spec falls back without scripts"
+
+TestGenerateDoqlLess:
+  doc: "Refresh behaviour for app.doql.less generation."
+  methods:
+    _pkg:
+      sig: (tmp_path:Path) -> None
+      does: "pkg"
+      side: "Updates state"
+    test_fresh_generation_for_node_uses_real_scripts:
+      sig: (tmp_path:Path) -> None
+      does: "checks fresh generation for node uses real scripts"
+    test_force_regenerates_autogen_file_without_duplicating:
+      sig: (tmp_path:Path) -> None
+      does: "Regression: previously the force path prepended a second app{}"
+    test_force_preserves_user_authored_file:
+      sig: (tmp_path:Path) -> None
+      does: "User-authored files keep their body; only the app{} block is refreshed."
+      side: "Writes data"
+    test_no_force_skips_existing:
+      sig: (tmp_path:Path) -> None
+      does: "checks no force skips existing"
+      side: "Writes data"
+
+functions:
+  sumd_file:
+    sig: (tmp_path) -> None
+    does: "sumd file"
+    side: "Writes data"
+
+# test_cqrs_es.py | TestEventStore, TestSumdAggregate, TestCommandBus +3 | 389 lines
+
+imports:
+  stdlib: [datetime, pathlib.Path]
+  third_party: [pytest, sumd.cqrs.commands.{AddSumdSection,CommandBus,CreateSumdDocument,SumdCommandHandler,ValidateSumdDocument}, sumd.cqrs.events.{Event,EventStore,SumdDocumentCreated,SumdDocumentUpdated}]
+
+TestEventStore:
+  doc: "Test EventStore functionality."
+  methods:
+    test_save_and_get_events:
+      sig: () -> None
+      does: "Test saving and retrieving events."
+      side: "Saves data"
+    test_persistence:
+      sig: () -> None
+      does: "Test event persistence to file."
+      side: "Saves data"
+    test_get_events_from_version:
+      sig: () -> None
+      does: "Test retrieving events from specific version."
+      side: "Saves data"
+
+TestSumdAggregate:
+  doc: "Test SumdAggregate functionality."
+  methods:
+    test_create_document:
+      sig: () -> None
+      does: "Test creating a SUMD document."
+    test_add_section:
+      sig: () -> None
+      does: "Test adding a section to document."
+      side: "Adds element"
+    test_remove_section:
+      sig: () -> None
+      does: "Test removing a section from document."
+      side: "Removes element"
+    test_load_from_history:
+      sig: () -> None
+      does: "Test loading aggregate from event history."
+      side: "Adds element"
+
+TestCommandBus:
+  doc: "Test CommandBus functionality."
+  methods:
+    test_dispatch_command:
+      sig: async () -> None
+      does: "Test dispatching commands."
+
+TestQueryBus:
+  doc: "Test QueryBus functionality."
+  methods:
+    test_dispatch_query:
+      sig: async () -> None
+      does: "Test dispatching queries."
+      side: "Writes data"
+
+TestEventSourcedRepository:
+  doc: "Test EventSourcedRepository functionality."
+  methods:
+    test_save_and_get_aggregate:
+      sig: async () -> None
+      does: "Test saving and retrieving aggregates."
+      side: "Saves data"
+
+TestIntegration:
+  doc: "Integration tests for CQRS ES architecture."
+  methods:
+    test_full_workflow:
+      sig: async () -> None
+      does: "Test complete CQRS ES workflow."
+      side: "Writes data"
+
+# test_dogfood.py | 148 lines
+
+imports:
+  stdlib: [shutil, subprocess, sys, textwrap, pathlib.Path]
+  third_party: [pytest]
+
+functions:
+  _run:
+    sig: (cmd:list[str], cwd:Path, timeout:int=60) -> subprocess.CompletedProcess
+    does: "starts"
+  project_copy:
+    sig: (tmp_path_factory) -> None
+    does: "Shallow copy of the project — only source files, no .venv / .git / build."
+  test_sumd_scans_itself:
+    sig: (project_copy) -> None
+    does: "sumd scan ."
+  test_sumd_scans_all_profiles:
+    sig: (project_copy, profile) -> None
+    does: "Every profile must exit 0 and produce SUMD.md."
+  test_sumr_generates_sumr_md:
+    sig: (project_copy) -> None
+    does: "sumr ."
+  test_sumd_lint_passes_on_generated_output:
+    sig: (project_copy) -> None
+    does: "After scan, sumd lint must report no errors on the generated SUMD.md."
+  test_sumd_version_flag:
+    sig: () -> None
+    does: "sumd --version must exit 0 and print a semver-like string."
+  test_sumd_scan_produces_no_unhandled_exceptions:
+    sig: (project_copy) -> None
+    does: "Stderr must not contain Python tracebacks after a successful scan."
+
+# test_dsl.py | TestDSLLexer, TestDSLParser, TestDSLEngine +3 | 470 lines
+
+imports:
+  stdlib: [pathlib.Path]
+  third_party: [pytest, sumd.dsl.commands.{DSLCommandRegistry,create_builtin_registry}, sumd.dsl.engine.{DSLContext,DSLEngine}, sumd.dsl.parser.{DSLExpression,DSLExpressionType,DSLLexer,DSLParser,parse_dsl}]
+
+TestDSLLexer:
+  doc: "Test DSL lexer functionality."
+  methods:
+    test_tokenize_simple_command:
+      sig: () -> None
+      does: "Test tokenizing a simple command."
+    test_tokenize_function_call:
+      sig: () -> None
+      does: "Test tokenizing a function call."
+    test_tokenize_arithmetic:
+      sig: () -> None
+      does: "Test tokenizing arithmetic expression."
+    test_tokenize_string_literals:
+      sig: () -> None
+      does: "Test tokenizing string literals."
+    test_tokenize_comments:
+      sig: () -> None
+      does: "Test tokenizing comments."
+
+TestDSLParser:
+  doc: "Test DSL parser functionality."
+  methods:
+    test_parse_simple_command:
+      sig: () -> None
+      does: "Test parsing a simple command."
+    test_parse_function_call:
+      sig: () -> None
+      does: "Test parsing a function call."
+    test_parse_arithmetic:
+      sig: () -> None
+      does: "Test parsing arithmetic expression."
+    test_parse_assignment:
+      sig: () -> None
+      does: "Test parsing assignment."
+    test_parse_pipeline:
+      sig: () -> None
+      does: "Test parsing pipeline."
+    test_parse_comparison:
+      sig: () -> None
+      does: "Test parsing comparison."
+    test_parse_logical:
+      sig: () -> None
+      does: "Test parsing logical expression."
+
+TestDSLEngine:
+  doc: "Test DSL engine functionality."
+  methods:
+    test_execute_literal:
+      sig: async () -> None
+      does: "Test executing literal expressions."
+    test_execute_arithmetic:
+      sig: async () -> None
+      does: "Test executing arithmetic expressions."
+    test_execute_comparison:
+      sig: async () -> None
+      does: "Test executing comparison expressions."
+    test_execute_logical:
+      sig: async () -> None
+      does: "Test executing logical expressions."
+    test_execute_assignment:
+      sig: async () -> None
+      does: "Test executing assignment expressions."
+    test_execute_function_call:
+      sig: async () -> None
+      does: "Test executing function calls."
+    test_execute_pipeline:
+      sig: async () -> None
+      does: "Test executing pipeline expressions."
+
+TestDSLCommandRegistry:
+  doc: "Test DSL command registry."
+  methods:
+    test_builtin_registry:
+      sig: () -> None
+      does: "Test built-in command registry."
+    test_command_categories:
+      sig: () -> None
+      does: "Test command categories."
+    test_help_system:
+      sig: () -> None
+      does: "Test help system."
+
+TestDSLShell:
+  doc: "Test DSL shell functionality."
+  methods:
+    test_shell_initialization:
+      sig: async () -> None
+      does: "Test shell initialization."
+    test_execute_command:
+      sig: async () -> None
+      does: "Test executing commands in shell."
+    test_execute_script:
+      sig: async () -> None
+      does: "Test executing DSL script."
+      side: "Writes data"
+
+TestDSLIntegration:
+  doc: "Integration tests for DSL functionality."
+  methods:
+    test_dsl_with_sumd_commands:
+      sig: async () -> None
+      does: "Test DSL with SUMD commands."
+      side: "Writes data"
+    test_complex_dsl_expressions:
+      sig: async () -> None
+      does: "Test complex DSL expressions."
+    test_error_handling:
+      sig: async () -> None
+      does: "Test error handling in DSL."
+
+# test_extractor.py | TestExtractPyproject, TestExtractTaskfile, TestExtractPyqual +7 | 313 lines
+
+imports:
+  third_party: [sumd.extractor]
+
+TestExtractPyproject:
+  methods:
+    test_missing_file_returns_empty:
+      sig: (tmp_path) -> None
+      does: "checks missing file returns empty"
+    test_basic_fields:
+      sig: (tmp_path) -> None
+      does: "checks basic fields"
+      side: "Writes data"
+    test_dependencies_parsed:
+      sig: (tmp_path) -> None
+      does: "checks dependencies parsed"
+      side: "Writes data"
+    test_dev_dependencies_from_optional:
+      sig: (tmp_path) -> None
+      does: "checks dev dependencies from optional"
+      side: "Writes data"
+    test_fallback_name_is_dir_name:
+      sig: (tmp_path) -> None
+      does: "checks fallback name is dir name"
+      side: "Writes data"
+    test_corrupt_toml_returns_empty:
+      sig: (tmp_path) -> None
+      does: "checks corrupt toml returns empty"
+      side: "Writes data"
+
+TestExtractTaskfile:
+  methods:
+    test_missing_returns_empty:
+      sig: (tmp_path) -> None
+      does: "checks missing returns empty"
+    test_parses_tasks:
+      sig: (tmp_path) -> None
+      does: "checks parses tasks"
+      side: "Writes data"
+    test_task_without_desc:
+      sig: (tmp_path) -> None
+      does: "checks task without desc"
+      side: "Writes data"
+    test_multiple_tasks:
+      sig: (tmp_path) -> None
+      does: "checks multiple tasks"
+      side: "Writes data"
+
+TestExtractPyqual:
+  methods:
+    test_missing_returns_empty:
+      sig: (tmp_path) -> None
+      does: "checks missing returns empty"
+    test_parses_pipeline:
+      sig: (tmp_path) -> None
+      does: "checks parses pipeline"
+      side: "Writes data"
+    test_flat_format:
+      sig: (tmp_path) -> None
+      does: "pyqual.yaml without a `pipeline:` wrapper should still parse."
+      side: "Writes data"
+
+TestExtractPythonModules:
+  methods:
+    test_missing_pkg_dir_returns_empty:
+      sig: (tmp_path) -> None
+      does: "checks missing pkg dir returns empty"
+    test_lists_modules:
+      sig: (tmp_path) -> None
+      does: "checks lists modules"
+      side: "Writes data"
+    test_excludes_dunder_files:
+      sig: (tmp_path) -> None
+      does: "checks excludes dunder files"
+      side: "Writes data"
+
+TestExtractReadmeTitle:
+  methods:
+    test_missing_returns_empty:
+      sig: (tmp_path) -> None
+      does: "checks missing returns empty"
+    test_extracts_h1:
+      sig: (tmp_path) -> None
+      does: "checks extracts h1"
+      side: "Writes data"
+    test_no_h1_returns_empty:
+      sig: (tmp_path) -> None
+      does: "checks no h1 returns empty"
+      side: "Writes data"
+    test_first_h1_only:
+      sig: (tmp_path) -> None
+      does: "checks first h1 only"
+      side: "Writes data"
+
+TestExtractEnv:
+  methods:
+    test_missing_returns_empty:
+      sig: (tmp_path) -> None
+      does: "checks missing returns empty"
+    test_parses_key_value:
+      sig: (tmp_path) -> None
+      does: "checks parses key value"
+      side: "Writes data"
+    test_captures_preceding_comment:
+      sig: (tmp_path) -> None
+      does: "checks captures preceding comment"
+      side: "Writes data"
+    test_captures_inline_comment:
+      sig: (tmp_path) -> None
+      does: "checks captures inline comment"
+      side: "Writes data"
+    test_empty_value_becomes_not_set:
+      sig: (tmp_path) -> None
+      does: "checks empty value becomes not set"
+      side: "Sets value"
+
+TestExtractGoal:
+  methods:
+    test_missing_returns_empty:
+      sig: (tmp_path) -> None
+      does: "checks missing returns empty"
+    test_parses_project_and_versioning:
+      sig: (tmp_path) -> None
+      does: "checks parses project and versioning"
+      side: "Writes data"
+
+TestExtractProjectAnalysis:
+  methods:
+    test_missing_project_dir_returns_empty:
+      sig: (tmp_path) -> None
+      does: "checks missing project dir returns empty"
+    test_loads_calls_toon_yaml:
+      sig: (tmp_path) -> None
+      does: "checks loads calls toon yaml"
+      side: "Writes data"
+    test_refactor_mode_loads_extra_files:
+      sig: (tmp_path) -> None
+      does: "checks refactor mode loads extra files"
+      side: "Writes data"
+    test_missing_files_skipped:
+      sig: (tmp_path) -> None
+      does: "checks missing files skipped"
+
+TestExtractRequirements:
+  methods:
+    test_no_requirements_returns_empty:
+      sig: (tmp_path) -> None
+      does: "checks no requirements returns empty"
+    test_parses_requirements_txt:
+      sig: (tmp_path) -> None
+      does: "checks parses requirements txt"
+      side: "Writes data"
+    test_ignores_comments_and_flags:
+      sig: (tmp_path) -> None
+      does: "checks ignores comments and flags"
+      side: "Writes data"
+
+TestExtractMakefile:
+  methods:
+    test_missing_returns_empty:
+      sig: (tmp_path) -> None
+      does: "checks missing returns empty"
+    test_parses_targets:
+      sig: (tmp_path) -> None
+      does: "checks parses targets"
+      side: "Writes data"
+    test_comment_captured:
+      sig: (tmp_path) -> None
+      does: "checks comment captured"
+      side: "Writes data"
+
+# test_mcp_cqrs_dsl.py | TestMCPCQRSCommands, TestMCPDSLCommands, TestMCPIntegration +1 | 465 lines
+
+imports:
+  stdlib: [json, pathlib.Path, unittest.mock.{AsyncMock,MagicMock}]
+  third_party: [pytest, tempfile, sumd.mcp_server]
+
+TestMCPCQRSCommands:
+  doc: "Test MCP CQRS command tools."
+  methods:
+    test_execute_command:
+      sig: async () -> None
+      does: "Test execute_command tool."
+    test_execute_command_error:
+      sig: async () -> None
+      does: "Test execute_command tool with error."
+    test_execute_query:
+      sig: async () -> None
+      does: "Test execute_query tool."
+    test_get_events:
+      sig: async () -> None
+      does: "Test get_events tool."
+    test_get_aggregate:
+      sig: async () -> None
+      does: "Test get_aggregate tool."
+
+TestMCPDSLCommands:
+  doc: "Test MCP DSL command tools."
+  methods:
+    test_execute_dsl:
+      sig: async () -> None
+      does: "Test execute_dsl tool."
+    test_dsl_shell_info:
+      sig: async () -> None
+      does: "Test dsl_shell_info tool."
+
+TestMCPIntegration:
+  doc: "Integration tests for MCP server with CQRS ES and DSL."
+  methods:
+    test_full_cqrs_workflow_via_mcp:
+      sig: async () -> None
+      does: "Test full CQRS workflow through MCP tools."
+      side: "Writes data"
+    test_dsl_integration_via_mcp:
+      sig: async () -> None
+      does: "Test DSL integration through MCP tools."
+
+TestMCPErrorHandling:
+  doc: "Test error handling in MCP tools."
+  methods:
+    test_unknown_command_type:
+      sig: async () -> None
+      does: "Test handling of unknown command type."
+    test_unknown_query_type:
+      sig: async () -> None
+      does: "Test handling of unknown query type."
+    test_aggregate_not_found:
+      sig: async () -> None
+      does: "Test handling of aggregate not found."
+
+# test_mcp_server.py | TestDocToDict, TestResolvePath, TestListTools +8 | 239 lines
+
+imports:
+  stdlib: [json, textwrap, pathlib.Path]
+  third_party: [asyncio, pytest, sumd.mcp_server.{_TOOL_HANDLERS,_doc_to_dict,_resolve_path,list_tools}]
+
+TestDocToDict:
+  methods:
+    test_has_required_keys:
+      sig: (sumd_file) -> None
+      does: "checks has required keys"
+    test_section_has_fields:
+      sig: (sumd_file) -> None
+      does: "checks section has fields"
+
+TestResolvePath:
+  methods:
+    test_absolute_path_unchanged:
+      sig: (tmp_path) -> None
+      does: "checks absolute path unchanged"
+    test_relative_resolves_from_cwd:
+      sig: () -> None
+      does: "checks relative resolves from cwd"
+
+TestListTools:
+  methods:
+    test_returns_thirteen_tools:
+      sig: () -> None
+      does: "checks returns thirteen tools"
+    test_tool_names:
+      sig: () -> None
+      does: "checks tool names"
+    test_each_tool_has_input_schema:
+      sig: () -> None
+      does: "checks each tool has input schema"
+
+TestParseSumd:
+  methods:
+    test_returns_json:
+      sig: (sumd_file) -> None
+      does: "checks returns json"
+    test_missing_file_returns_error:
+      sig: (tmp_path) -> None
+      does: "checks missing file returns error"
+
+TestValidateSumd:
+  methods:
+    test_valid_file:
+      sig: (sumd_file) -> None
+      does: "checks valid file"
+    test_missing_file_returns_error:
+      sig: (tmp_path) -> None
+      does: "checks missing file returns error"
+
+TestExportSumd:
+  methods:
+    test_export_json:
+      sig: (sumd_file) -> None
+      does: "checks export json"
+    test_export_markdown:
+      sig: (sumd_file) -> None
+      does: "checks export markdown"
+    test_export_to_file:
+      sig: (sumd_file, tmp_path) -> None
+      does: "checks export to file"
+
+TestListSections:
+  methods:
+    test_returns_list:
+      sig: (sumd_file) -> None
+      does: "checks returns list"
+    test_section_has_name:
+      sig: (sumd_file) -> None
+      does: "checks section has name"
+
+TestGetSection:
+  methods:
+    test_found_section:
+      sig: (sumd_file) -> None
+      does: "checks found section"
+    test_missing_section:
+      sig: (sumd_file) -> None
+      does: "checks missing section"
+
+TestInfoSumd:
+  methods:
+    test_returns_info:
+      sig: (sumd_file) -> None
+      does: "checks returns info"
+
+TestGenerateSumd:
+  methods:
+    test_generate_content:
+      sig: () -> None
+      does: "checks generate content"
+    test_generate_to_file:
+      sig: (tmp_path) -> None
+      does: "checks generate to file"
+
+TestUnknownTool:
+  methods:
+    test_unknown_returns_error:
+      sig: () -> None
+      does: "checks unknown returns error"
+
+functions:
+  sumd_file:
+    sig: (tmp_path) -> None
+    does: "sumd file"
+    side: "Writes data"
+  run:
+    sig: (coro) -> None
+    does: "Run a coroutine synchronously."
+
+# test_parser.py | 145 lines
+
+imports:
+  third_party: [sumd.parser.{SUMDParser,parse,validate}]
+
+functions:
+  test_parse_basic:
+    sig: () -> None
+    does: "Test basic parsing of SUMD document."
+  test_parse_sections:
+    sig: () -> None
+    does: "Test section parsing."
+  test_validate_valid_document:
+    sig: () -> None
+    does: "Test validation of valid document."
+  test_validate_missing_intent:
+    sig: () -> None
+    does: "Test validation fails without intent section."
+  test_parse_file:
+    sig: (tmp_path) -> None
+    does: "Test parsing from file."
+    side: "Writes data"
+  test_parser_class:
+    sig: () -> None
+    does: "Test SUMDParser class directly."
+  test_markpact_semantic_kinds_valid:
+    sig: () -> None
+    does: "All Phase 2 semantic markpact kinds must pass validation."
+  test_markpact_unknown_kind_error:
+    sig: () -> None
+    does: "Unknown markpact kind must produce an error."
+  test_markpact_missing_path_error:
+    sig: () -> None
+    does: "Semantic kinds with missing path= must produce an error."
+
+# test_pipeline.py | 136 lines
+
+imports:
+  stdlib: [pathlib.Path]
+  third_party: [pytest, sumd.extractor.required_tools_for_profile, sumd.pipeline.{RenderPipeline,_refresh_analysis_files,_refresh_map_toon}]
+
+functions:
+  proj_dir:
+    sig: (tmp_path:Path) -> Path
+    does: "Minimal project directory with just pyproject.toml."
+    side: "Writes data"
+  test_pipeline_run_returns_string:
+    sig: (proj_dir:Path) -> None
+    does: "checks pipeline run returns string"
+  test_pipeline_output_has_h1:
+    sig: (proj_dir:Path) -> None
+    does: "checks pipeline output has h1"
+  test_pipeline_output_has_metadata:
+    sig: (proj_dir:Path) -> None
+    does: "checks pipeline output has metadata"
+  test_pipeline_return_sources:
+    sig: (proj_dir:Path) -> None
+    does: "checks pipeline return sources"
+  test_pipeline_profile_minimal:
+    sig: (proj_dir:Path) -> None
+    does: "checks pipeline profile minimal"
+  test_pipeline_profile_refactor:
+    sig: (proj_dir:Path) -> None
+    does: "checks pipeline profile refactor"
+  test_pipeline_with_modules:
+    sig: (proj_dir:Path) -> None
+    does: "Pipeline picks up python modules in pkg dir."
+    side: "Writes data"
+  test_pipeline_with_taskfile:
+    sig: (proj_dir:Path) -> None
+    does: "checks pipeline with taskfile"
+    side: "Writes data"
+  test_pipeline_with_dependencies:
+    sig: (proj_dir:Path) -> None
+    does: "checks pipeline with dependencies"
+    side: "Writes data"
+  test_pipeline_injects_toc:
+    sig: (proj_dir:Path) -> None
+    does: "checks pipeline injects toc"
+  test_required_tools_rich:
+    sig: () -> None
+    does: "checks required tools rich"
+  test_required_tools_refactor:
+    sig: () -> None
+    does: "checks required tools refactor"
+  test_required_tools_minimal:
+    sig: () -> None
+    does: "checks required tools minimal"
+  test_refresh_map_toon_writes_file:
+    sig: (tmp_path:Path) -> None
+    does: "checks refresh map toon writes file"
+    side: "Writes data"
+  test_refresh_analysis_files_noop_without_tools:
+    sig: (tmp_path:Path) -> None
+    does: "checks refresh analysis files noop without tools"
+
+# test_sections.py | TestMetadataSection, TestArchitectureSection, TestDependenciesSection +7 | 298 lines
+
+imports:
+  stdlib: [pathlib.Path]
+  third_party: [sumd.sections.architecture.ArchitectureSection, sumd.sections.base.RenderContext, sumd.sections.call_graph.CallGraphSection, sumd.sections.code_analysis.CodeAnalysisSection, sumd.sections.dependencies.DependenciesSection, sumd.sections.environment.EnvironmentSection, sumd.sections.metadata.MetadataSection, sumd.sections.quality.QualitySection]
+
+TestMetadataSection:
+  methods:
+    test_always_renders:
+      sig: () -> None
+      does: "checks always renders"
+    test_contains_name_and_version:
+      sig: () -> None
+      does: "checks contains name and version"
+    test_contains_metadata_header:
+      sig: () -> None
+      does: "checks contains metadata header"
+    test_optional_fields_omitted_when_empty:
+      sig: () -> None
+      does: "checks optional fields omitted when empty"
+
+TestArchitectureSection:
+  methods:
+    test_always_renders:
+      sig: () -> None
+      does: "checks always renders"
+    test_header_present:
+      sig: () -> None
+      does: "checks header present"
+    test_modules_listed:
+      sig: () -> None
+      does: "checks modules listed"
+    test_no_modules_no_source_modules_section:
+      sig: () -> None
+      does: "checks no modules no source modules section"
+
+TestDependenciesSection:
+  methods:
+    test_renders_when_deps_present:
+      sig: () -> None
+      does: "checks renders when deps present"
+    test_runtime_deps_listed:
+      sig: () -> None
+      does: "checks runtime deps listed"
+    test_no_deps_shows_fallback:
+      sig: () -> None
+      does: "checks no deps shows fallback"
+    test_dev_deps_section:
+      sig: () -> None
+      does: "checks dev deps section"
+
+TestWorkflowsSection:
+  methods:
+    test_no_render_when_empty:
+      sig: () -> None
+      does: "checks no render when empty"
+    test_renders_with_tasks:
+      sig: () -> None
+      does: "checks renders with tasks"
+    test_header_present:
+      sig: () -> None
+      does: "checks header present"
+
+TestQualitySection:
+  methods:
+    test_no_render_when_empty:
+      sig: () -> None
+      does: "checks no render when empty"
+    test_renders_with_pyqual:
+      sig: () -> None
+      does: "checks renders with pyqual"
+    test_pipeline_name_in_output:
+      sig: () -> None
+      does: "checks pipeline name in output"
+
+TestEnvironmentSection:
+  methods:
+    test_no_render_when_empty:
+      sig: () -> None
+      does: "checks no render when empty"
+    test_renders_with_vars:
+      sig: () -> None
+      does: "checks renders with vars"
+
+TestCallGraphSection:
+  methods:
+    test_no_render_without_calls:
+      sig: () -> None
+      does: "checks no render without calls"
+    test_no_render_without_calls_file:
+      sig: () -> None
+      does: "checks no render without calls file"
+    test_renders_with_calls_file:
+      sig: () -> None
+      does: "checks renders with calls file"
+
+TestCodeAnalysisSection:
+  methods:
+    test_no_render_when_only_calls:
+      sig: () -> None
+      does: "checks no render when only calls"
+    test_renders_with_map:
+      sig: () -> None
+      does: "checks renders with map"
+
+TestRefactorAnalysisSection:
+  methods:
+    test_no_render_when_empty:
+      sig: () -> None
+      does: "checks no render when empty"
+    test_renders_with_analysis_files:
+      sig: () -> None
+      does: "checks renders with analysis files"
+    test_map_toon_excluded:
+      sig: () -> None
+      does: "map.toon.yaml should not appear in refactoring analysis section."
+
+TestSourceSnippetsSection:
+  methods:
+    test_no_render_when_empty:
+      sig: () -> None
+      does: "checks no render when empty"
+    test_renders_with_snippets:
+      sig: () -> None
+      does: "checks renders with snippets"
+
+functions:
+  make_ctx:
+    sig: () -> RenderContext
+    does: "Build a minimal RenderContext with sensible defaults."
+    side: "Updates state"
+
+# test_statement.py | 12 lines
+
+functions:
+  test_placeholder:
+    sig: () -> None
+    does: "Placeholder test to verify the test setup works."
+  test_import:
+    sig: () -> None
+    does: "Verify the main package can be imported."

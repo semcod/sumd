@@ -1,6 +1,6 @@
 # SUMD — Usage Guide
 
-> **Version 0.3.45** | [README](../README.md) | [SPEC](../SPEC.md)
+> **Version 0.3.46** | [README](../README.md) | [SPEC](../SPEC.md) | [CHANGELOG](../CHANGELOG.md) | [TODO](../TODO.md)
 
 ## Table of Contents
 

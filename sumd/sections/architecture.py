@@ -110,6 +110,20 @@ def _render_architecture_doql_parsed(doql: dict, L: list[str]) -> None:
     _render_doql_integrations(doql, L)
 
 
+def _render_architecture_rules(proj_dir: Path, L: list[str]) -> None:
+    rules_path = proj_dir / "sumd" / "rules.pl"
+    if not rules_path.exists():
+        rules_path = proj_dir / "rules.pl"
+    if rules_path.exists():
+        a = L.append
+        a("### Architecture Consistency Rules (sumd/rules.pl)")
+        a("")
+        a("```prolog markpact:file path=sumd/rules.pl")
+        a(rules_path.read_text(encoding="utf-8").rstrip())
+        a("```")
+        a("")
+
+
 def _render_architecture(
     doql: dict, modules: list[str], name: str, proj_dir: Path, raw_sources: bool
 ) -> list[str]:
@@ -132,6 +146,7 @@ def _render_architecture(
         _render_architecture_doql_section(doql, proj_dir, raw_sources, L)
     if modules:
         _render_architecture_modules(modules, name, L)
+    _render_architecture_rules(proj_dir, L)
     return L
 
 

@@ -1,0 +1,546 @@
+Tak — potraktowałbym `SUMD.md` jako **bazę faktów architektonicznych**, a walidację robił przez **reguły spójności**. Prolog bardzo dobrze do tego pasuje, bo program Prologowy to właśnie baza wiedzy złożona z faktów i reguł, a SWI‑Prolog ma nawet wbudowane mechanizmy consistency checking i cross-reference dla samego programu. [lpn.swi-prolog](https://lpn.swi-prolog.org/lpnpage.php?pagetype=html&pageid=lpn-htmlse1)
+
+W praktyce robi się to w dwóch krokach:
+1. z `SUMD.md` generujesz **fakty Prologowe** o systemie,
+2. uruchamiasz nad nimi **reguły walidacyjne**, które wykrywają „co logicznie się nie spina”, np. brakujące kroki, niespójne zależności, workflow bez triggera, gate bez źródła, interfejs bez implementacji albo deployment bez pliku compose. [stackoverflow](https://stackoverflow.com/questions/16220467/in-prolog-swi-how-to-build-a-knowledge-base-of-user-supplied-pairs-and-assert)
+
+## Jak walidować SUMD
+
+Najlepiej podzielić walidację na 4 warstwy.
+
+### 1. Spójność strukturalna
+To są reguły typu:
+- system ma nazwę i wersję, [ppl-ai-file-upload.s3.amazonaws](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/944903605/44374990-fd9e-4e95-a692-ac4de1d3f875/paste.txt)
+- każdy workflow ma trigger i co najmniej jeden krok, [ppl-ai-file-upload.s3.amazonaws](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/944903605/44374990-fd9e-4e95-a692-ac4de1d3f875/paste.txt)
+- jeśli `deploy.target = docker-compose`, to istnieje `compose_file`, [ppl-ai-file-upload.s3.amazonaws](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/944903605/44374990-fd9e-4e95-a692-ac4de1d3f875/paste.txt)
+- jeśli zdefiniowano `interface[type="api"]`, to powinien istnieć framework lub entrypoint. [ppl-ai-file-upload.s3.amazonaws](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/944903605/44374990-fd9e-4e95-a692-ac4de1d3f875/paste.txt)
+
+To są najprostsze reguły typu:
+
+```prolog
+invalid(workflow_missing_trigger(W)) :-
+    workflow(W),
+    \+ workflow_trigger(W, _).
+
+invalid(workflow_missing_step(W)) :-
+    workflow(W),
+    \+ workflow_step(W, _, _).
+
+invalid(deploy_missing_compose) :-
+    deploy_target(docker_compose),
+    \+ deploy_compose_file(_).
+```
+
+Takie reguły dają listę błędów zamiast tylko `true/false`. To jest kluczowe: nie pytasz „czy model jest poprawny?”, tylko „jakie konkretnie niespójności istnieją?”. [lpn.swi-prolog](https://lpn.swi-prolog.org/lpnpage.php?pagetype=html&pageid=lpn-htmlse1)
+
+### 2. Spójność semantyczna
+Tutaj wchodzą reguły architektoniczne:
+- jeśli jest `quality:regix`, to system powinien znać `gate:regix`, [ppl-ai-file-upload.s3.amazonaws](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/944903605/44374990-fd9e-4e95-a692-ac4de1d3f875/paste.txt)
+- jeśli istnieją workflowy `queue:*`, to system powinien mieć komponent queue/planfile, [ppl-ai-file-upload.s3.amazonaws](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/944903605/44374990-fd9e-4e95-a692-ac4de1d3f875/paste.txt)
+- jeśli są `monitor:*`, to monitoring stack powinien być obecny w deployment/config, [ppl-ai-file-upload.s3.amazonaws](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/944903605/44374990-fd9e-4e95-a692-ac4de1d3f875/paste.txt)
+- jeśli są `webhook:*`, to webhook powinien istnieć jako endpoint lub service. [ppl-ai-file-upload.s3.amazonaws](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/944903605/44374990-fd9e-4e95-a692-ac4de1d3f875/paste.txt)
+
+Przykład:
+
+```prolog
+invalid(missing_gate_for_quality(Gate)) :-
+    quality_workflow(Gate),
+    \+ gate(Gate).
+
+invalid(queue_workflows_without_planfile) :-
+    workflow(W),
+    sub_atom(W, 0, _, _, 'queue:'),
+    \+ dependency(planfile).
+```
+
+To już nie jest tylko walidacja składni dokumentu, ale walidacja **logiki systemu**. [ppl-ai-file-upload.s3.amazonaws](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/944903605/44374990-fd9e-4e95-a692-ac4de1d3f875/paste.txt)
+
+### 3. Spójność między artefaktami
+To jest najważniejsze dla `SUMD.md`, bo on agreguje wiele źródeł:
+- `SUMD.md` vs `Taskfile.yml`, [ppl-ai-file-upload.s3.amazonaws](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/944903605/44374990-fd9e-4e95-a692-ac4de1d3f875/paste.txt)
+- `SUMD.md` vs `app.doql.less`, [ppl-ai-file-upload.s3.amazonaws](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/944903605/44374990-fd9e-4e95-a692-ac4de1d3f875/paste.txt)
+- `SUMD.md` vs `docker-compose.yml`, [ppl-ai-file-upload.s3.amazonaws](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/944903605/44374990-fd9e-4e95-a692-ac4de1d3f875/paste.txt)
+- `SUMD.md` vs `Code Analysis` / `projectmap.toon.yaml`. [ppl-ai-file-upload.s3.amazonaws](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/944903605/44374990-fd9e-4e95-a692-ac4de1d3f875/paste.txt)
+
+Na przykład:
+- workflow istnieje w Taskfile, ale nie ma go w DOQL,
+- gate jest opisany w narracji, ale brak go w taskach,
+- entrypoint CLI jest wymieniony, ale brak go w pakiecie lub kodzie,
+- sekcja deployment mówi o compose, ale pliku nie ma.
+
+To można modelować jako fakty typu:
+`declared_in_sumd/1`, `declared_in_taskfile/1`, `declared_in_doql/1`, `implemented_in_code/1`.
+
+A potem:
+
+```prolog
+invalid(workflow_not_in_taskfile(W)) :-
+    declared_in_sumd(workflow(W)),
+    \+ declared_in_taskfile(workflow(W)).
+
+invalid(interface_not_implemented(I)) :-
+    declared_in_sumd(interface(I)),
+    \+ implemented_in_code(interface(I)).
+```
+
+To da Ci właśnie odpowiedź na pytanie „co logicznie się nie spina?”. [ppl-ai-file-upload.s3.amazonaws](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/944903605/44374990-fd9e-4e95-a692-ac4de1d3f875/paste.txt)
+
+### 4. Reguły projektowe
+Tu dokładasz własne zasady:
+- każdy gate quality ma workflow lokalny albo changed/incremental,
+- każdy deployment ma tryb dry-run,
+- każdy ważny moduł ma przynajmniej jeden test contract,
+- każdy interfejs użytkownika ma odpowiadający entrypoint. [ppl-ai-file-upload.s3.amazonaws](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/944903605/44374990-fd9e-4e95-a692-ac4de1d3f875/paste.txt)
+
+To już jest warstwa polityki architektonicznej, nie tylko opisu. Prolog bardzo dobrze się do tego nadaje, bo możesz te reguły dopisywać bez zmiany parsera. [swi-prolog](https://www.swi-prolog.org/pldoc/man?section=check)
+
+## Jak wygenerować Prolog z SUMD
+
+Najlepszy sposób to nie generować „ładnego opisu Prologowego”, tylko **wiedzę Prologową** w 3 sekcjach:
+
+1. **facts** — co system deklaruje,
+2. **rules** — jakie zależności są dozwolone i jakie błędy wykrywać,
+3. **queries** — gotowe pytania do uruchamiania przez CI lub skrypt. [github](https://github.com/tjvr/pyswip/blob/master/CHANGELOG)
+
+### 1. Fakty
+Na podstawie `SUMD.md` generujesz np.:
+
+```prolog
+system(koru).
+version(koru, '0.1.169').
+
+interface(api).
+interface(cli).
+interface_framework(api, fastapi).
+interface_framework(cli, argparse).
+
+workflow(default).
+workflow_trigger(default, manual).
+workflow_step(default, 1, 'task --list-all').
+
+workflow('quality:regix').
+workflow_trigger('quality:regix', manual).
+workflow_step('quality:regix', 1, 'regix gates').
+gate(regix).
+
+workflow('deploy:local').
+workflow_trigger('deploy:local', manual).
+workflow_step('deploy:local', 1, 'redeploy run redeploy/local/deployment.md').
+
+deploy_target(docker_compose).
+deploy_compose_file('docker-compose.yml').
+
+dependency(planfile).
+dependency(testql).
+dependency(regix).
+dependency(redup).
+dependency(vallm).
+```
+
+To powinno być automatycznie generowane z parsera `SUMD.md` albo bezpośrednio z plików źródłowych. [ppl-ai-file-upload.s3.amazonaws](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/944903605/44374990-fd9e-4e95-a692-ac4de1d3f875/paste.txt)
+
+### 2. Reguły
+Potem dopinasz uniwersalne reguły:
+
+```prolog
+quality_workflow(regix) :- workflow('quality:regix').
+quality_workflow(wup)   :- workflow('quality:wup').
+quality_workflow(redup) :- workflow('quality:redup').
+quality_workflow(sumr)  :- workflow('quality:sumr:status').
+quality_workflow(vallm) :- workflow('quality:vallm').
+
+invalid(workflow_missing_trigger(W)) :-
+    workflow(W),
+    \+ workflow_trigger(W, _).
+
+invalid(workflow_missing_step(W)) :-
+    workflow(W),
+    \+ workflow_step(W, _, _).
+
+invalid(missing_gate_for_quality(G)) :-
+    quality_workflow(G),
+    \+ gate(G).
+
+invalid(deploy_target_without_file) :-
+    deploy_target(docker_compose),
+    \+ deploy_compose_file(_).
+```
+
+To już jest walidator logiczny projektu. [swi-prolog](https://www.swi-prolog.org/pldoc/man?section=check)
+
+### 3. Zapytania
+Na końcu możesz mieć gotowe zapytania:
+
+```prolog
+all_invalid(X) :- invalid(X).
+valid_project :- \+ invalid(_).
+```
+
+I wtedy z Pythona lub CI pytasz:
+- `valid_project.`
+- `all_invalid(X).`
+
+To daje czytelną listę niespójności. [github](https://github.com/yuce/pyswip)
+
+## Jak załączyć Prolog do SUMD
+
+Masz 3 dobre opcje.
+
+### Opcja A — blok w `SUMD.md`
+Najprościej dodać sekcję:
+
+```md
+## Architecture Logic
+
+```prolog markpact:prolog path=.sumd/architecture.pl
+...
+```
+```
+
+To jest dobre, jeśli chcesz mieć wszystko w jednym dokumencie i np. użyć Markpact jako kontenera wykonywalnych bloków. `SUMD.md` już zawiera bloki `markpact:*`, więc to jest spójne z obecnym formatem. [ppl-ai-file-upload.s3.amazonaws](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/944903605/44374990-fd9e-4e95-a692-ac4de1d3f875/paste.txt)
+
+### Opcja B — osobny plik generowany
+Lepsze operacyjnie:
+- `SUMD.md` zawiera sekcję z krótkim opisem,
+- generator tworzy `.sumd/architecture.pl`,
+- `SUMD.md` tylko linkuje do pliku.
+
+To jest wygodniejsze dla CI i łatwiejsze do uruchomienia przez SWI‑Prolog lub PySwip. [github](https://github.com/tjvr/pyswip/blob/master/CHANGELOG)
+
+### Opcja C — oba naraz
+Najlepsze rozwiązanie:
+- w `SUMD.md` osadzasz skróconą, czytelną wersję,
+- pełną bazę wiedzy generujesz do `.sumd/architecture.pl`.
+
+To daje:
+- czytelność dla człowieka,
+- wykonywalność dla maszyn,
+- brak dryfu, jeśli generator zawsze nadpisuje plik. [ppl-ai-file-upload.s3.amazonaws](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/944903605/44374990-fd9e-4e95-a692-ac4de1d3f875/paste.txt)
+
+## Praktyczny pipeline
+
+Polecam taki pipeline:
+
+1. Parser czyta `SUMD.md` i pliki źródłowe wskazane w `generated_from`. [ppl-ai-file-upload.s3.amazonaws](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/944903605/44374990-fd9e-4e95-a692-ac4de1d3f875/paste.txt)
+2. Buduje model pośredni, np. `ArchitectureModel`.
+3. Generator emituje:
+   - `architecture_report.json`,
+   - `.sumd/architecture.pl`,
+   - opcjonalnie sekcję `## Architecture Logic` w `SUMD.md`.
+4. Runner uruchamia zapytania Prologowe i zwraca:
+   - listę `invalid(...)`,
+   - status `valid_project`.
+5. CI albo task `quality:sumd:logic` zgłasza błąd, jeśli znaleziono niespójności. [swi-prolog](https://www.swi-prolog.org/pldoc/man?section=check)
+
+## Jakie błędy warto wykrywać
+
+Dla Twojego `SUMD.md` zacząłbym od takich reguł:
+- workflow bez triggera, [ppl-ai-file-upload.s3.amazonaws](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/944903605/44374990-fd9e-4e95-a692-ac4de1d3f875/paste.txt)
+- workflow bez kroku, [ppl-ai-file-upload.s3.amazonaws](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/944903605/44374990-fd9e-4e95-a692-ac4de1d3f875/paste.txt)
+- quality workflow bez gate, [ppl-ai-file-upload.s3.amazonaws](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/944903605/44374990-fd9e-4e95-a692-ac4de1d3f875/paste.txt)
+- deploy bez compose file, [ppl-ai-file-upload.s3.amazonaws](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/944903605/44374990-fd9e-4e95-a692-ac4de1d3f875/paste.txt)
+- monitor workflow bez observability stack, [ppl-ai-file-upload.s3.amazonaws](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/944903605/44374990-fd9e-4e95-a692-ac4de1d3f875/paste.txt)
+- webhook workflow bez webhook service, [ppl-ai-file-upload.s3.amazonaws](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/944903605/44374990-fd9e-4e95-a692-ac4de1d3f875/paste.txt)
+- CLI entrypoint w sekcji interfejsów, ale brak śladu w analizie kodu, [ppl-ai-file-upload.s3.amazonaws](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/944903605/44374990-fd9e-4e95-a692-ac4de1d3f875/paste.txt)
+- workflow opisany w DOQL, ale nieobecny w Taskfile, [ppl-ai-file-upload.s3.amazonaws](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/944903605/44374990-fd9e-4e95-a692-ac4de1d3f875/paste.txt)
+- gate sprawdzany przez `topology --is-enabled`, ale nigdzie nieopisany jako gate systemowy. [ppl-ai-file-upload.s3.amazonaws](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/944903605/44374990-fd9e-4e95-a692-ac4de1d3f875/paste.txt)
+
+To już da bardzo praktyczny walidator architektury. [ppl-ai-file-upload.s3.amazonaws](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/944903605/44374990-fd9e-4e95-a692-ac4de1d3f875/paste.txt)
+
+## Najkrótsza rekomendacja
+
+Zrób to tak:
+- `SUMD.md` → parser → fakty Prologowe, [ppl-ai-file-upload.s3.amazonaws](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/944903605/44374990-fd9e-4e95-a692-ac4de1d3f875/paste.txt)
+- `rules.pl` → reguły spójności, [lpn.swi-prolog](https://lpn.swi-prolog.org/lpnpage.php?pagetype=html&pageid=lpn-htmlse1)
+- `architecture.pl` → wygenerowany knowledge base projektu,
+- `valid_project/0` i `invalid/1` → podstawowe query walidacyjne. [lpn.swi-prolog](https://lpn.swi-prolog.org/lpnpage.php?pagetype=html&pageid=lpn-htmlse1)
+
+A do `SUMD.md` dodaj:
+- sekcję `Architecture Logic`,
+- albo link do `.sumd/architecture.pl`,
+- plus raport wykrytych niespójności generowany w CI. [ppl-ai-file-upload.s3.amazonaws](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/944903605/44374990-fd9e-4e95-a692-ac4de1d3f875/paste.txt)
+
+Najpraktyczniej: **Python generuje Prolog, a Prolog waliduje SUMD**. [github](https://github.com/yuce/pyswip)
+
+Mogę teraz przygotować Ci **konkretny szablon `architecture.pl`** dla tego projektu oraz listę reguł `invalid(...)`, które będą od razu działały na `koru`.
+
+
+Tak — zrobiłbym to jako **drugą, generowaną warstwę architektury wewnątrz samego `SUMD.md`**, opartą nie na ręcznym opisie, tylko na analizie wszystkich artefaktów już wymienionych w `generated_from`: `pyproject.toml`, `Taskfile.yml`, `testql`, `app.doql.less`, `goal.yaml`, `.env.example`, `Dockerfile`, `docker-compose.yml` i plików analitycznych projektu. W samym `SUMD.md` już widać, że jest on budowany z wielu źródeł i zawiera zarówno deklarację DOQL, workflowy z Taskfile, scenariusze testql, deployment Docker Compose i mapę kodu z `projectmap.toon.yaml`, więc dokładanie kolejnej sekcji „Architecture Narrative” jest naturalnym rozszerzeniem tego samego pipeline’u. [ppl-ai-file-upload.s3.amazonaws](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/944903605/44374990-fd9e-4e95-a692-ac4de1d3f875/paste.txt)
+
+
+
+Najlepszy efekt osiągniesz, jeśli ta nowa sekcja nie będzie tylko streszczeniem, ale **syntetycznym opisem systemu**: czym system jest, jakie ma warstwy, jakie główne capability, jak przebiega sterowanie, jakie są quality gates, jak działa deployment i gdzie znajdują się punkty integracyjne. Z obecnego `SUMD.md` widać już wyraźnie, że `koru` jest systemem closed-loop automation wokół CLI/API, kolejki planfile, autopilota IDE, quality gates (`regix`, `wup`, `redup`, `sumr`, `vallm`), obserwowalności i deploymentu przez `redeploy` oraz `docker-compose`, więc właśnie takie osie powinny wejść do nowego opisu architektury. [ppl-ai-file-upload.s3.amazonaws](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/944903605/44374990-fd9e-4e95-a692-ac4de1d3f875/paste.txt)
+
+## Proponowany model
+
+Dodałbym do `SUMD.md` nową sekcję, np.:
+
+```md
+## Architecture Narrative
+
+### System role
+...
+
+### Runtime layers
+...
+
+### Control flows
+...
+
+### Quality and governance
+...
+
+### Deployment and operations
+...
+```
+
+Ta sekcja powinna być **generowana**, a nie pisana ręcznie, żeby nie dryfowała względem repo. `SUMD.md` już agreguje artefakty z wielu źródeł, więc nowy opis architektury powinien być kolejnym produktem tej samej syntezy. [ppl-ai-file-upload.s3.amazonaws](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/944903605/44374990-fd9e-4e95-a692-ac4de1d3f875/paste.txt)
+
+## Jak zbierać dane
+
+Z `SUMD.md` masz już wskazanie, z jakich plików brać prawdę architektoniczną:
+- `app.doql.less` daje deklarację aplikacji, interfejsy i workflowy wysokiego poziomu. [ppl-ai-file-upload.s3.amazonaws](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/944903605/44374990-fd9e-4e95-a692-ac4de1d3f875/paste.txt)
+- `Taskfile.yml` daje operacyjne przepływy i zadania runtime’owe. [ppl-ai-file-upload.s3.amazonaws](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/944903605/44374990-fd9e-4e95-a692-ac4de1d3f875/paste.txt)
+- `testql` pokazuje kontrakty i scenariusze testowe dla CLI/API. [ppl-ai-file-upload.s3.amazonaws](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/944903605/44374990-fd9e-4e95-a692-ac4de1d3f875/paste.txt)
+- `docker-compose.yml`, `Dockerfile`, `redeploy/*` i sekcja deploymentu opisują uruchomienie oraz target środowiska. [ppl-ai-file-upload.s3.amazonaws](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/944903605/44374990-fd9e-4e95-a692-ac4de1d3f875/paste.txt)
+- `projectmap.toon.yaml` i `Code Analysis` pokazują realne moduły, hotspoty, funkcje eksportowane i główne obszary kodu. [ppl-ai-file-upload.s3.amazonaws](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/944903605/44374990-fd9e-4e95-a692-ac4de1d3f875/paste.txt)
+- `.env.example` i `goal.yaml` uzupełniają konfigurację i release management. [ppl-ai-file-upload.s3.amazonaws](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/944903605/44374990-fd9e-4e95-a692-ac4de1d3f875/paste.txt)
+
+Czyli nie analizujesz „wszystkich plików repo w ciemno”, tylko najpierw bierzesz **artefakty źródłowe architektury**, a potem z mapy kodu potwierdzasz, czy opis ma pokrycie w implementacji. [ppl-ai-file-upload.s3.amazonaws](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/944903605/44374990-fd9e-4e95-a692-ac4de1d3f875/paste.txt)
+
+## Jak generować sekcję
+
+Najlepiej podzielić generator na 3 kroki:
+
+1. **Extract** — wyciągnij z plików strukturalne fakty:
+- interfejsy: CLI, API, MCP, webhook, watch loop, [ppl-ai-file-upload.s3.amazonaws](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/944903605/44374990-fd9e-4e95-a692-ac4de1d3f875/paste.txt)
+- główne workflowy: `loop`, `queue:*`, `quality:*`, `deploy:*`, `monitor:*`, `webhook:*`, [ppl-ai-file-upload.s3.amazonaws](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/944903605/44374990-fd9e-4e95-a692-ac4de1d3f875/paste.txt)
+- bramki jakości: `regix`, `wup`, `redup`, `sumr`, `vallm`, [ppl-ai-file-upload.s3.amazonaws](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/944903605/44374990-fd9e-4e95-a692-ac4de1d3f875/paste.txt)
+- moduły kodu: `queue`, `topology`, `autopilot`, `scan`, `serve`, `api`, `ide`, `local manager`. [ppl-ai-file-upload.s3.amazonaws](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/944903605/44374990-fd9e-4e95-a692-ac4de1d3f875/paste.txt)
+
+2. **Normalize** — sprowadź to do wspólnego modelu architektury, np.:
+- `system_role`,
+- `capabilities`,
+- `interfaces`,
+- `runtime_components`,
+- `control_flows`,
+- `quality_controls`,
+- `deployment_targets`,
+- `observability_stack`. [ppl-ai-file-upload.s3.amazonaws](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/944903605/44374990-fd9e-4e95-a692-ac4de1d3f875/paste.txt)
+
+3. **Render** — wygeneruj z tego narracyjny Markdown i wstrzyknij go do `SUMD.md` między znacznikami, np.:
+```md
+<!-- ARCHITECTURE_NARRATIVE:START -->
+...
+<!-- ARCHITECTURE_NARRATIVE:END -->
+```
+
+To daje powtarzalny update bez ręcznej edycji. [ppl-ai-file-upload.s3.amazonaws](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/944903605/44374990-fd9e-4e95-a692-ac4de1d3f875/paste.txt)
+
+## Co powinno wejść do opisu
+
+Na podstawie obecnego `SUMD.md` generator powinien opisać co najmniej te wątki:
+
+| Sekcja | Z czego wyliczać | Co opisać |
+|---|---|---|
+| Rola systemu | Metadata + Intent + app.doql.less  [ppl-ai-file-upload.s3.amazonaws](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/944903605/44374990-fd9e-4e95-a692-ac4de1d3f875/paste.txt) | Że `koru` to closed-loop automation across semcod repositories.  [ppl-ai-file-upload.s3.amazonaws](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/944903605/44374990-fd9e-4e95-a692-ac4de1d3f875/paste.txt) |
+| Interfejsy | `interface[type=...]`, CLI entry points, API/MCP moduły  [ppl-ai-file-upload.s3.amazonaws](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/944903605/44374990-fd9e-4e95-a692-ac4de1d3f875/paste.txt) | CLI, REST/FastAPI, MCP, webhooki, watch/event channels.  [ppl-ai-file-upload.s3.amazonaws](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/944903605/44374990-fd9e-4e95-a692-ac4de1d3f875/paste.txt) |
+| Warstwy runtime | `Code Analysis` + moduły `src/koru/*`  [ppl-ai-file-upload.s3.amazonaws](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/944903605/44374990-fd9e-4e95-a692-ac4de1d3f875/paste.txt) | CLI/orchestration, queue execution, autopilot/IDE, topology, scanning, local service, API/dashboard.  [ppl-ai-file-upload.s3.amazonaws](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/944903605/44374990-fd9e-4e95-a692-ac4de1d3f875/paste.txt) |
+| Przepływy sterowania | `Taskfile.yml` + workflowy w DOQL  [ppl-ai-file-upload.s3.amazonaws](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/944903605/44374990-fd9e-4e95-a692-ac4de1d3f875/paste.txt) | Manual workflows, queue loop, autoloop, quality gates, deploy i monitor flows.  [ppl-ai-file-upload.s3.amazonaws](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/944903605/44374990-fd9e-4e95-a692-ac4de1d3f875/paste.txt) |
+| Governance | `quality:*`, `goal.yaml`, testql  [ppl-ai-file-upload.s3.amazonaws](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/944903605/44374990-fd9e-4e95-a692-ac4de1d3f875/paste.txt) | Gating, drift detection, contracts, release conventions.  [ppl-ai-file-upload.s3.amazonaws](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/944903605/44374990-fd9e-4e95-a692-ac4de1d3f875/paste.txt) |
+| Operacje | `docker-compose`, monitoring, redeploy  [ppl-ai-file-upload.s3.amazonaws](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/944903605/44374990-fd9e-4e95-a692-ac4de1d3f875/paste.txt) | Observability stack, healing webhook, deploy local/device.  [ppl-ai-file-upload.s3.amazonaws](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/944903605/44374990-fd9e-4e95-a692-ac4de1d3f875/paste.txt) |
+
+To powinien być opis bardziej semantyczny niż lista tasków. Na przykład zamiast wypisywać każde `task quality:*`, generator może napisać, że system posiada warstwę quality governance uruchamianą lokalnie i warunkowo przez topologię komponentów. [ppl-ai-file-upload.s3.amazonaws](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/944903605/44374990-fd9e-4e95-a692-ac4de1d3f875/paste.txt)
+
+## Jak to wdrożyć technicznie
+
+Zrobiłbym osobny skrypt, np. `scripts/generate_architecture_narrative.py`, który:
+- czyta `SUMD.md`,
+- parsuje sekcję `generated_from`,
+- opcjonalnie czyta wskazane pliki bezpośrednio z repo,
+- buduje model architektury,
+- generuje Markdown,
+- podmienia blok w `SUMD.md`. [ppl-ai-file-upload.s3.amazonaws](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/944903605/44374990-fd9e-4e95-a692-ac4de1d3f875/paste.txt)
+
+W pipeline możesz to wpiąć jako:
+- `task docs:architecture`,
+- albo jako część `quality:sumr:refresh`,
+- albo jako nowy blok Markpact, jeśli chcesz, by `SUMD.md` był jednocześnie źródłem i rendererem. Sekcja `SUMD.md` już używa znaczników `markpact:*`, więc Markpact jest naturalnym kandydatem do osadzenia generatora tej warstwy. [github](https://github.com/wronai/markpact/blob/main/docs/ci-cd.md)
+
+## Najlepsza forma zapisu
+
+Najbardziej polecam taki układ w `SUMD.md`:
+
+```md
+## Architecture Narrative
+
+<!-- ARCHITECTURE_NARRATIVE:START -->
+_Generated from app.doql.less, Taskfile.yml, testql scenarios, projectmap.toon.yaml, deployment specs and code analysis._
+
+### System role
+...
+
+### Runtime layers
+...
+
+### Control flows
+...
+
+### Quality governance
+...
+
+### Operations
+...
+<!-- ARCHITECTURE_NARRATIVE:END -->
+```
+
+Dzięki temu człowiek ma gotowy opis, a generator ma stabilne miejsce aktualizacji. `SUMD.md` już pełni rolę dokumentu syntetycznego, więc taka sekcja dobrze wpisuje się w jego strukturę. [ppl-ai-file-upload.s3.amazonaws](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/944903605/44374990-fd9e-4e95-a692-ac4de1d3f875/paste.txt)
+
+## Jakich reguł użyć przy syntezie
+
+Żeby opis nie był przypadkowy, dodałbym reguły:
+- jeśli występują `queue:*`, `planfile`, `watch`, `autoloop`, to opisz system jako event/queue-driven orchestration layer, [ppl-ai-file-upload.s3.amazonaws](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/944903605/44374990-fd9e-4e95-a692-ac4de1d3f875/paste.txt)
+- jeśli występują `koru.cli autopilot *`, `ide/*`, `injector`, to opisz warstwę operator/autopilot/IDE automation, [ppl-ai-file-upload.s3.amazonaws](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/944903605/44374990-fd9e-4e95-a692-ac4de1d3f875/paste.txt)
+- jeśli występują `quality:*` i `topology --is-enabled gate:*`, to opisz conditional governance driven by topology toggles, [ppl-ai-file-upload.s3.amazonaws](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/944903605/44374990-fd9e-4e95-a692-ac4de1d3f875/paste.txt)
+- jeśli występują `docker-compose.observability.yml`, `Grafana`, `Prometheus`, `Alertmanager`, `healing-webhook`, to opisz observability and self-healing stack, [ppl-ai-file-upload.s3.amazonaws](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/944903605/44374990-fd9e-4e95-a692-ac4de1d3f875/paste.txt)
+- jeśli występują `redeploy`, `deploy:*`, `doql adopt`, to opisz drift-aware deployment and intended-state capture. [ppl-ai-file-upload.s3.amazonaws](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/944903605/44374990-fd9e-4e95-a692-ac4de1d3f875/paste.txt)
+
+To daje już bardzo sensowny opis architektury bez ręcznego pisania. [ppl-ai-file-upload.s3.amazonaws](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/944903605/44374990-fd9e-4e95-a692-ac4de1d3f875/paste.txt)
+
+## Rekomendacja końcowa
+
+Ja bym zrobił to tak:
+1. **Nie generować opisu bezpośrednio z jednego parsera `SUMD.md`**, tylko z tych samych plików źródłowych, z których `SUMD.md` już powstał. [ppl-ai-file-upload.s3.amazonaws](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/944903605/44374990-fd9e-4e95-a692-ac4de1d3f875/paste.txt)
+2. **Wstrzykiwać wynik do osobnej sekcji w `SUMD.md`** pomiędzy znacznikami start/end. [ppl-ai-file-upload.s3.amazonaws](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/944903605/44374990-fd9e-4e95-a692-ac4de1d3f875/paste.txt)
+3. **Dodać walidację driftu**, np. jeśli są moduły `src/koru/autopilot*`, a narracja nie wspomina autopilota, generator zgłasza niedopowiedzenie architektury. [ppl-ai-file-upload.s3.amazonaws](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/944903605/44374990-fd9e-4e95-a692-ac4de1d3f875/paste.txt)
+4. **Opcjonalnie użyć Markpact** jako kontenera, jeśli chcesz, by sama generacja była opisana i wykonywana w tym samym Markdownzie. [github](https://github.com/wronai/markpact/blob/main/docs/ci-cd.md)
+
+Najbardziej praktyczny następny krok to przygotowanie:
+- modelu danych `ArchitectureSummary`,
+- generatora `generate_architecture_narrative.py`,
+- szablonu Markdown dla sekcji `Architecture Narrative`. [ppl-ai-file-upload.s3.amazonaws](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/944903605/44374990-fd9e-4e95-a692-ac4de1d3f875/paste.txt)
+
+Mogę od razu rozpisać Ci **konkretny schemat JSON/Pydantic + algorytm generatora + przykładowy wynik sekcji** dla tego `koru` na podstawie obecnego `SUMD.md`.
+
+
+
+
+
+Tak — **Markpact może tu być bardzo dobrym nośnikiem**. Z opisu projektu wynika, że Markpact jest minimalistycznym runtime’em, który trzyma projekt w jednym `README.md` i wykonuje tylko oznaczone codeblocki `markpact`, ignorując zwykły Markdown.  To oznacza, że możesz potraktować Markpact jako **kontener dokumentacyjno-wykonawczy** dla logiki architektury, a nie tylko jako opis tekstowy. [github](https://github.com/wronai/markpact/blob/main/docs/ci-cd.md)
+
+## Dlaczego to pasuje
+
+Twój problem nie dotyczy samego Prologa, tylko potrzeby zapisania:
+- architektury,
+- flow,
+- reguł,
+- walidacji,
+- generacji kodu
+w jednym miejscu. Markpact jest do tego naturalny, bo pozwala mieć jeden plik Markdown, w którym część bloków jest opisem, a część jest wykonywalna. [pypi](https://pypi.org/project/markpact-example-pypi/)
+
+To jest nawet lepsze niż próba „udawania” nowej składni w Pythonie, bo nie walczysz z parserem Pythona. Zamiast wciskać Prologa w dekoratory, możesz mieć osobne bloki `markpact:prolog`, `markpact:python`, `markpact:sumd` i spinać je jednym runnerem. [github](https://github.com/wronai/markpact/blob/main/docs/ci-cd.md)
+
+## Jak to ułożyć
+
+Najlepszy układ byłby taki:
+- `README.md` lub `ARCHITECTURE.md` jako źródło prawdy,
+- blok `markpact:sumd` z opisem architektury,
+- blok `markpact:prolog` z regułami walidacji,
+- blok `markpact:python` z adapterem Pydantic + runnerem,
+- opcjonalnie blok generujący `.py`, `.pl`, raport JSON lub Mermaid. [pypi](https://pypi.org/project/markpact-example-pypi/)
+
+Przykład idei:
+
+```md
+# Architektura projektu
+
+Opis systemu...
+
+```prolog markpact:prolog path=rules/architecture.pl
+valid_workflow(W) :-
+    workflow(W),
+    step(W, _).
+```
+
+```python markpact:python path=tools/validate_architecture.py
+from pydantic import BaseModel
+...
+```
+
+```yaml markpact:sumd path=architecture/system.sumd.yaml
+system: koru
+flows:
+  - name: default
+    trigger: manual
+```
+```
+
+W takim modelu Markdown jest interfejsem człowieka, a Markpact — runtime’em, który składa z tego działające artefakty. [pypi](https://pypi.org/project/markpact-example-pypi/)
+
+## Relacja z Pythonem i Pydantic
+
+To dobrze współgra z Twoim pomysłem o Pythonie i Pydantic:
+- **Pydantic** waliduje strukturę wejścia i wyjścia. [pydantic](https://pydantic.dev/docs/validation/latest/get-started/)
+- **Prolog** waliduje reguły logiczne.
+- **Markpact** trzyma oba światy w jednym pliku i generuje kod do uruchomienia. [github](https://github.com/wronai/markpact/blob/main/docs/ci-cd.md)
+
+Czyli zamiast pisać:
+
+```python
+@prolog
+def valid_workflow():
+    ...
+```
+
+możesz mieć:
+- regułę jako blok Prologa w Markdown,
+- model Pydantic jako blok Pythona,
+- a runner Pythonowy ładuje blok Prologa i wykonuje go na danych.
+
+To jest znacznie czystsze architektonicznie niż wciskanie własnego DSL w składnię Pythona. [github](https://github.com/yuce/pyswip)
+
+## Gdzie Markpact jest lepszy
+
+Markpact wygrywa tam, gdzie chcesz:
+- mieć **jeden plik** jako source of truth, [github](https://github.com/wronai/markpact/blob/main/docs/ci-cd.md)
+- łączyć dokumentację i wykonanie,
+- generować pliki pośrednie,
+- zachować czytelność dla ludzi i LLM. [pypi](https://pypi.org/project/markpact-example-pypi/)
+
+Właśnie do reprezentacji architektury to jest bardzo mocne, bo możesz mieć:
+- opis domeny,
+- kontrakty,
+- reguły logiczne,
+- testy,
+- generatory
+w jednym artefakcie. [github](https://github.com/wronai/markpact/blob/main/docs/ci-cd.md)
+
+## Gdzie nie wystarczy
+
+Sam Markpact nie zastąpi Ci silnika wnioskowania. On jest raczej **opakowaniem/orchestracją**, a nie logiką. Do samej logiki nadal potrzebujesz Prologa albo własnego rule engine w Pythonie.  Więc najlepszy model to: [github](https://github.com/wronai/markpact/blob/main/docs/ci-cd.md)
+- Markpact = kontener i orchestrator,
+- Python = parser, adapter, generacja, Pydantic,
+- Prolog = reguły i inferencja. [pydantic](https://pydantic.dev/docs/validation/latest/get-started/)
+
+## Rekomendacja
+
+Tak — **użyłbym Markpact**, jeśli Twoim celem jest „jednoplikowa reprezentacja architektury i logiki systemu”. To jest lepsze niż próba udawania składni dekoratorów dla Prologa, bo:
+- nie łamiesz składni Pythona,
+- możesz trzymać wiele języków obok siebie,
+- masz naturalne miejsce na generowanie i walidację. [github](https://github.com/wronai/markpact/blob/main/docs/ci-cd.md)
+
+Praktycznie zrobiłbym tak:
+- `ARCHITECTURE.md` w Markpact jako główny plik,
+- bloki `markpact:python` dla modeli Pydantic i runnera,
+- bloki `markpact:prolog` dla reguł,
+- bloki `markpact:json|yaml` dla modelu architektury,
+- komendę `markpact ... --publish` albo lokalny runner do wygenerowania `.py` i raportu. [pypi](https://pypi.org/project/markpact-example-pypi/)
+
+Chcesz, żebym przygotował Ci **przykładowy plik Markpact `ARCHITECTURE.md`**, który:
+- opisuje architekturę,
+- zawiera Prologowe reguły,
+- generuje runner Pythonowy z Pydantic,
+- i waliduje `SUMD.md`?
+
+
+

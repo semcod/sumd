@@ -308,6 +308,51 @@ def validate_markdown(
 # ---------------------------------------------------------------------------
 
 
+def validate_project_architecture(proj_dir: Path) -> list[str]:
+    """Run Prolog-based architectural consistency checks on the project.
+
+    Returns:
+        list[str]: list of logic-based consistency errors.
+    """
+    try:
+        from sumd.extractor import generate_project_logic
+        from sumd.prolog_engine import PythonPrologDB, PythonPrologEngine
+
+        # If it's a dummy/partial directory (like in dogfood tests where SUMD.md is isolated),
+        # skip architectural validation.
+        if not (proj_dir / "app.doql.less").exists() and not (proj_dir / "Makefile").exists() and not (proj_dir / "Taskfile.yml").exists():
+            return []
+
+        # 1. Generate latest facts
+        facts_text = generate_project_logic(proj_dir)
+
+        # 2. Load rules
+        rules_path = Path(__file__).parent / "rules.pl"
+        if not rules_path.exists():
+            return []
+        rules_text = rules_path.read_text(encoding="utf-8")
+
+        # 3. Initialize DB and Engine
+        db = PythonPrologDB()
+        db.parse_and_load(facts_text)
+        db.parse_and_load(rules_text)
+
+        engine = PythonPrologEngine(db)
+
+        # 4. Query invalid(Error)
+        results = engine.query("invalid(Error)")
+
+        # 5. Format results
+        errors = []
+        for r in results:
+            err = r.get("Error")
+            if err:
+                errors.append(f"architecture inconsistency: {err}")
+        return sorted(errors)
+    except Exception as e:
+        return [f"failed to execute architectural logic validation: {e}"]
+
+
 def validate_sumd_file(path: Path, profile: str = "rich") -> dict:
     """Run all validators on a SUMD.md file.
 
@@ -316,6 +361,7 @@ def validate_sumd_file(path: Path, profile: str = "rich") -> dict:
           "source": str,
           "markdown": list[str],        # structural issues
           "codeblocks": list[CodeBlockIssue],  # format issues
+          "logic": list[str],            # architectural logic issues
           "ok": bool,
         }
     """
@@ -323,9 +369,15 @@ def validate_sumd_file(path: Path, profile: str = "rich") -> dict:
     source = path.name
     md_issues = validate_markdown(content, source, profile)
     cb_issues = validate_codeblocks(content, source)
+    
+    # Run logic validation if it's a project SUMD
+    proj_dir = Path(path).parent.resolve()
+    logic_issues = validate_project_architecture(proj_dir)
+    
     return {
         "source": str(path),
         "markdown": md_issues,
         "codeblocks": cb_issues,
-        "ok": not md_issues and not any(c.kind == "error" for c in cb_issues),
+        "logic": logic_issues,
+        "ok": not md_issues and not logic_issues and not any(c.kind == "error" for c in cb_issues),
     }

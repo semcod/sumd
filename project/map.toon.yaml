@@ -1,10 +1,10 @@
-# sumd | 69f 15732L | python:61,shell:6,less:2 | 2026-05-02
-# stats: 266 func | 153 cls | 69 mod | CC̄=4.4 | critical:13 | cycles:0
-# alerts[5]: CC _path_matches_pattern=18; CC scan=14; CC _map_cc_stats=12; CC run=11; CC analyze=11
-# hotspots[5]: cqrs_command fan=19; scan fan=18; scaffold fan=18; analyze fan=17; generate fan=15
+# sumd | 75f 16783L | python:67,shell:6,less:2 | 2026-05-21
+# stats: 284 func | 159 cls | 75 mod | CC̄=3.9 | critical:10 | cycles:0
+# alerts[5]: CC generate_project_logic=20; CC _path_matches_pattern=18; CC _extract_sumd_semantic_facts=14; CC run=12; CC _split_body_terms=11
+# hotspots[5]: cqrs_command fan=19; scan fan=18; scaffold fan=18; generate_project_logic fan=18; analyze fan=17
 # evolution: baseline
 # Keys: M=modules, D=details, i=imports, e=exports, c=classes, f=functions, m=methods
-M[69]:
+M[75]:
   app.doql.less,261
   examples/app.doql.less,60
   examples/basic/demo.sh,50
@@ -13,35 +13,38 @@ M[69]:
   examples/llm/ollama_example.sh,38
   examples/llm/openai_example.py,89
   examples/mcp/mcp_client.py,139
+  print_errors.py,7
   project.sh,41
   scripts/bootstrap.sh,70
   scripts/install_testql_autoloop.sh,157
   sumd/__init__.py,36
-  sumd/cli.py,1985
+  sumd/__main__.py,6
+  sumd/cli.py,2000
   sumd/cqrs/__init__.py,19
-  sumd/cqrs/aggregates.py,220
+  sumd/cqrs/aggregates.py,221
   sumd/cqrs/commands.py,266
-  sumd/cqrs/events.py,177
-  sumd/cqrs/queries.py,416
+  sumd/cqrs/events.py,185
+  sumd/cqrs/queries.py,420
   sumd/cqrs/sumd_aggregate.py,345
   sumd/dsl/__init__.py,15
   sumd/dsl/commands.py,657
-  sumd/dsl/engine.py,557
+  sumd/dsl/engine.py,595
   sumd/dsl/nlp.py,448
-  sumd/dsl/parser.py,587
-  sumd/dsl/schema.py,340
+  sumd/dsl/parser.py,667
+  sumd/dsl/schema.py,352
   sumd/dsl/schema_commands.py,518
   sumd/dsl/shell.py,360
-  sumd/extractor.py,1078
+  sumd/extractor.py,1283
   sumd/generator.py,16
   sumd/mcp_server.py,715
   sumd/models.py,46
   sumd/parser.py,196
-  sumd/pipeline.py,444
+  sumd/pipeline.py,452
+  sumd/prolog_engine.py,431
   sumd/renderer.py,30
   sumd/sections/__init__.py,107
   sumd/sections/api_stubs.py,77
-  sumd/sections/architecture.py,156
+  sumd/sections/architecture.py,171
   sumd/sections/base.py,95
   sumd/sections/call_graph.py,157
   sumd/sections/code_analysis.py,69
@@ -62,7 +65,10 @@ M[69]:
   sumd/sections/utils/should_render.py,26
   sumd/sections/workflows.py,87
   sumd/toon_parser.py,174
-  sumd/validator.py,332
+  sumd/validator.py,384
+  test_gitignore.py,1
+  test_ignore.py,1
+  tests/test_architectural_logic.py,167
   tests/test_cli.py,348
   tests/test_cqrs_es.py,389
   tests/test_dogfood.py,148
@@ -88,7 +94,9 @@ D:
     e: run,main
     run(sumd_file;single_tool;tool_args)
     main()
+  print_errors.py:
   sumd/__init__.py:
+  sumd/__main__.py:
   sumd/cli.py:
     e: _detect_project_type,_render_doql_boilerplate,_node_framework,_node_spec_from_package_json,_build_doql_spec,_generate_doql_less,cli,validate,export,info,generate,extract,_is_project_dir,_walk_projects,_detect_projects,_ensure_venv,_tool_bin,_run_one_tool,_run_analysis_tools,_export_sumd_json,_render_write_validate,_echo_scan_result,_maybe_generate_doql,_maybe_generate_testql,_finalize_scan,_scan_one_project,scan,lint,_lint_collect_paths,_lint_print_result,_setup_tools_venv,_run_code2llm_formats,_run_tool_subprocess,analyze,_api_scenario_template,_scaffold_write,_scaffold_smoke_scenario,_scaffold_crud_scenarios,_scaffold_from_openapi,_scaffold_generic,scaffold,map_cmd,dsl,cqrs_command,nlp_command,main,main_sumr
     _detect_project_type(proj_dir)
@@ -118,7 +126,7 @@ D:
     _finalize_scan(proj_dir;doc;sources;cb_warnings;export_json;run_analyze;tool_list;doql_sync;sumd_path)
     _scan_one_project(proj_dir;fix;raw;export_json;run_analyze;tool_list;parser_inst;profile;generate_doql;doql_sync;generate_testql)
     scan(workspace;export_json;report;fix;raw;analyze;tools;profile;depth;recursive;generate_doql;doql_sync;generate_testql;workspace_mode)
-    lint(files;workspace;as_json)
+    lint(files;workspace;as_json;strict)
     _lint_collect_paths(files;workspace)
     _lint_print_result(path;r)
     _setup_tools_venv(venv_dir;tool_list;force)
@@ -222,7 +230,7 @@ D:
   sumd/dsl/engine.py:
     e: DSLContext,DSLEngine
     DSLContext: __init__(1),set_variable(2),get_variable(1),register_function(2),get_function(1)  # Execution context for DSL expressions.
-    DSLEngine: __init__(3),execute(2),execute_text(2),_is_natural_language(1),process_natural_language(1),get_suggestions(1),_execute_expression(2),_execute_assignment(2),_execute_command(2),_execute_function_call(2),_execute_property_access(2),_execute_comparison(2),_execute_logical(2),_execute_arithmetic(2),_execute_pipeline(2),_execute_list(2),_execute_dict(2),_execute_block(2),_execute_sumd_command(3),_call_function(3),_initialize_builtin_functions(0),_builtin_print(1),_builtin_len(2),_builtin_str(2),_builtin_int(2),_builtin_float(2),_builtin_bool(2),_builtin_type(2),_builtin_write_file(3),_builtin_list_files(2),_builtin_cwd(1),_builtin_cd(2),_builtin_help(1)  # Engine for executing DSL expressions.
+    DSLEngine: __init__(3),execute(2),execute_text(2),_is_natural_language(1),process_natural_language(1),get_suggestions(1),_execute_expression(2),_execute_assignment(2),_execute_command(2),_execute_function_call(2),_execute_property_access(2),_execute_comparison(2),_execute_logical(2),_execute_arithmetic(2),_execute_pipeline(2),_execute_list(2),_execute_dict(2),_execute_block(2),_execute_sumd_command(3),_call_function(3),_initialize_builtin_functions(0),_builtin_print(2),_builtin_len(2),_builtin_str(2),_builtin_int(2),_builtin_float(2),_builtin_bool(2),_builtin_type(2),_builtin_write_file(3),_builtin_list_files(2),_builtin_cwd(1),_builtin_cd(2),_builtin_help(1)  # Engine for executing DSL expressions.
   sumd/dsl/nlp.py:
     e: NLPProcessor,NLPIntegration,SimpleNLPModel
     NLPProcessor: __init__(1),_initialize_default_intents(0),_initialize_default_entities(0),parse_natural_language(1),_text_matches_intent(2),_extract_entities(2),_extract_entity_value(2),_extract_command_fallback(1),_extract_entities_fallback(1),generate_dsl_command(2),suggest_commands(1)  # Natural Language Processor for DSL commands.
@@ -251,7 +259,7 @@ D:
     NLPIntent:  # NLP intent model.
     NLPEntity:  # NLP entity model.
     NLPModel:  # NLP model configuration.
-    DSLContext:  # DSL execution context model.
+    DSLContext: set_variable(2),get_variable(1),register_function(2)  # DSL execution context model.
     DSLCommandResult:  # DSL command execution result.
   sumd/dsl/schema_commands.py:
     e: SchemaCommandRegistry,SchemaBasedCommands
@@ -263,7 +271,7 @@ D:
     DSLShellServer: __init__(1),execute_dsl(2),get_shell_info(0)  # Server for DSL shell operations (for MCP integration).
     main()
   sumd/extractor.py:
-    e: _read_toml,extract_pyproject,_first_task_cmd,extract_taskfile,_parse_openapi_endpoints,extract_openapi,_parse_doql_entities,_parse_doql_interfaces,_parse_doql_workflows,_parse_doql_content,extract_doql,extract_pyqual,extract_python_modules,extract_readme_title,extract_requirements,extract_makefile,extract_goal,extract_env,_parse_dockerfile_line,extract_dockerfile,extract_docker_compose,extract_package_json,_lang_of,_fan_out,_cc_estimate,_try_radon_cc,_analyse_py_top_funcs,_analyse_class_methods,_analyse_py_top_classes,_analyse_py_module,_parse_ignore_file,_path_matches_pattern,_is_path_ignored,_is_map_ignored_path,_collect_map_files,_render_map_detail,_map_cc_stats,_render_py_module_detail,generate_map_toon,required_tools_for_profile,extract_source_snippets,extract_swop,extract_project_analysis
+    e: _read_toml,extract_pyproject,_first_task_cmd,extract_taskfile,_parse_openapi_endpoints,extract_openapi,_parse_doql_entities,_parse_doql_interfaces,_parse_doql_workflows,_parse_doql_content,extract_doql,extract_pyqual,extract_python_modules,extract_readme_title,extract_requirements,extract_makefile,extract_goal,extract_env,_parse_dockerfile_line,extract_dockerfile,extract_docker_compose,extract_package_json,_lang_of,_fan_out,_cc_estimate,_try_radon_cc,_analyse_py_top_funcs,_analyse_class_methods,_analyse_py_top_classes,_analyse_py_module,_parse_ignore_file,_path_matches_pattern,_is_path_ignored,_is_map_ignored_path,_collect_map_files,_render_map_detail,_map_cc_stats,_render_py_module_detail,generate_map_toon,generate_project_logic,_extract_sumd_semantic_facts,required_tools_for_profile,extract_source_snippets,extract_swop,extract_project_analysis
     _read_toml(path)
     extract_pyproject(proj_dir)
     _first_task_cmd(cmds)
@@ -303,6 +311,8 @@ D:
     _map_cc_stats(all_funcs)
     _render_py_module_detail(rel;info;a)
     generate_map_toon(proj_dir)
+    generate_project_logic(proj_dir)
+    _extract_sumd_semantic_facts(proj_dir)
     required_tools_for_profile(profile)
     extract_source_snippets(proj_dir;pkg_name)
     extract_swop(proj_dir)
@@ -352,6 +362,23 @@ D:
     _collect_infra_sources(dockerfile;compose;pkg_json;modules;project_analysis)
     _collect_sources(pyproj;reqs;tasks;makefile;scenarios;openapi;doql;pyqual;goal;env_vars;dockerfile;compose;pkg_json;modules;project_analysis;swop)
     _inject_toc(content)
+  sumd/prolog_engine.py:
+    e: is_variable,to_term,_split_body_terms,unify,resolve_val,deep_resolve,extend_subst,occurs_check,rename_variables,Variable,Term,Rule,PythonPrologDB,PythonPrologEngine,HybridPrologEngine
+    Variable: __init__(1),__repr__(0),__eq__(1),__hash__(0)  # Represents a logical variable in our pure Python engine.
+    Term: __init__(1),__repr__(0),__eq__(1)  # Represents a Prolog term (e.g. parent(john, mary)).
+    Rule: __init__(2),__repr__(0)  # Represents a Prolog rule Head :- Body.
+    PythonPrologDB: __init__(0),add_fact(1),add_rule(2),parse_and_load(1)  # In-memory Prolog database for pure Python execution.
+    PythonPrologEngine: __init__(1),query(1),_find_vars(1),_resolve(2)  # SLD Resolution Logic Interpreter.
+    HybridPrologEngine: __init__(1),query(1),_query_pyswip(1),_query_subprocess(1),_query_python(1),_swipl_executable_exists(0)  # Hybrid Logic Engine delegating queries based on backend avai
+    is_variable(x)
+    to_term(x)
+    _split_body_terms(body_str)
+    unify(x;y;subst)
+    resolve_val(x;subst)
+    deep_resolve(x;subst)
+    extend_subst(v;val;subst)
+    occurs_check(v;val;subst)
+    rename_variables(rule;suffix)
   sumd/renderer.py:
     e: generate_sumd_content
     generate_sumd_content(proj_dir;return_sources;raw_sources;profile)
@@ -361,7 +388,7 @@ D:
     ApiStubsSection: should_render(1)
     _render_api_stubs(openapi)
   sumd/sections/architecture.py:
-    e: _render_architecture_doql_section,_render_architecture_modules,_render_doql_app,_render_doql_entities,_render_doql_interfaces,_render_doql_integrations,_render_architecture_doql_parsed,_render_architecture,ArchitectureSection
+    e: _render_architecture_doql_section,_render_architecture_modules,_render_doql_app,_render_doql_entities,_render_doql_interfaces,_render_doql_integrations,_render_architecture_doql_parsed,_render_architecture_rules,_render_architecture,ArchitectureSection
     ArchitectureSection:
     _render_architecture_doql_section(doql;proj_dir;raw_sources;L)
     _render_architecture_modules(modules;name;L)
@@ -370,6 +397,7 @@ D:
     _render_doql_interfaces(doql;L)
     _render_doql_integrations(doql;L)
     _render_architecture_doql_parsed(doql;L)
+    _render_architecture_rules(proj_dir;L)
     _render_architecture(doql;modules;name;proj_dir;raw_sources)
   sumd/sections/base.py:
     e: RenderContext,Section
@@ -477,7 +505,7 @@ D:
     _parse_toon_file(f)
     extract_testql_scenarios(proj_dir)
   sumd/validator.py:
-    e: _validate_yaml_body,_validate_less_css_body,_validate_mermaid_body,_validate_toon_body,_validate_bash_body,_validate_deps_body,_validate_markpact_meta,validate_codeblocks,_check_h1,_check_required_sections,_check_metadata_fields,_check_unclosed_fences,_check_empty_links,validate_markdown,validate_sumd_file,CodeBlockIssue
+    e: _validate_yaml_body,_validate_less_css_body,_validate_mermaid_body,_validate_toon_body,_validate_bash_body,_validate_deps_body,_validate_markpact_meta,validate_codeblocks,_check_h1,_check_required_sections,_check_metadata_fields,_check_unclosed_fences,_check_empty_links,validate_markdown,validate_project_architecture,validate_sumd_file,CodeBlockIssue
     CodeBlockIssue:
     _validate_yaml_body(body;path)
     _validate_less_css_body(body;path)
@@ -493,7 +521,17 @@ D:
     _check_unclosed_fences(lines;source)
     _check_empty_links(content;source)
     validate_markdown(content;source;profile)
+    validate_project_architecture(proj_dir)
     validate_sumd_file(path;profile)
+  test_gitignore.py:
+  test_ignore.py:
+  tests/test_architectural_logic.py:
+    e: test_pure_python_prolog_basic,test_architectural_validation_missing_file,test_architectural_validation_aligned,test_architectural_validation_missing_automation,test_architectural_validation_missing_gate
+    test_pure_python_prolog_basic()
+    test_architectural_validation_missing_file(tmp_path)
+    test_architectural_validation_aligned(tmp_path)
+    test_architectural_validation_missing_automation(tmp_path)
+    test_architectural_validation_missing_gate(tmp_path)
   tests/test_cli.py:
     e: sumd_file,TestValidateCommand,TestInfoCommand,TestExportCommand,TestCliVersion,TestCliHelp,TestProjectDetection,TestNodeSpecFromPackageJson,TestGenerateDoqlLess
     TestValidateCommand: test_valid_file_exits_zero(1),test_valid_file_prints_ok(1),test_missing_file_exits_nonzero(1)

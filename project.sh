@@ -22,8 +22,6 @@ $PIP install code2llm --upgrade --quiet
 #$VENV/bin/code2llm ./ -f toon,evolution,code2logic,project-yaml -o ./project --no-chunk
 $VENV/bin/code2llm ./ -f all -o ./project --no-chunk
 #$VENV/bin/code2llm report --format all       # → all views
-rm -f project/analysis.json
-rm -f project/analysis.yaml
 
 $PIP install code2docs --upgrade --quiet
 $VENV/bin/code2docs ./ --readme-only
@@ -39,3 +37,16 @@ $VENV/bin/doql adopt . --format less --output app.doql.less --force
 $PIP install sumd --upgrade --quiet
 $VENV/bin/sumd .
 $VENV/bin/sumr .
+
+
+pip install -U goal
+$PIP install goal --upgrade --quiet
+#$VENV/bin/goal -a
+
+if [ -x "./tree.sh" ]; then
+    bash ./tree.sh
+elif command -v tree >/dev/null 2>&1; then
+    tree -L 2
+else
+    echo "Skipping tree snapshot: ./tree.sh not found and 'tree' is not installed."
+fi

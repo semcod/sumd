@@ -1205,7 +1205,10 @@ def scan(
 @click.option(
     "--json", "as_json", is_flag=True, default=False, help="Output results as JSON"
 )
-def lint(files: tuple[Path, ...], workspace: Optional[Path], as_json: bool):
+@click.option(
+    "--strict", is_flag=True, default=False, help="Treat logic inconsistencies as fatal errors"
+)
+def lint(files: tuple[Path, ...], workspace: Optional[Path], as_json: bool, strict: bool):
     """Validate SUMD.md files — check markdown structure and codeblock formats.
 
     Validates:
@@ -1234,10 +1237,20 @@ def lint(files: tuple[Path, ...], workspace: Optional[Path], as_json: bool):
     for path in paths:
         r = validate_sumd_file(path)
         all_results.append(r)
+        
+        # Build errors list: markdown and codeblocks are always fatal.
+        # Logic errors are fatal only if strict is True.
         errors = r["markdown"] + [
             c.message for c in r["codeblocks"] if c.kind == "error"
         ]
+        if strict:
+            errors += r.get("logic", [])
+            
         warnings = [c for c in r["codeblocks"] if c.kind == "warning"]
+        if not strict:
+            # If not strict, logic errors are presented as warnings
+            total_warnings += len(r.get("logic", []))
+            
         total_errors += len(errors)
         total_warnings += len(warnings)
 
@@ -1275,7 +1288,7 @@ def _lint_collect_paths(
 
 def _lint_print_result(path: Path, r: dict) -> None:
     """Print lint result for a single file."""
-    errors = r["markdown"] + [c.message for c in r["codeblocks"] if c.kind == "error"]
+    errors = r["markdown"] + r.get("logic", []) + [c.message for c in r["codeblocks"] if c.kind == "error"]
     warnings = [c for c in r["codeblocks"] if c.kind == "warning"]
     status = "✅" if r["ok"] else "❌"
     cb_count = len(r["codeblocks"])
@@ -1284,6 +1297,8 @@ def _lint_print_result(path: Path, r: dict) -> None:
     )
     for issue in r["markdown"]:
         click.echo(f"    [markdown] ❌ {issue}")
+    for issue in r.get("logic", []):
+        click.echo(f"    [logic] ❌ {issue}")
     for cb in r["codeblocks"]:
         icon = "❌" if cb.kind == "error" else "⚠"
         click.echo(f"    [codeblock L{cb.line} {cb.lang}] {icon} {cb.message}")
