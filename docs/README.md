@@ -1,7 +1,7 @@
 <!-- code2docs:start --># sumd
 
-![version](https://img.shields.io/badge/version-0.1.0-blue) ![python](https://img.shields.io/badge/python-%3E%3D3.10-blue) ![coverage](https://img.shields.io/badge/coverage-unknown-lightgrey) ![functions](https://img.shields.io/badge/functions-1105-green)
-> **1105** functions | **101** classes | **120** files | CC̄ = 3.8
+![version](https://img.shields.io/badge/version-0.1.0-blue) ![python](https://img.shields.io/badge/python-%3E%3D3.10-blue) ![coverage](https://img.shields.io/badge/coverage-unknown-lightgrey) ![functions](https://img.shields.io/badge/functions-550-green)
+> **550** functions | **109** classes | **118** files | CC̄ = 4.0
 
 > Auto-generated project documentation from source code analysis.
 
@@ -73,19 +73,19 @@ docs = generate_docs("./my-project", config=config)
 
 ```
 sumd/
-├── SUMR
 ├── swop
 ├── goal
 ├── test
+├── TODO
 ├── Makefile
 ├── working_script
-├── SUMD
     ├── pre-commit-config
     ├── guards
 ├── script
 ├── pyqual
 ├── pyproject
-├── TODO
+├── tree
+├── print_errors
 ├── mcp
 ├── CHANGELOG
 ├── Taskfile
@@ -96,11 +96,8 @@ sumd/
     ├── USAGE
     ├── TESTQL_AUTOLOOP_ONBOARDING
     ├── README
-    ├── SUMR
-    ├── SUMD
     ├── sumd
     ├── README
-            ├── toon
         ├── anthropic_example
         ├── ollama_example
         ├── llm_cli_example
@@ -115,13 +112,11 @@ sumd/
         ├── demo
         ├── README
             ├── goal
-            ├── SUMD
             ├── sumd
             ├── pyproject
             ├── Taskfile
             ├── openapi
             ├── README
-                    ├── toon
         ├── makefile
         ├── taskfile
         ├── vscode-tasks
@@ -134,9 +129,12 @@ sumd/
     ├── validator
     ├── cli
     ├── generator
+    ├── prolog_engine
 ├── sumd/
+    ├── __main__
     ├── extractor
     ├── parser
+    ├── rules
     ├── models
     ├── renderer
     ├── pipeline
@@ -168,6 +166,7 @@ sumd/
         ├── sumd_aggregate
     ├── cqrs/
         ├── queries
+        ├── engine
         ├── schema
         ├── commands
     ├── dsl/
@@ -177,33 +176,31 @@ sumd/
         ├── nlp
     ├── install_testql_autoloop
     ├── bootstrap
-            ├── testql-autoloop
-            ├── testql-model-smoke
-        ├── toon
-        ├── toon
             ├── toon
             ├── toon
-    ├── prompt
-        ├── toon
-        ├── toon
-    ├── context
-        ├── toon
-        ├── toon
+            ├── toon
+    ├── requirements
+    ├── pyproject
     ├── README
-    ├── calls
-        ├── toon
         ├── engine
+        ├── cli
+    ├── sumd_logic_validator/
+        ├── main
+        ├── logic/
+            ├── rules
 ```
 
 ## API Overview
 
 ### Classes
 
-- **`RenderPipeline`** — —
 - **`CodeBlockIssue`** — —
-- **`RenderPipeline`** — —
-- **`CodeBlockIssue`** — —
-- **`CodeBlockIssue`** — —
+- **`Variable`** — Represents a logical variable in our pure Python engine.
+- **`Term`** — Represents a Prolog term (e.g. parent(john, mary)).
+- **`Rule`** — Represents a Prolog rule Head :- Body.
+- **`PythonPrologDB`** — In-memory Prolog database for pure Python execution.
+- **`PythonPrologEngine`** — SLD Resolution Logic Interpreter.
+- **`HybridPrologEngine`** — Hybrid Logic Engine delegating queries based on backend availability.
 - **`SUMDParser`** — Parser for SUMD markdown documents.
 - **`SectionType`** — SUMD section types.
 - **`Section`** — Represents a SUMD section.
@@ -269,6 +266,8 @@ sumd/
 - **`GetValidationResults`** — Query to get validation results for a document.
 - **`ExecuteDslQuery`** — Query to execute DSL query.
 - **`SumdQueryHandler`** — Handler for SUMD queries.
+- **`DSLContext`** — Execution context for DSL expressions.
+- **`DSLEngine`** — Engine for executing DSL expressions.
 - **`DSLDataType`** — Supported data types in DSL.
 - **`DSLCommandType`** — Supported command types in DSL.
 - **`DSLActionType`** — Supported action types in DSL.
@@ -298,152 +297,21 @@ sumd/
 - **`NLPProcessor`** — Natural Language Processor for DSL commands.
 - **`NLPIntegration`** — NLP integration for DSL engine.
 - **`SimpleNLPModel`** — Simple NLP model implementation for basic functionality.
-- **`DSLContext`** — Execution context for DSL expressions.
-- **`DSLEngine`** — Engine for executing DSL expressions.
+- **`Variable`** — Represents a logical variable in our pure Python engine.
+- **`Term`** — Represents a Prolog term (e.g. parent(john, mary)).
+- **`Rule`** — Represents a Prolog rule Head :- Body.
+- **`PythonPrologDB`** — In-memory Prolog database for pure Python execution.
+- **`PythonPrologEngine`** — SLD Resolution Logic Interpreter.
+- **`HybridPrologEngine`** — Hybrid Logic Engine delegating queries based on backend availability.
 
 ### Functions
 
-- `cli()` — —
-- `validate()` — —
-- `export()` — —
-- `info()` — —
-- `generate()` — —
-- `extract()` — —
-- `scan()` — —
-- `lint()` — —
-- `analyze()` — —
-- `scaffold()` — —
-- `map_cmd()` — —
-- `main()` — —
-- `main_sumr()` — —
-- `extract_pyproject()` — —
-- `extract_taskfile()` — —
-- `extract_openapi()` — —
-- `extract_doql()` — —
-- `extract_pyqual()` — —
-- `extract_python_modules()` — —
-- `extract_readme_title()` — —
-- `extract_requirements()` — —
-- `extract_makefile()` — —
-- `extract_goal()` — —
-- `extract_env()` — —
-- `extract_dockerfile()` — —
-- `extract_docker_compose()` — —
-- `extract_package_json()` — —
-- `generate_map_toon()` — —
-- `required_tools_for_profile()` — —
-- `extract_source_snippets()` — —
-- `extract_swop()` — —
-- `extract_project_analysis()` — —
-- `run()` — —
-- `validate_codeblocks()` — —
-- `validate_markdown()` — —
-- `validate_sumd_file()` — —
-- `list_tools()` — —
-- `call_tool()` — —
 - `print()` — —
 - `print()` — —
-- `ask()` — —
-- `main()` — —
-- `build_context()` — —
-- `run()` — —
-- `cli()` — —
-- `validate()` — —
-- `export()` — —
-- `info()` — —
-- `generate()` — —
-- `extract()` — —
-- `scan()` — —
-- `lint()` — —
-- `analyze()` — —
-- `scaffold()` — —
-- `map_cmd()` — —
-- `main_sumr()` — —
-- `extract_pyproject()` — —
-- `extract_taskfile()` — —
-- `extract_openapi()` — —
-- `extract_doql()` — —
-- `extract_pyqual()` — —
-- `extract_python_modules()` — —
-- `extract_readme_title()` — —
-- `extract_requirements()` — —
-- `extract_makefile()` — —
-- `extract_goal()` — —
-- `extract_env()` — —
-- `extract_dockerfile()` — —
-- `extract_docker_compose()` — —
-- `extract_package_json()` — —
-- `generate_map_toon()` — —
-- `required_tools_for_profile()` — —
-- `extract_source_snippets()` — —
-- `extract_swop()` — —
-- `extract_project_analysis()` — —
-- `list_tools()` — —
-- `call_tool()` — —
-- `parse()` — —
-- `parse_file()` — —
-- `generate_sumd_content()` — —
-- `extract_testql_scenarios()` — —
-- `validate_codeblocks()` — —
-- `validate_markdown()` — —
-- `validate_sumd_file()` — —
-- `sumd_file()` — —
-- `project_copy()` — —
-- `test_sumd_scans_itself()` — —
-- `test_sumd_scans_all_profiles()` — —
-- `test_sumr_generates_sumr_md()` — —
-- `test_sumd_lint_passes_on_generated_output()` — —
-- `test_sumd_version_flag()` — —
-- `test_sumd_scan_produces_no_unhandled_exceptions()` — —
-- `test_parse_basic()` — —
-- `test_parse_sections()` — —
-- `test_validate_valid_document()` — —
-- `test_validate_missing_intent()` — —
-- `test_parse_file()` — —
-- `test_parser_class()` — —
-- `test_markpact_semantic_kinds_valid()` — —
-- `test_markpact_unknown_kind_error()` — —
-- `test_markpact_missing_path_error()` — —
-- `proj_dir()` — —
-- `test_pipeline_run_returns_string()` — —
-- `test_pipeline_output_has_h1()` — —
-- `test_pipeline_output_has_metadata()` — —
-- `test_pipeline_return_sources()` — —
-- `test_pipeline_profile_minimal()` — —
-- `test_pipeline_profile_refactor()` — —
-- `test_pipeline_with_modules()` — —
-- `test_pipeline_with_taskfile()` — —
-- `test_pipeline_with_dependencies()` — —
-- `test_pipeline_injects_toc()` — —
-- `test_required_tools_rich()` — —
-- `test_required_tools_refactor()` — —
-- `test_required_tools_minimal()` — —
-- `test_refresh_map_toon_writes_file()` — —
-- `test_refresh_analysis_files_noop_without_tools()` — —
-- `make_ctx()` — —
-- `test_placeholder()` — —
-- `test_import()` — —
-- `print()` — —
-- `write_file()` — —
-- `test_sumd_scans_itself()` — —
-- `test_sumd_scans_all_profiles()` — —
-- `test_sumr_generates_sumr_md()` — —
-- `test_mcp_tools_registered()` — —
-- `test_mcp_main_no_crash()` — —
 - `print()` — —
 - `write_file()` — —
 - `print()` — —
-- `scan()` — —
-- `validate()` — —
-- `print()` — —
-- `ask()` — —
-- `main()` — —
-- `build_context()` — —
-- `run()` — —
-- `ask()` — —
-- `main()` — —
-- `build_context()` — —
-- `run()` — —
+- `write_file()` — —
 - `ask(sumd_path, question, model)` — —
 - `main()` — —
 - `build_context(sumd_path)` — Return a focused context string from SUMD.md.
@@ -454,6 +322,7 @@ sumd/
 - `extract_testql_scenarios(proj_dir)` — Scan all *.testql.toon.yaml and testql-scenarios/*.yaml files in project.
 - `validate_codeblocks(content, source)` — Validate all fenced code blocks in *content*.
 - `validate_markdown(content, source, profile)` — Validate SUMD markdown structure.
+- `validate_project_architecture(proj_dir)` — Run Prolog-based architectural consistency checks on the project.
 - `validate_sumd_file(path, profile)` — Run all validators on a SUMD.md file.
 - `cli()` — SUMD - Structured Unified Markdown Descriptor CLI.
 - `validate(file)` — Validate a SUMD document.
@@ -462,7 +331,7 @@ sumd/
 - `generate(file, format, output)` — Generate a SUMD document from structured format.
 - `extract(file, section)` — Extract content from a SUMD document.
 - `scan(workspace, export_json, report, fix)` — Scan a workspace directory and generate SUMD.md for every project found.
-- `lint(files, workspace, as_json)` — Validate SUMD.md files — check markdown structure and codeblock formats.
+- `lint(files, workspace, as_json, strict)` — Validate SUMD.md files — check markdown structure and codeblock formats.
 - `analyze(project, tools, force)` — Run analysis tools (code2llm, redup, vallm) on a project.
 - `scaffold(project, output, force, scenario_type)` — Generate testql scenario scaffolds from OpenAPI spec or SUMD.md.
 - `map_cmd(project, output, force, stdout)` — Generate project/map.toon.yaml — static code map in toon format.
@@ -471,6 +340,14 @@ sumd/
 - `nlp_command(text, directory, execute, verbose)` — Process natural language text and convert to DSL commands.
 - `main()` — Main entry point — if first arg is a path, run 'scan <path> --fix'.
 - `main_sumr()` — Entry point for `sumr` command — generates SUMR.md (refactor profile).
+- `is_variable(x)` — —
+- `to_term(x)` — —
+- `unify(x, y, subst)` — Logical unification of x and y under substitution subst.
+- `resolve_val(x, subst)` — —
+- `deep_resolve(x, subst)` — —
+- `extend_subst(v, val, subst)` — —
+- `occurs_check(v, val, subst)` — —
+- `rename_variables(rule, suffix)` — Rename variables in rule to avoid collisions in resolution.
 - `extract_pyproject(proj_dir)` — —
 - `extract_taskfile(proj_dir)` — —
 - `extract_openapi(proj_dir)` — —
@@ -486,6 +363,7 @@ sumd/
 - `extract_docker_compose(proj_dir)` — Parse docker-compose*.yml — services with images, ports, environment.
 - `extract_package_json(proj_dir)` — Parse package.json — name, version, scripts, dependencies.
 - `generate_map_toon(proj_dir)` — Generate project/map.toon.yaml content for proj_dir.
+- `generate_project_logic(proj_dir)` — Generate project/logic.pl containing Prolog facts representing the project structure.
 - `required_tools_for_profile(profile)` — Return the set of external tools needed to refresh analysis files for *profile*.
 - `extract_source_snippets(proj_dir, pkg_name)` — Return per-module AST summary for source_snippets section.
 - `extract_swop(proj_dir)` — Extract SWOP manifest files from .swop/manifests/<context>/ directory.
@@ -505,130 +383,41 @@ sumd/
 - `main()` — Main entry point for DSL shell.
 - `log()` — —
 - `write_if_missing()` — —
-- `extract_pyproject()` — —
-- `extract_taskfile()` — —
-- `extract_openapi()` — —
-- `extract_doql()` — —
-- `extract_pyqual()` — —
-- `extract_python_modules()` — —
-- `extract_readme_title()` — —
-- `extract_requirements()` — —
-- `extract_makefile()` — —
-- `extract_goal()` — —
-- `extract_env()` — —
-- `extract_dockerfile()` — —
-- `extract_docker_compose()` — —
-- `extract_package_json()` — —
-- `generate_map_toon()` — —
-- `required_tools_for_profile()` — —
-- `extract_source_snippets()` — —
-- `extract_swop()` — —
-- `extract_project_analysis()` — —
-- `cli()` — —
-- `validate()` — —
-- `export()` — —
-- `info()` — —
-- `generate()` — —
-- `extract()` — —
-- `scan()` — —
-- `lint()` — —
-- `analyze()` — —
-- `scaffold()` — —
-- `map_cmd()` — —
-- `dsl()` — —
-- `cqrs_command()` — —
-- `nlp_command()` — —
-- `main()` — —
-- `main_sumr()` — —
-- `parse_dsl()` — —
-- `run()` — —
-- `extract_testql_scenarios()` — —
-- `validate_codeblocks()` — —
-- `validate_markdown()` — —
-- `validate_sumd_file()` — —
-- `parse()` — —
-- `parse_file()` — —
-- `create_builtin_registry()` — —
-- `build_context()` — —
-- `ask()` — —
-- `list_tools()` — —
-- `call_tool()` — —
-- `generate_sumd_content()` — —
-- `call_with_ctx()` — —
-- `always()` — —
-- `has_attr()` — —
-- `test_sumd_scans_itself()` — —
-- `test_sumd_scans_all_profiles()` — —
-- `test_sumr_generates_sumr_md()` — —
-- `test_mcp_tools_registered()` — —
-- `test_mcp_main_no_crash()` — —
-- `print()` — —
-- `write_file()` — —
-- `sumd_file()` — —
-- `project_copy()` — —
-- `test_sumd_lint_passes_on_generated_output()` — —
-- `test_sumd_version_flag()` — —
-- `test_sumd_scan_produces_no_unhandled_exceptions()` — —
-- `test_parse_basic()` — —
-- `test_parse_sections()` — —
-- `test_validate_valid_document()` — —
-- `test_validate_missing_intent()` — —
-- `test_parse_file()` — —
-- `test_parser_class()` — —
-- `test_markpact_semantic_kinds_valid()` — —
-- `test_markpact_unknown_kind_error()` — —
-- `test_markpact_missing_path_error()` — —
-- `proj_dir()` — —
-- `test_pipeline_run_returns_string()` — —
-- `test_pipeline_output_has_h1()` — —
-- `test_pipeline_output_has_metadata()` — —
-- `test_pipeline_return_sources()` — —
-- `test_pipeline_profile_minimal()` — —
-- `test_pipeline_profile_refactor()` — —
-- `test_pipeline_with_modules()` — —
-- `test_pipeline_with_taskfile()` — —
-- `test_pipeline_with_dependencies()` — —
-- `test_pipeline_injects_toc()` — —
-- `test_required_tools_rich()` — —
-- `test_required_tools_refactor()` — —
-- `test_required_tools_minimal()` — —
-- `test_refresh_map_toon_writes_file()` — —
-- `test_refresh_analysis_files_noop_without_tools()` — —
-- `make_ctx()` — —
-- `test_placeholder()` — —
-- `test_import()` — —
-- `log()` — —
-- `write_if_missing()` — —
+- `is_variable(x)` — —
+- `to_term(x)` — —
+- `unify(x, y, subst)` — Logical unification of x and y under substitution subst.
+- `resolve_val(x, subst)` — —
+- `deep_resolve(x, subst)` — —
+- `extend_subst(v, val, subst)` — —
+- `occurs_check(v, val, subst)` — —
+- `rename_variables(rule, suffix)` — Rename variables in rule to avoid collisions in resolution.
+- `get_engine()` — —
+- `main()` — 🧠 Hybrid Python-Prolog logic runner CLI.
+- `info()` — Display information about the available Prolog backends.
+- `query(query_str)` — Query the logic rules.
+- `shell()` — Start interactive logic query shell.
 
 
 ## Project Structure
 
 📄 `.pre-commit-config`
-📄 `.windsurf.workflows.testql-autoloop`
-📄 `.windsurf.workflows.testql-model-smoke`
 📄 `CHANGELOG`
 📄 `Makefile`
-📄 `README` (4 functions)
+📄 `README`
 📄 `SPEC`
-📄 `SUMD` (353 functions, 2 classes)
-📄 `SUMR` (126 functions, 2 classes)
-📄 `TODO` (5 functions)
+📄 `TODO`
 📄 `Taskfile`
 📄 `Taskfile.guards`
 📄 `docs.README`
 📄 `docs.TESTQL_AUTOLOOP_ONBOARDING`
-📄 `docs.USAGE` (6 functions)
+📄 `docs.USAGE`
 📄 `examples.README`
-📄 `examples.SUMD` (7 functions)
-📄 `examples.SUMR`
 📄 `examples.basic.README`
 📄 `examples.basic.demo`
 📄 `examples.basic.sample-project.README`
-📄 `examples.basic.sample-project.SUMD`
 📄 `examples.basic.sample-project.Taskfile`
 📄 `examples.basic.sample-project.goal`
 📄 `examples.basic.sample-project.openapi`
-📄 `examples.basic.sample-project.project.map.toon`
 📄 `examples.basic.sample-project.pyproject`
 📄 `examples.basic.sample-project.sumd`
 📄 `examples.integrations.Dockerfile`
@@ -650,22 +439,11 @@ sumd/
 📄 `examples.mcp.continue_config`
 📄 `examples.mcp.cursor_mcp`
 📄 `examples.mcp.mcp_client` (2 functions)
-📄 `examples.project.map.toon` (7 functions)
 📄 `examples.sumd`
 📄 `goal`
 📄 `mcp`
+📄 `print_errors`
 📄 `project`
-📄 `project.README`
-📄 `project.analysis.toon`
-📄 `project.calls`
-📄 `project.calls.toon`
-📄 `project.context`
-📄 `project.duplication.toon`
-📄 `project.evolution.toon`
-📄 `project.map.toon` (1008 functions)
-📄 `project.project.toon`
-📄 `project.prompt`
-📄 `project.validation.toon`
 📄 `pyproject`
 📄 `pyqual`
 📄 `script` (19 functions)
@@ -673,6 +451,7 @@ sumd/
 📄 `scripts.install_testql_autoloop` (2 functions)
 📄 `simple_script` (17 functions)
 📦 `sumd`
+📄 `sumd.__main__`
 📄 `sumd.cli` (47 functions)
 📦 `sumd.cqrs`
 📄 `sumd.cqrs.aggregates` (23 functions, 6 classes)
@@ -681,23 +460,25 @@ sumd/
 📄 `sumd.cqrs.queries` (17 functions, 13 classes)
 📄 `sumd.cqrs.sumd_aggregate` (18 functions, 3 classes)
 📦 `sumd.dsl`
-📄 `sumd.dsl.commands` (28 functions, 2 classes)
-📄 `sumd.dsl.engine` (40 functions, 2 classes)
+📄 `sumd.dsl.commands` (30 functions, 2 classes)
+📄 `sumd.dsl.engine` (38 functions, 2 classes)
 📄 `sumd.dsl.nlp` (21 functions, 3 classes)
 📄 `sumd.dsl.parser` (29 functions, 6 classes)
-📄 `sumd.dsl.schema` (14 classes)
+📄 `sumd.dsl.schema` (3 functions, 14 classes)
 📄 `sumd.dsl.schema_commands` (33 functions, 2 classes)
 📄 `sumd.dsl.shell` (14 functions, 2 classes)
-📄 `sumd.extractor` (43 functions)
+📄 `sumd.extractor` (45 functions)
 📄 `sumd.generator`
 📄 `sumd.mcp_server` (18 functions)
 📄 `sumd.models` (3 classes)
 📄 `sumd.parser` (9 functions, 1 classes)
 📄 `sumd.pipeline` (16 functions, 1 classes)
+📄 `sumd.prolog_engine` (32 functions, 6 classes)
 📄 `sumd.renderer` (1 functions)
+📄 `sumd.rules`
 📦 `sumd.sections`
 📄 `sumd.sections.api_stubs` (2 functions, 1 classes)
-📄 `sumd.sections.architecture` (8 functions, 1 classes)
+📄 `sumd.sections.architecture` (9 functions, 1 classes)
 📄 `sumd.sections.base` (2 functions, 2 classes)
 📄 `sumd.sections.call_graph` (7 functions, 1 classes)
 📄 `sumd.sections.code_analysis` (3 functions, 1 classes)
@@ -717,17 +498,28 @@ sumd/
 📄 `sumd.sections.utils.should_render` (2 functions)
 📄 `sumd.sections.workflows` (4 functions, 1 classes)
 📄 `sumd.toon_parser` (8 functions)
-📄 `sumd.validator` (15 functions, 1 classes)
+📄 `sumd.validator` (16 functions, 1 classes)
+📄 `sumd_logic_validator.README`
+📄 `sumd_logic_validator.pyproject`
+📄 `sumd_logic_validator.requirements`
+📦 `sumd_logic_validator.sumd_logic_validator`
+📄 `sumd_logic_validator.sumd_logic_validator.cli` (5 functions)
+📄 `sumd_logic_validator.sumd_logic_validator.engine` (32 functions, 6 classes)
+📦 `sumd_logic_validator.sumd_logic_validator.logic`
+📄 `sumd_logic_validator.sumd_logic_validator.logic.rules`
+📄 `sumd_logic_validator.sumd_logic_validator.main`
 📄 `swop`
 📄 `test` (1 functions)
 📄 `testql-scenarios.generated-cli-tests.testql.toon`
 📄 `testql-scenarios.generated-from-pytests.testql.toon`
+📄 `testql-scenarios.sumd-cli.testql.toon`
+📄 `tree`
 📄 `working_script` (12 functions)
 
 ## Requirements
 
 - Python >= >=3.10
-- click >=8.3.3- pyyaml >=6.0.3- toml >=0.10.2- goal >=2.1.190- costs >=0.1.50- pfix >=0.1.72
+- click >=8.3.3- pyyaml >=6.0.3- toml >=0.10.2- goal >=2.1.190- costs >=0.1.50- pfix >=0.1.72- mcp >=1.27.0
 
 ## Contributing
 

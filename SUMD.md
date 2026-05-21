@@ -25,9 +25,9 @@ SUMD - Structured Unified Markdown Descriptor for AI-aware project documentation
 ## Metadata
 
 - **name**: `sumd`
-- **version**: `0.3.46`
+- **version**: `0.3.47`
 - **python_requires**: `>=3.10`
-- **license**: Apache-2.0
+- **license**: {'text': 'Apache-2.0'}
 - **ai_model**: `openrouter/qwen/qwen3-coder-next`
 - **ecosystem**: SUMD + DOQL + testql + taskfile
 - **generated_from**: pyproject.toml, Taskfile.yml, Makefile, testql(3), app.doql.less, pyqual.yaml, goal.yaml, .env.example, src(11 mod), project/(3 analysis files), .swop/manifests/core/commands.yml, .swop/manifests/core/queries.yml, .swop/manifests/core/events.yml
@@ -45,11 +45,11 @@ SUMD (description) → DOQL/source (code) → taskfile (automation) → testql (
 
 app {
   name: sumd;
-  version: 0.3.46;
+  version: 0.3.47;
 }
 
 dependencies {
-  runtime: "click>=8.3.3, pyyaml>=6.0.3, toml>=0.10.2, goal>=2.1.190, costs>=0.1.50, pfix>=0.1.72";
+  runtime: "click>=8.3.3, pyyaml>=6.0.3, toml>=0.10.2, goal>=2.1.190, costs>=0.1.50, pfix>=0.1.72, mcp>=1.27.0";
   dev: "pytest>=9.0.3, pytest-asyncio>=0.21.0, pytest-cov>=7.1.0, ruff>=0.15.11, build>=1.4.4, twine>=6.2.0, pyqual>=0.1.143, goal>=2.1.190, costs>=0.1.50, pfix>=0.1.72, mcp>=1.27.0";
 }
 
@@ -826,7 +826,7 @@ pipeline:
 ```yaml
 project:
   name: sumd
-  version: 0.3.46
+  version: 0.3.47
   env: local
 ```
 
@@ -913,13 +913,13 @@ pip install -e .[dev]
 ### `project/map.toon.yaml`
 
 ```toon markpact:analysis path=project/map.toon.yaml
-# sumd | 75f 16783L | python:67,shell:6,less:2 | 2026-05-21
-# stats: 284 func | 159 cls | 75 mod | CC̄=3.9 | critical:10 | cycles:0
-# alerts[5]: CC generate_project_logic=20; CC _path_matches_pattern=18; CC _extract_sumd_semantic_facts=14; CC run=12; CC _split_body_terms=11
+# sumd | 84f 17392L | python:75,shell:7,less:2 | 2026-05-21
+# stats: 301 func | 165 cls | 84 mod | CC̄=4.6 | critical:23 | cycles:0
+# alerts[5]: CC generate_project_logic=20; CC _path_matches_pattern=18; CC _extract_sumd_semantic_facts=15; CC scan=14; CC _split_body_terms=14
 # hotspots[5]: cqrs_command fan=19; scan fan=18; scaffold fan=18; generate_project_logic fan=18; analyze fan=17
 # evolution: baseline
 # Keys: M=modules, D=details, i=imports, e=exports, c=classes, f=functions, m=methods
-M[75]:
+M[84]:
   app.doql.less,261
   examples/app.doql.less,60
   examples/basic/demo.sh,50
@@ -929,7 +929,7 @@ M[75]:
   examples/llm/openai_example.py,89
   examples/mcp/mcp_client.py,139
   print_errors.py,7
-  project.sh,41
+  project.sh,55
   scripts/bootstrap.sh,70
   scripts/install_testql_autoloop.sh,157
   sumd/__init__.py,36
@@ -981,6 +981,14 @@ M[75]:
   sumd/sections/workflows.py,87
   sumd/toon_parser.py,174
   sumd/validator.py,384
+  sumd_logic_validator/logic/__init__.py,2
+  sumd_logic_validator/sumd_logic_validator/__init__.py,4
+  sumd_logic_validator/sumd_logic_validator/cli.py,115
+  sumd_logic_validator/sumd_logic_validator/engine.py,435
+  sumd_logic_validator/sumd_logic_validator/logic/__init__.py,2
+  sumd_logic_validator/sumd_logic_validator/main.py,5
+  sumd_logic_validator/tests/__init__.py,1
+  sumd_logic_validator/tests/test_engine.py,29
   test_gitignore.py,1
   test_ignore.py,1
   tests/test_architectural_logic.py,167
@@ -995,6 +1003,7 @@ M[75]:
   tests/test_pipeline.py,136
   tests/test_sections.py,298
   tests/test_statement.py,12
+  tree.sh,2
 D:
   examples/llm/anthropic_example.py:
     e: ask,main
@@ -1438,6 +1447,40 @@ D:
     validate_markdown(content;source;profile)
     validate_project_architecture(proj_dir)
     validate_sumd_file(path;profile)
+  sumd_logic_validator/logic/__init__.py:
+  sumd_logic_validator/sumd_logic_validator/__init__.py:
+  sumd_logic_validator/sumd_logic_validator/cli.py:
+    e: get_engine,main,info,query,shell
+    get_engine()
+    main()
+    info()
+    query(query_str)
+    shell()
+  sumd_logic_validator/sumd_logic_validator/engine.py:
+    e: is_variable,to_term,_split_body_terms,unify,resolve_val,deep_resolve,extend_subst,occurs_check,rename_variables,Variable,Term,Rule,PythonPrologDB,PythonPrologEngine,HybridPrologEngine
+    Variable: __init__(1),__repr__(0),__eq__(1),__hash__(0)  # Represents a logical variable in our pure Python engine.
+    Term: __init__(1),__repr__(0),__eq__(1)  # Represents a Prolog term (e.g. parent(john, mary)).
+    Rule: __init__(2),__repr__(0)  # Represents a Prolog rule Head :- Body.
+    PythonPrologDB: __init__(0),add_fact(1),add_rule(2),parse_and_load(1)  # In-memory Prolog database for pure Python execution.
+    PythonPrologEngine: __init__(1),query(1),_find_vars(1),_resolve(2)  # SLD Resolution Logic Interpreter.
+    HybridPrologEngine: __init__(1),query(1),_query_pyswip(1),_query_subprocess(1),_query_python(1),_swipl_executable_exists(0)  # Hybrid Logic Engine delegating queries based on backend avai
+    is_variable(x)
+    to_term(x)
+    _split_body_terms(body_str)
+    unify(x;y;subst)
+    resolve_val(x;subst)
+    deep_resolve(x;subst)
+    extend_subst(v;val;subst)
+    occurs_check(v;val;subst)
+    rename_variables(rule;suffix)
+  sumd_logic_validator/sumd_logic_validator/logic/__init__.py:
+  sumd_logic_validator/sumd_logic_validator/main.py:
+  sumd_logic_validator/tests/__init__.py:
+  sumd_logic_validator/tests/test_engine.py:
+    e: engine,test_detects_architectural_inconsistencies,test_project_structure_facts
+    engine()
+    test_detects_architectural_inconsistencies(engine)
+    test_project_structure_facts(engine)
   test_gitignore.py:
   test_ignore.py:
   tests/test_architectural_logic.py:
@@ -1569,7 +1612,7 @@ D:
 
 ```prolog markpact:analysis path=project/logic.pl
 % ── Project Metadata ─────────────────────────────────────
-project_metadata('sumd', '0.3.46', 'python').
+project_metadata('sumd', '0.3.47', 'python').
 
 % ── Project Files ────────────────────────────────────────
 project_file('app.doql.less', 261, 'less').
@@ -1581,7 +1624,7 @@ project_file('examples/llm/ollama_example.sh', 38, 'shell').
 project_file('examples/llm/openai_example.py', 89, 'python').
 project_file('examples/mcp/mcp_client.py', 139, 'python').
 project_file('print_errors.py', 7, 'python').
-project_file('project.sh', 41, 'shell').
+project_file('project.sh', 55, 'shell').
 project_file('scripts/bootstrap.sh', 70, 'shell').
 project_file('scripts/install_testql_autoloop.sh', 157, 'shell').
 project_file('sumd/__init__.py', 36, 'python').
@@ -1633,6 +1676,14 @@ project_file('sumd/sections/utils/should_render.py', 26, 'python').
 project_file('sumd/sections/workflows.py', 87, 'python').
 project_file('sumd/toon_parser.py', 174, 'python').
 project_file('sumd/validator.py', 384, 'python').
+project_file('sumd_logic_validator/logic/__init__.py', 2, 'python').
+project_file('sumd_logic_validator/sumd_logic_validator/__init__.py', 4, 'python').
+project_file('sumd_logic_validator/sumd_logic_validator/cli.py', 115, 'python').
+project_file('sumd_logic_validator/sumd_logic_validator/engine.py', 435, 'python').
+project_file('sumd_logic_validator/sumd_logic_validator/logic/__init__.py', 2, 'python').
+project_file('sumd_logic_validator/sumd_logic_validator/main.py', 5, 'python').
+project_file('sumd_logic_validator/tests/__init__.py', 1, 'python').
+project_file('sumd_logic_validator/tests/test_engine.py', 29, 'python').
 project_file('test_gitignore.py', 1, 'python').
 project_file('test_ignore.py', 1, 'python').
 project_file('tests/test_architectural_logic.py', 167, 'python').
@@ -1647,6 +1698,7 @@ project_file('tests/test_parser.py', 145, 'python').
 project_file('tests/test_pipeline.py', 136, 'python').
 project_file('tests/test_sections.py', 298, 'python').
 project_file('tests/test_statement.py', 12, 'python').
+project_file('tree.sh', 2, 'shell').
 
 % ── Python Functions ─────────────────────────────────────
 python_function('examples/llm/anthropic_example.py', 'ask', 3, 1, 3).
@@ -1654,54 +1706,54 @@ python_function('examples/llm/anthropic_example.py', 'main', 0, 2, 8).
 python_function('examples/llm/openai_example.py', 'build_context', 1, 5, 5).
 python_function('examples/llm/openai_example.py', 'ask', 3, 1, 3).
 python_function('examples/llm/openai_example.py', 'main', 0, 2, 8).
-python_function('examples/mcp/mcp_client.py', 'run', 3, 12, 12).
-python_function('examples/mcp/mcp_client.py', 'main', 0, 2, 9).
-python_function('sumd/cli.py', '_detect_project_type', 1, 7, 4).
-python_function('sumd/cli.py', '_render_doql_boilerplate', 3, 3, 3).
-python_function('sumd/cli.py', '_node_framework', 1, 4, 0).
-python_function('sumd/cli.py', '_node_spec_from_package_json', 1, 6, 5).
+python_function('examples/mcp/mcp_client.py', 'run', 3, 11, 12).
+python_function('examples/mcp/mcp_client.py', 'main', 0, 3, 9).
+python_function('sumd/cli.py', '_detect_project_type', 1, 8, 4).
+python_function('sumd/cli.py', '_render_doql_boilerplate', 3, 4, 3).
+python_function('sumd/cli.py', '_node_framework', 1, 5, 0).
+python_function('sumd/cli.py', '_node_spec_from_package_json', 1, 7, 5).
 python_function('sumd/cli.py', '_build_doql_spec', 2, 3, 4).
 python_function('sumd/cli.py', '_generate_doql_less', 5, 7, 8).
 python_function('sumd/cli.py', 'cli', 0, 1, 2).
 python_function('sumd/cli.py', 'validate', 1, 4, 8).
-python_function('sumd/cli.py', 'export', 3, 7, 11).
+python_function('sumd/cli.py', 'export', 3, 8, 11).
 python_function('sumd/cli.py', 'info', 1, 3, 7).
 python_function('sumd/cli.py', 'generate', 3, 8, 15).
 python_function('sumd/cli.py', 'extract', 2, 5, 8).
-python_function('sumd/cli.py', '_is_project_dir', 1, 6, 4).
+python_function('sumd/cli.py', '_is_project_dir', 1, 8, 4).
 python_function('sumd/cli.py', '_walk_projects', 4, 10, 7).
 python_function('sumd/cli.py', '_detect_projects', 2, 1, 1).
 python_function('sumd/cli.py', '_ensure_venv', 3, 4, 4).
-python_function('sumd/cli.py', '_tool_bin', 2, 1, 1).
-python_function('sumd/cli.py', '_run_one_tool', 4, 2, 5).
+python_function('sumd/cli.py', '_tool_bin', 2, 2, 1).
+python_function('sumd/cli.py', '_run_one_tool', 4, 3, 5).
 python_function('sumd/cli.py', '_run_analysis_tools', 3, 5, 5).
-python_function('sumd/cli.py', '_export_sumd_json', 2, 1, 2).
-python_function('sumd/cli.py', '_render_write_validate', 4, 1, 5).
-python_function('sumd/cli.py', '_echo_scan_result', 4, 1, 3).
-python_function('sumd/cli.py', '_maybe_generate_doql', 2, 6, 6).
+python_function('sumd/cli.py', '_export_sumd_json', 2, 2, 2).
+python_function('sumd/cli.py', '_render_write_validate', 4, 5, 5).
+python_function('sumd/cli.py', '_echo_scan_result', 4, 2, 3).
+python_function('sumd/cli.py', '_maybe_generate_doql', 2, 7, 6).
 python_function('sumd/cli.py', '_maybe_generate_testql', 1, 5, 5).
-python_function('sumd/cli.py', '_finalize_scan', 9, 8, 9).
-python_function('sumd/cli.py', '_scan_one_project', 11, 8, 9).
-python_function('sumd/cli.py', 'scan', 14, 9, 18).
-python_function('sumd/cli.py', 'lint', 4, 7, 13).
-python_function('sumd/cli.py', '_lint_collect_paths', 2, 4, 7).
-python_function('sumd/cli.py', '_lint_print_result', 2, 4, 3).
-python_function('sumd/cli.py', '_setup_tools_venv', 3, 6, 6).
-python_function('sumd/cli.py', '_run_code2llm_formats', 3, 4, 4).
+python_function('sumd/cli.py', '_finalize_scan', 9, 9, 9).
+python_function('sumd/cli.py', '_scan_one_project', 11, 10, 9).
+python_function('sumd/cli.py', 'scan', 14, 14, 18).
+python_function('sumd/cli.py', 'lint', 4, 12, 13).
+python_function('sumd/cli.py', '_lint_collect_paths', 2, 6, 7).
+python_function('sumd/cli.py', '_lint_print_result', 2, 10, 3).
+python_function('sumd/cli.py', '_setup_tools_venv', 3, 7, 6).
+python_function('sumd/cli.py', '_run_code2llm_formats', 3, 5, 4).
 python_function('sumd/cli.py', '_run_tool_subprocess', 3, 3, 4).
-python_function('sumd/cli.py', 'analyze', 3, 8, 17).
+python_function('sumd/cli.py', 'analyze', 3, 11, 17).
 python_function('sumd/cli.py', '_api_scenario_template', 4, 1, 3).
 python_function('sumd/cli.py', '_scaffold_write', 5, 3, 3).
-python_function('sumd/cli.py', '_scaffold_smoke_scenario', 6, 1, 5).
-python_function('sumd/cli.py', '_scaffold_crud_scenarios', 6, 4, 7).
+python_function('sumd/cli.py', '_scaffold_smoke_scenario', 6, 6, 5).
+python_function('sumd/cli.py', '_scaffold_crud_scenarios', 6, 5, 7).
 python_function('sumd/cli.py', '_scaffold_from_openapi', 6, 7, 12).
 python_function('sumd/cli.py', '_scaffold_generic', 4, 1, 3).
-python_function('sumd/cli.py', 'scaffold', 4, 8, 18).
-python_function('sumd/cli.py', 'map_cmd', 4, 6, 12).
-python_function('sumd/cli.py', 'dsl', 4, 10, 13).
-python_function('sumd/cli.py', 'cqrs_command', 4, 5, 19).
-python_function('sumd/cli.py', 'nlp_command', 4, 8, 13).
-python_function('sumd/cli.py', 'main', 0, 7, 3).
+python_function('sumd/cli.py', 'scaffold', 4, 9, 18).
+python_function('sumd/cli.py', 'map_cmd', 4, 7, 12).
+python_function('sumd/cli.py', 'dsl', 4, 1, 13).
+python_function('sumd/cli.py', 'cqrs_command', 4, 1, 19).
+python_function('sumd/cli.py', 'nlp_command', 4, 1, 13).
+python_function('sumd/cli.py', 'main', 0, 10, 3).
 python_function('sumd/cli.py', 'main_sumr', 0, 3, 2).
 python_function('sumd/dsl/commands.py', 'create_builtin_registry', 0, 1, 3).
 python_function('sumd/dsl/commands.py', '_cmd_cat', 2, 3, 3).
@@ -1712,14 +1764,14 @@ python_function('sumd/dsl/commands.py', '_cmd_rm', 2, 4, 5).
 python_function('sumd/dsl/commands.py', '_cmd_sumd_scan', 2, 6, 6).
 python_function('sumd/dsl/commands.py', '_cmd_sumd_map', 2, 6, 6).
 python_function('sumd/dsl/commands.py', '_cmd_sumd_validate', 2, 2, 5).
-python_function('sumd/dsl/commands.py', '_cmd_sumd_info', 2, 2, 3).
+python_function('sumd/dsl/commands.py', '_cmd_sumd_info', 2, 3, 3).
 python_function('sumd/dsl/commands.py', '_cmd_find', 2, 6, 9).
-python_function('sumd/dsl/commands.py', '_cmd_grep', 2, 8, 11).
+python_function('sumd/dsl/commands.py', '_cmd_grep', 2, 9, 11).
 python_function('sumd/dsl/commands.py', '_cmd_echo', 2, 1, 1).
 python_function('sumd/dsl/commands.py', '_cmd_pwd', 2, 1, 1).
 python_function('sumd/dsl/commands.py', '_cmd_cd', 2, 4, 5).
 python_function('sumd/dsl/commands.py', '_cmd_help', 2, 2, 2).
-python_function('sumd/dsl/commands.py', '_cmd_clear', 2, 1, 1).
+python_function('sumd/dsl/commands.py', '_cmd_clear', 2, 2, 1).
 python_function('sumd/dsl/commands.py', '_cmd_set', 2, 3, 5).
 python_function('sumd/dsl/commands.py', '_cmd_get', 2, 3, 2).
 python_function('sumd/dsl/commands.py', '_cmd_unset', 2, 3, 1).
@@ -1727,7 +1779,7 @@ python_function('sumd/dsl/commands.py', '_cmd_vars', 2, 2, 3).
 python_function('sumd/dsl/commands.py', '_cmd_exists', 2, 2, 2).
 python_function('sumd/dsl/commands.py', '_cmd_read_file', 2, 3, 3).
 python_function('sumd/dsl/parser.py', 'parse_dsl', 1, 1, 4).
-python_function('sumd/dsl/shell.py', 'main', 0, 10, 12).
+python_function('sumd/dsl/shell.py', 'main', 0, 11, 12).
 python_function('sumd/extractor.py', '_read_toml', 1, 2, 2).
 python_function('sumd/extractor.py', 'extract_pyproject', 1, 3, 5).
 python_function('sumd/extractor.py', '_first_task_cmd', 1, 4, 2).
@@ -1736,27 +1788,27 @@ python_function('sumd/extractor.py', '_parse_openapi_endpoints', 1, 8, 7).
 python_function('sumd/extractor.py', 'extract_openapi', 1, 5, 7).
 python_function('sumd/extractor.py', '_parse_doql_entities', 1, 4, 5).
 python_function('sumd/extractor.py', '_parse_doql_interfaces', 1, 3, 7).
-python_function('sumd/extractor.py', '_parse_doql_workflows', 1, 3, 10).
-python_function('sumd/extractor.py', '_parse_doql_content', 1, 5, 14).
+python_function('sumd/extractor.py', '_parse_doql_workflows', 1, 7, 10).
+python_function('sumd/extractor.py', '_parse_doql_content', 1, 6, 14).
 python_function('sumd/extractor.py', 'extract_doql', 1, 3, 3).
-python_function('sumd/extractor.py', 'extract_pyqual', 1, 3, 5).
-python_function('sumd/extractor.py', 'extract_python_modules', 2, 2, 4).
+python_function('sumd/extractor.py', 'extract_pyqual', 1, 5, 5).
+python_function('sumd/extractor.py', 'extract_python_modules', 2, 4, 4).
 python_function('sumd/extractor.py', 'extract_readme_title', 1, 4, 5).
 python_function('sumd/extractor.py', 'extract_requirements', 1, 7, 7).
 python_function('sumd/extractor.py', 'extract_makefile', 1, 7, 9).
 python_function('sumd/extractor.py', 'extract_goal', 1, 3, 7).
-python_function('sumd/extractor.py', 'extract_env', 1, 8, 9).
+python_function('sumd/extractor.py', 'extract_env', 1, 10, 9).
 python_function('sumd/extractor.py', '_parse_dockerfile_line', 2, 8, 6).
-python_function('sumd/extractor.py', 'extract_dockerfile', 1, 5, 5).
-python_function('sumd/extractor.py', 'extract_docker_compose', 1, 9, 12).
+python_function('sumd/extractor.py', 'extract_dockerfile', 1, 6, 5).
+python_function('sumd/extractor.py', 'extract_docker_compose', 1, 10, 12).
 python_function('sumd/extractor.py', 'extract_package_json', 1, 3, 6).
 python_function('sumd/extractor.py', '_lang_of', 1, 1, 2).
 python_function('sumd/extractor.py', '_fan_out', 1, 5, 5).
 python_function('sumd/extractor.py', '_cc_estimate', 1, 4, 4).
-python_function('sumd/extractor.py', '_try_radon_cc', 1, 2, 1).
-python_function('sumd/extractor.py', '_analyse_py_top_funcs', 2, 4, 6).
-python_function('sumd/extractor.py', '_analyse_class_methods', 2, 4, 6).
-python_function('sumd/extractor.py', '_analyse_py_top_classes', 2, 4, 7).
+python_function('sumd/extractor.py', '_try_radon_cc', 1, 3, 1).
+python_function('sumd/extractor.py', '_analyse_py_top_funcs', 2, 5, 6).
+python_function('sumd/extractor.py', '_analyse_class_methods', 2, 6, 6).
+python_function('sumd/extractor.py', '_analyse_py_top_classes', 2, 5, 7).
 python_function('sumd/extractor.py', '_analyse_py_module', 1, 2, 6).
 python_function('sumd/extractor.py', '_parse_ignore_file', 1, 6, 7).
 python_function('sumd/extractor.py', '_path_matches_pattern', 2, 18, 4).
@@ -1764,63 +1816,63 @@ python_function('sumd/extractor.py', '_is_path_ignored', 3, 7, 3).
 python_function('sumd/extractor.py', '_is_map_ignored_path', 1, 4, 1).
 python_function('sumd/extractor.py', '_collect_map_files', 1, 8, 12).
 python_function('sumd/extractor.py', '_render_map_detail', 2, 5, 3).
-python_function('sumd/extractor.py', '_map_cc_stats', 1, 6, 8).
-python_function('sumd/extractor.py', '_render_py_module_detail', 3, 5, 3).
-python_function('sumd/extractor.py', 'generate_map_toon', 1, 3, 13).
+python_function('sumd/extractor.py', '_map_cc_stats', 1, 12, 8).
+python_function('sumd/extractor.py', '_render_py_module_detail', 3, 7, 3).
+python_function('sumd/extractor.py', 'generate_map_toon', 1, 5, 13).
 python_function('sumd/extractor.py', 'generate_project_logic', 1, 20, 18).
-python_function('sumd/extractor.py', '_extract_sumd_semantic_facts', 1, 14, 10).
-python_function('sumd/extractor.py', 'required_tools_for_profile', 1, 1, 0).
+python_function('sumd/extractor.py', '_extract_sumd_semantic_facts', 1, 15, 10).
+python_function('sumd/extractor.py', 'required_tools_for_profile', 1, 4, 0).
 python_function('sumd/extractor.py', 'extract_source_snippets', 2, 6, 11).
 python_function('sumd/extractor.py', 'extract_swop', 1, 9, 8).
-python_function('sumd/extractor.py', 'extract_project_analysis', 2, 5, 7).
-python_function('sumd/mcp_server.py', '_doc_to_dict', 1, 1, 0).
+python_function('sumd/extractor.py', 'extract_project_analysis', 2, 6, 7).
+python_function('sumd/mcp_server.py', '_doc_to_dict', 1, 2, 0).
 python_function('sumd/mcp_server.py', '_resolve_path', 1, 2, 3).
 python_function('sumd/mcp_server.py', 'list_tools', 0, 1, 2).
 python_function('sumd/mcp_server.py', '_tool_parse_sumd', 1, 1, 5).
 python_function('sumd/mcp_server.py', '_tool_validate_sumd', 1, 1, 7).
 python_function('sumd/mcp_server.py', '_tool_export_sumd', 1, 5, 8).
-python_function('sumd/mcp_server.py', '_tool_list_sections', 1, 1, 4).
-python_function('sumd/mcp_server.py', '_tool_get_section', 1, 3, 6).
-python_function('sumd/mcp_server.py', '_tool_info_sumd', 1, 1, 5).
+python_function('sumd/mcp_server.py', '_tool_list_sections', 1, 2, 4).
+python_function('sumd/mcp_server.py', '_tool_get_section', 1, 5, 6).
+python_function('sumd/mcp_server.py', '_tool_info_sumd', 1, 2, 5).
 python_function('sumd/mcp_server.py', '_tool_generate_sumd', 1, 5, 5).
 python_function('sumd/mcp_server.py', '_tool_execute_command', 1, 3, 6).
 python_function('sumd/mcp_server.py', '_tool_execute_query', 1, 3, 5).
-python_function('sumd/mcp_server.py', '_tool_get_events', 1, 2, 6).
+python_function('sumd/mcp_server.py', '_tool_get_events', 1, 3, 6).
 python_function('sumd/mcp_server.py', '_tool_get_aggregate', 1, 3, 4).
 python_function('sumd/mcp_server.py', '_tool_execute_dsl', 1, 3, 5).
 python_function('sumd/mcp_server.py', '_tool_dsl_shell_info', 1, 2, 3).
 python_function('sumd/mcp_server.py', 'call_tool', 2, 3, 4).
-python_function('sumd/mcp_server.py', 'main', 0, 2, 3).
+python_function('sumd/mcp_server.py', 'main', 0, 1, 3).
 python_function('sumd/parser.py', 'parse', 1, 1, 2).
 python_function('sumd/parser.py', 'parse_file', 1, 1, 2).
-python_function('sumd/parser.py', 'validate', 1, 1, 2).
+python_function('sumd/parser.py', 'validate', 1, 6, 2).
 python_function('sumd/pipeline.py', '_refresh_map_toon', 1, 5, 4).
 python_function('sumd/pipeline.py', '_find_tools_bin_dir', 1, 3, 1).
 python_function('sumd/pipeline.py', '_run_tool_if_present', 4, 3, 3).
 python_function('sumd/pipeline.py', '_refresh_analysis_files', 2, 7, 5).
-python_function('sumd/pipeline.py', '_collect_tool_sources', 5, 6, 3).
+python_function('sumd/pipeline.py', '_collect_tool_sources', 5, 7, 3).
 python_function('sumd/pipeline.py', '_doql_sources', 1, 4, 1).
 python_function('sumd/pipeline.py', '_collect_pkg_sources', 10, 5, 6).
 python_function('sumd/pipeline.py', '_collect_infra_sources', 5, 6, 3).
 python_function('sumd/pipeline.py', '_collect_sources', 16, 2, 4).
 python_function('sumd/pipeline.py', '_inject_toc', 1, 3, 6).
 python_function('sumd/prolog_engine.py', 'is_variable', 1, 6, 4).
-python_function('sumd/prolog_engine.py', 'to_term', 1, 10, 14).
-python_function('sumd/prolog_engine.py', '_split_body_terms', 1, 11, 3).
+python_function('sumd/prolog_engine.py', 'to_term', 1, 13, 14).
+python_function('sumd/prolog_engine.py', '_split_body_terms', 1, 13, 3).
 python_function('sumd/prolog_engine.py', 'unify', 3, 10, 7).
 python_function('sumd/prolog_engine.py', 'resolve_val', 2, 3, 1).
-python_function('sumd/prolog_engine.py', 'deep_resolve', 2, 2, 4).
+python_function('sumd/prolog_engine.py', 'deep_resolve', 2, 3, 4).
 python_function('sumd/prolog_engine.py', 'extend_subst', 3, 2, 2).
-python_function('sumd/prolog_engine.py', 'occurs_check', 3, 3, 4).
-python_function('sumd/prolog_engine.py', 'rename_variables', 2, 4, 5).
+python_function('sumd/prolog_engine.py', 'occurs_check', 3, 4, 4).
+python_function('sumd/prolog_engine.py', 'rename_variables', 2, 2, 5).
 python_function('sumd/renderer.py', 'generate_sumd_content', 4, 1, 2).
-python_function('sumd/sections/api_stubs.py', '_render_api_stubs', 1, 8, 9).
-python_function('sumd/sections/architecture.py', '_render_architecture_doql_section', 4, 4, 8).
+python_function('sumd/sections/api_stubs.py', '_render_api_stubs', 1, 11, 9).
+python_function('sumd/sections/architecture.py', '_render_architecture_doql_section', 4, 6, 8).
 python_function('sumd/sections/architecture.py', '_render_architecture_modules', 3, 2, 1).
 python_function('sumd/sections/architecture.py', '_render_doql_app', 2, 3, 3).
-python_function('sumd/sections/architecture.py', '_render_doql_entities', 2, 4, 4).
-python_function('sumd/sections/architecture.py', '_render_doql_interfaces', 2, 3, 5).
-python_function('sumd/sections/architecture.py', '_render_doql_integrations', 2, 3, 5).
+python_function('sumd/sections/architecture.py', '_render_doql_entities', 2, 6, 4).
+python_function('sumd/sections/architecture.py', '_render_doql_interfaces', 2, 6, 5).
+python_function('sumd/sections/architecture.py', '_render_doql_integrations', 2, 5, 5).
 python_function('sumd/sections/architecture.py', '_render_architecture_doql_parsed', 2, 1, 4).
 python_function('sumd/sections/architecture.py', '_render_architecture_rules', 2, 3, 4).
 python_function('sumd/sections/architecture.py', '_render_architecture', 5, 6, 5).
@@ -1829,40 +1881,40 @@ python_function('sumd/sections/call_graph.py', '_parse_hub_stat_line', 1, 2, 3).
 python_function('sumd/sections/call_graph.py', '_process_in_hubs_line', 3, 6, 5).
 python_function('sumd/sections/call_graph.py', '_parse_calls_hubs', 1, 8, 3).
 python_function('sumd/sections/call_graph.py', '_parse_calls_toon', 1, 1, 3).
-python_function('sumd/sections/call_graph.py', '_render_call_graph', 1, 4, 8).
-python_function('sumd/sections/code_analysis.py', '_render_code_analysis', 2, 6, 4).
+python_function('sumd/sections/call_graph.py', '_render_call_graph', 1, 7, 8).
+python_function('sumd/sections/code_analysis.py', '_render_code_analysis', 2, 9, 4).
 python_function('sumd/sections/configuration.py', '_render_configuration_section', 2, 1, 0).
 python_function('sumd/sections/dependencies.py', '_render_deps_runtime', 3, 6, 2).
 python_function('sumd/sections/dependencies.py', '_render_deps_dev', 3, 6, 2).
 python_function('sumd/sections/dependencies.py', '_render_dependencies', 3, 2, 4).
 python_function('sumd/sections/deployment.py', '_render_deployment_install', 3, 2, 2).
 python_function('sumd/sections/deployment.py', '_render_deployment_reqs', 2, 5, 2).
-python_function('sumd/sections/deployment.py', '_render_dockerfile_info', 2, 5, 3).
-python_function('sumd/sections/deployment.py', '_render_deployment_docker', 3, 4, 4).
+python_function('sumd/sections/deployment.py', '_render_dockerfile_info', 2, 6, 3).
+python_function('sumd/sections/deployment.py', '_render_deployment_docker', 3, 8, 4).
 python_function('sumd/sections/deployment.py', '_render_deployment', 5, 1, 4).
 python_function('sumd/sections/environment.py', '_render_env_section', 1, 3, 2).
-python_function('sumd/sections/environment.py', '_render_goal_section', 1, 7, 3).
-python_function('sumd/sections/extras.py', '_render_makefile_targets', 2, 2, 1).
-python_function('sumd/sections/extras.py', '_render_pkg_json_scripts', 2, 6, 4).
+python_function('sumd/sections/environment.py', '_render_goal_section', 1, 9, 3).
+python_function('sumd/sections/extras.py', '_render_makefile_targets', 2, 3, 1).
+python_function('sumd/sections/extras.py', '_render_pkg_json_scripts', 2, 7, 4).
 python_function('sumd/sections/extras.py', '_render_extras', 2, 3, 3).
-python_function('sumd/sections/interfaces.py', '_render_interfaces_openapi', 4, 5, 7).
+python_function('sumd/sections/interfaces.py', '_render_interfaces_openapi', 4, 6, 7).
 python_function('sumd/sections/interfaces.py', '_render_testql_raw', 3, 4, 7).
-python_function('sumd/sections/interfaces.py', '_render_testql_endpoint', 2, 1, 2).
-python_function('sumd/sections/interfaces.py', '_render_testql_extras', 2, 6, 3).
+python_function('sumd/sections/interfaces.py', '_render_testql_endpoint', 2, 3, 2).
+python_function('sumd/sections/interfaces.py', '_render_testql_extras', 2, 7, 3).
 python_function('sumd/sections/interfaces.py', '_render_testql_one_structured', 2, 7, 4).
 python_function('sumd/sections/interfaces.py', '_render_interfaces_testql', 4, 3, 3).
 python_function('sumd/sections/interfaces.py', '_render_interfaces', 5, 5, 4).
 python_function('sumd/sections/quality.py', '_render_quality_raw', 2, 2, 4).
-python_function('sumd/sections/quality.py', '_render_quality_parsed', 2, 8, 3).
+python_function('sumd/sections/quality.py', '_render_quality_parsed', 2, 9, 3).
 python_function('sumd/sections/quality.py', '_render_quality', 3, 3, 3).
-python_function('sumd/sections/source_snippets.py', '_render_source_snippets', 2, 6, 4).
+python_function('sumd/sections/source_snippets.py', '_render_source_snippets', 2, 8, 4).
 python_function('sumd/sections/swop.py', '_render_swop_section', 2, 9, 5).
-python_function('sumd/sections/test_contracts.py', '_render_scenario_contract', 2, 8, 2).
+python_function('sumd/sections/test_contracts.py', '_render_scenario_contract', 2, 9, 2).
 python_function('sumd/sections/test_contracts.py', '_render_test_contracts', 1, 5, 9).
 python_function('sumd/sections/utils/render.py', 'call_with_ctx', 1, 1, 2).
 python_function('sumd/sections/utils/should_render.py', 'always', 2, 1, 0).
 python_function('sumd/sections/utils/should_render.py', 'has_attr', 1, 1, 2).
-python_function('sumd/sections/workflows.py', '_render_workflows_doql', 2, 2, 3).
+python_function('sumd/sections/workflows.py', '_render_workflows_doql', 2, 4, 3).
 python_function('sumd/sections/workflows.py', '_render_workflows_taskfile', 4, 6, 4).
 python_function('sumd/sections/workflows.py', '_render_workflows', 4, 4, 4).
 python_function('sumd/toon_parser.py', '_parse_toon_block_config', 1, 9, 4).
@@ -1875,63 +1927,80 @@ python_function('sumd/toon_parser.py', '_parse_toon_file', 1, 4, 13).
 python_function('sumd/toon_parser.py', 'extract_testql_scenarios', 1, 7, 8).
 python_function('sumd/validator.py', '_validate_yaml_body', 2, 2, 1).
 python_function('sumd/validator.py', '_validate_less_css_body', 2, 2, 1).
-python_function('sumd/validator.py', '_validate_mermaid_body', 2, 2, 4).
+python_function('sumd/validator.py', '_validate_mermaid_body', 2, 3, 4).
 python_function('sumd/validator.py', '_validate_toon_body', 2, 2, 1).
 python_function('sumd/validator.py', '_validate_bash_body', 2, 4, 1).
 python_function('sumd/validator.py', '_validate_deps_body', 2, 5, 6).
 python_function('sumd/validator.py', '_validate_markpact_meta', 5, 5, 6).
 python_function('sumd/validator.py', 'validate_codeblocks', 2, 9, 11).
-python_function('sumd/validator.py', '_check_h1', 2, 2, 2).
-python_function('sumd/validator.py', '_check_required_sections', 3, 1, 6).
-python_function('sumd/validator.py', '_check_metadata_fields', 2, 7, 6).
-python_function('sumd/validator.py', '_check_unclosed_fences', 2, 2, 2).
-python_function('sumd/validator.py', '_check_empty_links', 2, 1, 1).
+python_function('sumd/validator.py', '_check_h1', 2, 3, 2).
+python_function('sumd/validator.py', '_check_required_sections', 3, 7, 6).
+python_function('sumd/validator.py', '_check_metadata_fields', 2, 9, 6).
+python_function('sumd/validator.py', '_check_unclosed_fences', 2, 4, 2).
+python_function('sumd/validator.py', '_check_empty_links', 2, 2, 1).
 python_function('sumd/validator.py', 'validate_markdown', 3, 1, 6).
 python_function('sumd/validator.py', 'validate_project_architecture', 1, 8, 11).
-python_function('sumd/validator.py', 'validate_sumd_file', 2, 3, 8).
-python_function('tests/test_architectural_logic.py', 'test_pure_python_prolog_basic', 0, 1, 6).
-python_function('tests/test_architectural_logic.py', 'test_architectural_validation_missing_file', 1, 2, 5).
-python_function('tests/test_architectural_logic.py', 'test_architectural_validation_aligned', 1, 1, 3).
-python_function('tests/test_architectural_logic.py', 'test_architectural_validation_missing_automation', 1, 2, 5).
-python_function('tests/test_architectural_logic.py', 'test_architectural_validation_missing_gate', 1, 2, 5).
+python_function('sumd/validator.py', 'validate_sumd_file', 2, 4, 8).
+python_function('sumd_logic_validator/sumd_logic_validator/cli.py', 'get_engine', 0, 4, 6).
+python_function('sumd_logic_validator/sumd_logic_validator/cli.py', 'main', 0, 1, 1).
+python_function('sumd_logic_validator/sumd_logic_validator/cli.py', 'info', 0, 2, 3).
+python_function('sumd_logic_validator/sumd_logic_validator/cli.py', 'query', 1, 6, 11).
+python_function('sumd_logic_validator/sumd_logic_validator/cli.py', 'shell', 0, 10, 11).
+python_function('sumd_logic_validator/sumd_logic_validator/engine.py', 'is_variable', 1, 6, 3).
+python_function('sumd_logic_validator/sumd_logic_validator/engine.py', 'to_term', 1, 13, 15).
+python_function('sumd_logic_validator/sumd_logic_validator/engine.py', '_split_body_terms', 1, 14, 4).
+python_function('sumd_logic_validator/sumd_logic_validator/engine.py', 'unify', 3, 10, 7).
+python_function('sumd_logic_validator/sumd_logic_validator/engine.py', 'resolve_val', 2, 3, 1).
+python_function('sumd_logic_validator/sumd_logic_validator/engine.py', 'deep_resolve', 2, 3, 4).
+python_function('sumd_logic_validator/sumd_logic_validator/engine.py', 'extend_subst', 3, 2, 2).
+python_function('sumd_logic_validator/sumd_logic_validator/engine.py', 'occurs_check', 3, 4, 4).
+python_function('sumd_logic_validator/sumd_logic_validator/engine.py', 'rename_variables', 2, 2, 5).
+python_function('sumd_logic_validator/tests/test_engine.py', 'engine', 0, 1, 3).
+python_function('sumd_logic_validator/tests/test_engine.py', 'test_detects_architectural_inconsistencies', 1, 3, 5).
+python_function('sumd_logic_validator/tests/test_engine.py', 'test_project_structure_facts', 1, 5, 2).
+python_function('tests/test_architectural_logic.py', 'test_pure_python_prolog_basic', 0, 5, 6).
+python_function('tests/test_architectural_logic.py', 'test_architectural_validation_missing_file', 1, 3, 5).
+python_function('tests/test_architectural_logic.py', 'test_architectural_validation_aligned', 1, 2, 3).
+python_function('tests/test_architectural_logic.py', 'test_architectural_validation_missing_automation', 1, 3, 5).
+python_function('tests/test_architectural_logic.py', 'test_architectural_validation_missing_gate', 1, 3, 5).
 python_function('tests/test_cli.py', 'sumd_file', 1, 1, 1).
 python_function('tests/test_dogfood.py', '_run', 3, 1, 1).
 python_function('tests/test_dogfood.py', 'project_copy', 1, 1, 5).
-python_function('tests/test_dogfood.py', 'test_sumd_scans_itself', 1, 1, 5).
-python_function('tests/test_dogfood.py', 'test_sumd_scans_all_profiles', 2, 1, 4).
-python_function('tests/test_dogfood.py', 'test_sumr_generates_sumr_md', 1, 2, 5).
-python_function('tests/test_dogfood.py', 'test_sumd_lint_passes_on_generated_output', 1, 1, 3).
-python_function('tests/test_dogfood.py', 'test_sumd_version_flag', 0, 1, 4).
-python_function('tests/test_dogfood.py', 'test_sumd_scan_produces_no_unhandled_exceptions', 1, 1, 2).
+python_function('tests/test_dogfood.py', 'test_sumd_scans_itself', 1, 5, 5).
+python_function('tests/test_dogfood.py', 'test_sumd_scans_all_profiles', 2, 3, 4).
+python_function('tests/test_dogfood.py', 'test_sumr_generates_sumr_md', 1, 5, 5).
+python_function('tests/test_dogfood.py', 'test_sumd_lint_passes_on_generated_output', 1, 3, 3).
+python_function('tests/test_dogfood.py', 'test_sumd_version_flag', 0, 3, 4).
+python_function('tests/test_dogfood.py', 'test_sumd_scan_produces_no_unhandled_exceptions', 1, 3, 2).
 python_function('tests/test_mcp_server.py', 'sumd_file', 1, 1, 1).
 python_function('tests/test_mcp_server.py', 'run', 1, 1, 2).
-python_function('tests/test_parser.py', 'test_parse_basic', 0, 1, 2).
-python_function('tests/test_parser.py', 'test_parse_sections', 0, 1, 1).
-python_function('tests/test_parser.py', 'test_validate_valid_document', 0, 1, 3).
-python_function('tests/test_parser.py', 'test_validate_missing_intent', 0, 1, 4).
-python_function('tests/test_parser.py', 'test_parse_file', 1, 1, 2).
-python_function('tests/test_parser.py', 'test_parser_class', 0, 1, 3).
-python_function('tests/test_parser.py', 'test_markpact_semantic_kinds_valid', 0, 2, 2).
+python_function('tests/test_parser.py', 'test_parse_basic', 0, 4, 2).
+python_function('tests/test_parser.py', 'test_parse_sections', 0, 6, 1).
+python_function('tests/test_parser.py', 'test_validate_valid_document', 0, 2, 3).
+python_function('tests/test_parser.py', 'test_validate_missing_intent', 0, 3, 4).
+python_function('tests/test_parser.py', 'test_parse_file', 1, 2, 2).
+python_function('tests/test_parser.py', 'test_parser_class', 0, 3, 3).
+python_function('tests/test_parser.py', 'test_markpact_semantic_kinds_valid', 0, 5, 2).
 python_function('tests/test_parser.py', 'test_markpact_unknown_kind_error', 0, 2, 2).
 python_function('tests/test_parser.py', 'test_markpact_missing_path_error', 0, 2, 2).
 python_function('tests/test_pipeline.py', 'proj_dir', 1, 1, 1).
-python_function('tests/test_pipeline.py', 'test_pipeline_run_returns_string', 1, 1, 4).
-python_function('tests/test_pipeline.py', 'test_pipeline_output_has_h1', 1, 2, 4).
-python_function('tests/test_pipeline.py', 'test_pipeline_output_has_metadata', 1, 1, 2).
-python_function('tests/test_pipeline.py', 'test_pipeline_return_sources', 1, 1, 3).
-python_function('tests/test_pipeline.py', 'test_pipeline_profile_minimal', 1, 1, 2).
-python_function('tests/test_pipeline.py', 'test_pipeline_profile_refactor', 1, 1, 2).
-python_function('tests/test_pipeline.py', 'test_pipeline_with_modules', 1, 1, 4).
-python_function('tests/test_pipeline.py', 'test_pipeline_with_taskfile', 1, 1, 3).
-python_function('tests/test_pipeline.py', 'test_pipeline_with_dependencies', 1, 1, 3).
-python_function('tests/test_pipeline.py', 'test_pipeline_injects_toc', 1, 1, 2).
-python_function('tests/test_pipeline.py', 'test_required_tools_rich', 0, 1, 1).
-python_function('tests/test_pipeline.py', 'test_required_tools_refactor', 0, 1, 1).
-python_function('tests/test_pipeline.py', 'test_required_tools_minimal', 0, 1, 1).
-python_function('tests/test_pipeline.py', 'test_refresh_map_toon_writes_file', 1, 1, 2).
+python_function('tests/test_pipeline.py', 'test_pipeline_run_returns_string', 1, 3, 4).
+python_function('tests/test_pipeline.py', 'test_pipeline_output_has_h1', 1, 5, 4).
+python_function('tests/test_pipeline.py', 'test_pipeline_output_has_metadata', 1, 4, 2).
+python_function('tests/test_pipeline.py', 'test_pipeline_return_sources', 1, 4, 3).
+python_function('tests/test_pipeline.py', 'test_pipeline_profile_minimal', 1, 4, 2).
+python_function('tests/test_pipeline.py', 'test_pipeline_profile_refactor', 1, 5, 2).
+python_function('tests/test_pipeline.py', 'test_pipeline_with_modules', 1, 2, 4).
+python_function('tests/test_pipeline.py', 'test_pipeline_with_taskfile', 1, 3, 3).
+python_function('tests/test_pipeline.py', 'test_pipeline_with_dependencies', 1, 3, 3).
+python_function('tests/test_pipeline.py', 'test_pipeline_injects_toc', 1, 2, 2).
+python_function('tests/test_pipeline.py', 'test_required_tools_rich', 0, 2, 1).
+python_function('tests/test_pipeline.py', 'test_required_tools_refactor', 0, 2, 1).
+python_function('tests/test_pipeline.py', 'test_required_tools_minimal', 0, 2, 1).
+python_function('tests/test_pipeline.py', 'test_refresh_map_toon_writes_file', 1, 2, 2).
 python_function('tests/test_pipeline.py', 'test_refresh_analysis_files_noop_without_tools', 1, 1, 1).
 python_function('tests/test_sections.py', 'make_ctx', 0, 1, 4).
-python_function('tests/test_statement.py', 'test_placeholder', 0, 1, 0).
+python_function('tests/test_statement.py', 'test_placeholder', 0, 2, 0).
 python_function('tests/test_statement.py', 'test_import', 0, 1, 0).
 
 % ── Python Classes ───────────────────────────────────────
@@ -1960,9 +2029,9 @@ python_method('ValueObject', '__eq__', 1, 2, 1).
 python_method('ValueObject', '__hash__', 0, 1, 4).
 python_method('ValueObject', 'get_state', 0, 1, 1).
 python_class('sumd/cqrs/aggregates.py', 'Repository').
-python_method('Repository', 'get_by_id', 1, 1, 0).
+python_method('Repository', 'get_by_id', 1, 3, 0).
 python_method('Repository', 'save', 1, 1, 0).
-python_method('Repository', 'delete', 1, 1, 0).
+python_method('Repository', 'delete', 1, 2, 0).
 python_class('sumd/cqrs/aggregates.py', 'EventSourcedRepository').
 python_method('EventSourcedRepository', '__init__', 2, 1, 0).
 python_method('EventSourcedRepository', 'get_by_id', 1, 3, 4).
@@ -1971,7 +2040,7 @@ python_method('EventSourcedRepository', 'delete', 1, 2, 0).
 python_method('EventSourcedRepository', 'clear_cache', 0, 1, 1).
 python_class('sumd/cqrs/commands.py', 'Command').
 python_class('sumd/cqrs/commands.py', 'CommandHandler').
-python_method('CommandHandler', 'handle', 1, 1, 0).
+python_method('CommandHandler', 'handle', 1, 9, 0).
 python_method('CommandHandler', 'can_handle', 1, 1, 0).
 python_class('sumd/cqrs/commands.py', 'CommandBus').
 python_method('CommandBus', '__init__', 1, 1, 0).
@@ -1988,17 +2057,17 @@ python_class('sumd/cqrs/commands.py', 'ExecuteDslCommand').
 python_class('sumd/cqrs/commands.py', 'SumdCommandHandler').
 python_method('SumdCommandHandler', '__init__', 1, 1, 0).
 python_method('SumdCommandHandler', 'can_handle', 1, 1, 0).
-python_method('SumdCommandHandler', 'handle', 1, 7, 10).
+python_method('SumdCommandHandler', 'handle', 1, 9, 10).
 python_class('sumd/cqrs/events.py', 'Event').
 python_method('Event', 'to_dict', 0, 1, 1).
 python_method('Event', 'from_dict', 2, 1, 2).
 python_class('sumd/cqrs/events.py', 'EventStore').
 python_method('EventStore', '__init__', 1, 2, 1).
-python_method('EventStore', 'save_event', 1, 5, 4).
-python_method('EventStore', 'get_events', 2, 1, 1).
+python_method('EventStore', 'save_event', 1, 6, 4).
+python_method('EventStore', 'get_events', 2, 3, 1).
 python_method('EventStore', 'get_all_events', 0, 2, 3).
-python_method('EventStore', '_persist_event', 1, 3, 5).
-python_method('EventStore', '_load_events', 0, 8, 7).
+python_method('EventStore', '_persist_event', 1, 2, 5).
+python_method('EventStore', '_load_events', 0, 7, 7).
 python_class('sumd/cqrs/events.py', 'SumdDocumentCreated').
 python_class('sumd/cqrs/events.py', 'SumdDocumentUpdated').
 python_class('sumd/cqrs/events.py', 'SumdSectionAdded').
@@ -2007,7 +2076,7 @@ python_class('sumd/cqrs/events.py', 'SumdDocumentValidated').
 python_class('sumd/cqrs/events.py', 'SumdCommandExecuted').
 python_class('sumd/cqrs/queries.py', 'Query').
 python_class('sumd/cqrs/queries.py', 'QueryHandler').
-python_method('QueryHandler', 'handle', 1, 1, 0).
+python_method('QueryHandler', 'handle', 1, 10, 0).
 python_method('QueryHandler', 'can_handle', 1, 1, 0).
 python_class('sumd/cqrs/queries.py', 'QueryBus').
 python_method('QueryBus', '__init__', 1, 1, 0).
@@ -2026,14 +2095,14 @@ python_class('sumd/cqrs/queries.py', 'SumdQueryHandler').
 python_method('SumdQueryHandler', '__init__', 1, 1, 0).
 python_method('SumdQueryHandler', 'can_handle', 1, 1, 0).
 python_method('SumdQueryHandler', 'handle', 1, 10, 10).
-python_method('SumdQueryHandler', '_handle_get_sumd_document', 1, 2, 4).
-python_method('SumdQueryHandler', '_handle_list_sumd_sections', 1, 2, 4).
+python_method('SumdQueryHandler', '_handle_get_sumd_document', 1, 3, 4).
+python_method('SumdQueryHandler', '_handle_list_sumd_sections', 1, 3, 4).
 python_method('SumdQueryHandler', '_handle_get_sumd_section', 1, 4, 5).
 python_method('SumdQueryHandler', '_handle_get_project_info', 1, 3, 5).
-python_method('SumdQueryHandler', '_handle_get_event_history', 1, 2, 4).
-python_method('SumdQueryHandler', '_handle_get_all_events', 1, 2, 5).
+python_method('SumdQueryHandler', '_handle_get_event_history', 1, 3, 4).
+python_method('SumdQueryHandler', '_handle_get_all_events', 1, 3, 5).
 python_method('SumdQueryHandler', '_handle_search_documents', 1, 6, 11).
-python_method('SumdQueryHandler', '_handle_get_validation_results', 1, 2, 4).
+python_method('SumdQueryHandler', '_handle_get_validation_results', 1, 4, 4).
 python_method('SumdQueryHandler', '_handle_execute_dsl_query', 1, 2, 2).
 python_class('sumd/cqrs/sumd_aggregate.py', 'SumdSection').
 python_method('SumdSection', 'to_dict', 0, 1, 0).
@@ -2045,17 +2114,17 @@ python_method('SumdAggregate', 'state', 0, 1, 0).
 python_method('SumdAggregate', '_when', 1, 6, 6).
 python_method('SumdAggregate', '_when_document_created', 1, 1, 1).
 python_method('SumdAggregate', '_when_document_updated', 1, 6, 2).
-python_method('SumdAggregate', '_when_section_added', 1, 1, 4).
-python_method('SumdAggregate', '_when_section_removed', 1, 1, 2).
+python_method('SumdAggregate', '_when_section_added', 1, 3, 4).
+python_method('SumdAggregate', '_when_section_removed', 1, 3, 2).
 python_method('SumdAggregate', '_when_document_validated', 1, 1, 1).
 python_method('SumdAggregate', 'create_document', 4, 2, 3).
 python_method('SumdAggregate', 'update_document', 1, 2, 3).
 python_method('SumdAggregate', 'add_section', 5, 3, 3).
-python_method('SumdAggregate', 'remove_section', 1, 3, 5).
+python_method('SumdAggregate', 'remove_section', 1, 4, 5).
 python_method('SumdAggregate', 'validate_document', 2, 2, 3).
 python_method('SumdAggregate', 'get_section', 1, 3, 1).
 python_method('SumdAggregate', 'has_section', 1, 1, 1).
-python_method('SumdAggregate', 'get_state', 0, 1, 5).
+python_method('SumdAggregate', 'get_state', 0, 5, 5).
 python_method('SumdAggregate', 'create_from_file', 2, 6, 10).
 python_class('sumd/dsl/commands.py', 'DSLCommand').
 python_method('DSLCommand', '__post_init__', 0, 2, 0).
@@ -2063,9 +2132,9 @@ python_class('sumd/dsl/commands.py', 'DSLCommandRegistry').
 python_method('DSLCommandRegistry', '__init__', 0, 1, 0).
 python_method('DSLCommandRegistry', 'register', 1, 4, 1).
 python_method('DSLCommandRegistry', 'get_command', 1, 1, 1).
-python_method('DSLCommandRegistry', 'list_commands', 1, 4, 3).
+python_method('DSLCommandRegistry', 'list_commands', 1, 5, 3).
 python_method('DSLCommandRegistry', 'list_categories', 0, 1, 2).
-python_method('DSLCommandRegistry', 'get_help', 1, 6, 4).
+python_method('DSLCommandRegistry', 'get_help', 1, 7, 4).
 python_class('sumd/dsl/engine.py', 'DSLContext').
 python_method('DSLContext', '__init__', 1, 2, 1).
 python_method('DSLContext', 'set_variable', 2, 1, 0).
@@ -2076,7 +2145,7 @@ python_class('sumd/dsl/engine.py', 'DSLEngine').
 python_method('DSLEngine', '__init__', 3, 2, 4).
 python_method('DSLEngine', 'execute', 2, 1, 1).
 python_method('DSLEngine', 'execute_text', 2, 3, 5).
-python_method('DSLEngine', '_is_natural_language', 1, 3, 4).
+python_method('DSLEngine', '_is_natural_language', 1, 4, 4).
 python_method('DSLEngine', 'process_natural_language', 1, 1, 1).
 python_method('DSLEngine', 'get_suggestions', 1, 1, 1).
 python_method('DSLEngine', '_execute_expression', 2, 15, 13).
@@ -2091,7 +2160,7 @@ python_method('DSLEngine', '_execute_pipeline', 2, 6, 4).
 python_method('DSLEngine', '_execute_list', 2, 2, 2).
 python_method('DSLEngine', '_execute_dict', 2, 2, 3).
 python_method('DSLEngine', '_execute_block', 2, 2, 1).
-python_method('DSLEngine', '_execute_sumd_command', 3, 4, 6).
+python_method('DSLEngine', '_execute_sumd_command', 3, 5, 6).
 python_method('DSLEngine', '_call_function', 3, 2, 2).
 python_method('DSLEngine', '_initialize_builtin_functions', 0, 1, 0).
 python_method('DSLEngine', '_builtin_print', 2, 1, 1).
@@ -2102,7 +2171,7 @@ python_method('DSLEngine', '_builtin_float', 2, 2, 2).
 python_method('DSLEngine', '_builtin_bool', 2, 2, 2).
 python_method('DSLEngine', '_builtin_type', 2, 2, 2).
 python_method('DSLEngine', '_builtin_write_file', 3, 1, 2).
-python_method('DSLEngine', '_builtin_list_files', 2, 1, 4).
+python_method('DSLEngine', '_builtin_list_files', 2, 3, 4).
 python_method('DSLEngine', '_builtin_cwd', 1, 1, 1).
 python_method('DSLEngine', '_builtin_cd', 2, 2, 3).
 python_method('DSLEngine', '_builtin_help', 1, 1, 1).
@@ -2128,7 +2197,7 @@ python_method('NLPIntegration', 'get_available_intents', 0, 1, 2).
 python_method('NLPIntegration', 'get_intent_examples', 1, 2, 0).
 python_class('sumd/dsl/nlp.py', 'SimpleNLPModel').
 python_method('SimpleNLPModel', '__init__', 0, 1, 0).
-python_method('SimpleNLPModel', 'predict_intent', 1, 3, 4).
+python_method('SimpleNLPModel', 'predict_intent', 1, 5, 4).
 python_method('SimpleNLPModel', 'extract_entities', 2, 4, 1).
 python_class('sumd/dsl/parser.py', 'DSLTokenType').
 python_class('sumd/dsl/parser.py', 'DSLToken').
@@ -2137,7 +2206,7 @@ python_method('DSLLexer', '__init__', 1, 1, 0).
 python_method('DSLLexer', 'tokenize', 0, 7, 8).
 python_class('sumd/dsl/parser.py', 'DSLExpressionType').
 python_class('sumd/dsl/parser.py', 'DSLExpression').
-python_method('DSLExpression', '__str__', 0, 8, 2).
+python_method('DSLExpression', '__str__', 0, 11, 2).
 python_class('sumd/dsl/parser.py', 'DSLParser').
 python_method('DSLParser', '__init__', 1, 1, 0).
 python_method('DSLParser', 'parse', 0, 6, 7).
@@ -2185,7 +2254,7 @@ python_class('sumd/dsl/schema_commands.py', 'SchemaCommandRegistry').
 python_method('SchemaCommandRegistry', '__init__', 1, 1, 2).
 python_method('SchemaCommandRegistry', '_register_commands', 0, 3, 0).
 python_method('SchemaCommandRegistry', 'get_command', 1, 3, 0).
-python_method('SchemaCommandRegistry', 'list_commands', 1, 2, 2).
+python_method('SchemaCommandRegistry', 'list_commands', 1, 4, 2).
 python_method('SchemaCommandRegistry', 'validate_command_call', 2, 8, 3).
 python_method('SchemaCommandRegistry', '_validate_parameter_type', 2, 2, 2).
 python_method('SchemaCommandRegistry', 'process_natural_language', 1, 1, 1).
@@ -2201,36 +2270,36 @@ python_method('SchemaBasedCommands', '_execute_nlp_command', 2, 4, 3).
 python_method('SchemaBasedCommands', '_execute_schema_command', 2, 4, 3).
 python_method('SchemaBasedCommands', '_cmd_sumd_scan', 1, 2, 3).
 python_method('SchemaBasedCommands', '_cmd_sumd_validate', 1, 2, 5).
-python_method('SchemaBasedCommands', '_cmd_sumd_info', 1, 2, 2).
+python_method('SchemaBasedCommands', '_cmd_sumd_info', 1, 3, 2).
 python_method('SchemaBasedCommands', '_cmd_cat', 1, 2, 2).
-python_method('SchemaBasedCommands', '_cmd_ls', 1, 2, 5).
+python_method('SchemaBasedCommands', '_cmd_ls', 1, 3, 5).
 python_method('SchemaBasedCommands', '_cmd_edit', 1, 2, 3).
-python_method('SchemaBasedCommands', '_cmd_find', 1, 2, 6).
+python_method('SchemaBasedCommands', '_cmd_find', 1, 4, 6).
 python_method('SchemaBasedCommands', '_cmd_grep', 1, 7, 8).
 python_method('SchemaBasedCommands', '_cmd_echo', 1, 1, 1).
 python_method('SchemaBasedCommands', '_cmd_pwd', 1, 1, 1).
 python_method('SchemaBasedCommands', '_cmd_cd', 1, 2, 4).
 python_method('SchemaBasedCommands', '_cmd_ask', 1, 5, 3).
 python_method('SchemaBasedCommands', '_cmd_summarize', 1, 2, 2).
-python_method('SchemaBasedCommands', '_cmd_analyze_sentiment', 1, 3, 6).
+python_method('SchemaBasedCommands', '_cmd_analyze_sentiment', 1, 8, 6).
 python_method('SchemaBasedCommands', '_cmd_schema_info', 1, 1, 1).
-python_method('SchemaBasedCommands', '_cmd_list_commands', 1, 3, 5).
-python_method('SchemaBasedCommands', '_cmd_command_help', 1, 3, 2).
+python_method('SchemaBasedCommands', '_cmd_list_commands', 1, 4, 5).
+python_method('SchemaBasedCommands', '_cmd_command_help', 1, 4, 2).
 python_class('sumd/dsl/shell.py', 'DSLShell').
-python_method('DSLShell', '__init__', 3, 4, 6).
+python_method('DSLShell', '__init__', 3, 2, 6).
 python_method('DSLShell', '_setup_readline', 0, 3, 6).
 python_method('DSLShell', '_completer', 2, 10, 5).
 python_method('DSLShell', '_register_commands', 0, 3, 2).
 python_method('DSLShell', 'run', 0, 9, 8).
 python_method('DSLShell', '_get_prompt', 0, 1, 0).
-python_method('DSLShell', '_handle_shell_command', 1, 13, 8).
+python_method('DSLShell', '_handle_shell_command', 1, 14, 8).
 python_method('DSLShell', '_execute_line', 1, 9, 6).
 python_method('DSLShell', 'execute_script', 1, 9, 12).
 python_method('DSLShell', 'execute_command', 1, 2, 3).
 python_class('sumd/dsl/shell.py', 'DSLShellServer').
 python_method('DSLShellServer', '__init__', 1, 2, 2).
 python_method('DSLShellServer', 'execute_dsl', 2, 4, 5).
-python_method('DSLShellServer', 'get_shell_info', 0, 1, 4).
+python_method('DSLShellServer', 'get_shell_info', 0, 2, 4).
 python_class('sumd/models.py', 'SectionType').
 python_class('sumd/models.py', 'Section').
 python_class('sumd/models.py', 'SUMDDocument').
@@ -2240,7 +2309,7 @@ python_method('SUMDParser', 'parse', 1, 1, 4).
 python_method('SUMDParser', 'parse_file', 1, 1, 2).
 python_method('SUMDParser', '_parse_header', 1, 9, 7).
 python_method('SUMDParser', '_parse_sections', 1, 6, 7).
-python_method('SUMDParser', 'validate', 1, 5, 1).
+python_method('SUMDParser', 'validate', 1, 6, 1).
 python_class('sumd/pipeline.py', 'RenderPipeline').
 python_method('RenderPipeline', '__init__', 2, 1, 1).
 python_method('RenderPipeline', '_collect', 0, 3, 23).
@@ -2249,27 +2318,27 @@ python_method('RenderPipeline', '_render_legacy_sections', 1, 1, 0).
 python_method('RenderPipeline', '_assemble', 2, 4, 5).
 python_method('RenderPipeline', 'run', 2, 2, 3).
 python_class('sumd/prolog_engine.py', 'Variable').
-python_method('Variable', '__init__', 1, 1, 0).
-python_method('Variable', '__repr__', 0, 1, 0).
-python_method('Variable', '__eq__', 1, 2, 1).
+python_method('Variable', '__init__', 1, 2, 0).
+python_method('Variable', '__repr__', 0, 2, 0).
+python_method('Variable', '__eq__', 1, 3, 1).
 python_method('Variable', '__hash__', 0, 1, 1).
 python_class('sumd/prolog_engine.py', 'Term').
-python_method('Term', '__init__', 1, 1, 1).
+python_method('Term', '__init__', 1, 2, 1).
 python_method('Term', '__repr__', 0, 2, 2).
 python_method('Term', '__eq__', 1, 3, 1).
 python_class('sumd/prolog_engine.py', 'Rule').
 python_method('Rule', '__init__', 2, 2, 0).
 python_method('Rule', '__repr__', 0, 2, 2).
 python_class('sumd/prolog_engine.py', 'PythonPrologDB').
-python_method('PythonPrologDB', '__init__', 0, 1, 0).
-python_method('PythonPrologDB', 'add_fact', 1, 1, 4).
+python_method('PythonPrologDB', '__init__', 0, 2, 0).
+python_method('PythonPrologDB', 'add_fact', 1, 2, 4).
 python_method('PythonPrologDB', 'add_rule', 2, 1, 2).
-python_method('PythonPrologDB', 'parse_and_load', 1, 4, 8).
+python_method('PythonPrologDB', 'parse_and_load', 1, 6, 8).
 python_class('sumd/prolog_engine.py', 'PythonPrologEngine').
-python_method('PythonPrologEngine', '__init__', 1, 1, 0).
+python_method('PythonPrologEngine', '__init__', 1, 2, 0).
 python_method('PythonPrologEngine', 'query', 1, 5, 7).
-python_method('PythonPrologEngine', '_find_vars', 1, 4, 5).
-python_method('PythonPrologEngine', '_resolve', 2, 10, 7).
+python_method('PythonPrologEngine', '_find_vars', 1, 1, 5).
+python_method('PythonPrologEngine', '_resolve', 2, 12, 7).
 python_class('sumd/prolog_engine.py', 'HybridPrologEngine').
 python_method('HybridPrologEngine', '__init__', 1, 2, 8).
 python_method('HybridPrologEngine', 'query', 1, 5, 6).
@@ -2285,9 +2354,9 @@ python_class('sumd/sections/base.py', 'Section').
 python_method('Section', 'should_render', 1, 1, 0).
 python_method('Section', 'render', 1, 1, 0).
 python_class('sumd/sections/call_graph.py', 'CallGraphSection').
-python_method('CallGraphSection', 'should_render', 1, 1, 2).
+python_method('CallGraphSection', 'should_render', 1, 2, 2).
 python_class('sumd/sections/code_analysis.py', 'CodeAnalysisSection').
-python_method('CodeAnalysisSection', 'should_render', 1, 1, 2).
+python_method('CodeAnalysisSection', 'should_render', 1, 3, 2).
 python_method('CodeAnalysisSection', 'render', 1, 1, 1).
 python_class('sumd/sections/configuration.py', 'ConfigurationSection').
 python_class('sumd/sections/dependencies.py', 'DependenciesSection').
@@ -2312,227 +2381,256 @@ python_class('sumd/sections/test_contracts.py', 'TestContractsSection').
 python_class('sumd/sections/workflows.py', 'WorkflowsSection').
 python_method('WorkflowsSection', 'should_render', 1, 2, 2).
 python_class('sumd/validator.py', 'CodeBlockIssue').
+python_class('sumd_logic_validator/sumd_logic_validator/engine.py', 'Variable').
+python_method('Variable', '__init__', 1, 2, 0).
+python_method('Variable', '__repr__', 0, 2, 0).
+python_method('Variable', '__eq__', 1, 3, 1).
+python_method('Variable', '__hash__', 0, 1, 1).
+python_class('sumd_logic_validator/sumd_logic_validator/engine.py', 'Term').
+python_method('Term', '__init__', 1, 2, 1).
+python_method('Term', '__repr__', 0, 2, 2).
+python_method('Term', '__eq__', 1, 3, 1).
+python_class('sumd_logic_validator/sumd_logic_validator/engine.py', 'Rule').
+python_method('Rule', '__init__', 2, 2, 0).
+python_method('Rule', '__repr__', 0, 2, 2).
+python_class('sumd_logic_validator/sumd_logic_validator/engine.py', 'PythonPrologDB').
+python_method('PythonPrologDB', '__init__', 0, 2, 0).
+python_method('PythonPrologDB', 'add_fact', 1, 2, 4).
+python_method('PythonPrologDB', 'add_rule', 2, 1, 2).
+python_method('PythonPrologDB', 'parse_and_load', 1, 7, 8).
+python_class('sumd_logic_validator/sumd_logic_validator/engine.py', 'PythonPrologEngine').
+python_method('PythonPrologEngine', '__init__', 1, 2, 0).
+python_method('PythonPrologEngine', 'query', 1, 5, 7).
+python_method('PythonPrologEngine', '_find_vars', 1, 1, 5).
+python_method('PythonPrologEngine', '_resolve', 2, 12, 7).
+python_class('sumd_logic_validator/sumd_logic_validator/engine.py', 'HybridPrologEngine').
+python_method('HybridPrologEngine', '__init__', 1, 2, 8).
+python_method('HybridPrologEngine', 'query', 1, 5, 6).
+python_method('HybridPrologEngine', '_query_pyswip', 1, 4, 8).
+python_method('HybridPrologEngine', '_query_subprocess', 1, 9, 10).
+python_method('HybridPrologEngine', '_query_python', 1, 1, 1).
+python_method('HybridPrologEngine', '_swipl_executable_exists', 0, 2, 1).
 python_class('tests/test_cli.py', 'TestValidateCommand').
-python_method('TestValidateCommand', 'test_valid_file_exits_zero', 1, 1, 3).
+python_method('TestValidateCommand', 'test_valid_file_exits_zero', 1, 2, 3).
 python_method('TestValidateCommand', 'test_valid_file_prints_ok', 1, 2, 4).
-python_method('TestValidateCommand', 'test_missing_file_exits_nonzero', 1, 1, 3).
+python_method('TestValidateCommand', 'test_missing_file_exits_nonzero', 1, 2, 3).
 python_class('tests/test_cli.py', 'TestInfoCommand').
-python_method('TestInfoCommand', 'test_info_runs', 1, 1, 3).
+python_method('TestInfoCommand', 'test_info_runs', 1, 2, 3).
 python_class('tests/test_cli.py', 'TestExportCommand').
-python_method('TestExportCommand', 'test_export_json', 1, 2, 6).
-python_method('TestExportCommand', 'test_export_to_output_file', 2, 1, 4).
-python_method('TestExportCommand', 'test_export_markdown', 1, 1, 3).
+python_method('TestExportCommand', 'test_export_json', 1, 4, 6).
+python_method('TestExportCommand', 'test_export_to_output_file', 2, 3, 4).
+python_method('TestExportCommand', 'test_export_markdown', 1, 2, 3).
 python_class('tests/test_cli.py', 'TestCliVersion').
-python_method('TestCliVersion', 'test_version_option', 0, 1, 2).
+python_method('TestCliVersion', 'test_version_option', 0, 3, 2).
 python_class('tests/test_cli.py', 'TestCliHelp').
-python_method('TestCliHelp', 'test_help', 0, 2, 3).
-python_method('TestCliHelp', 'test_validate_help', 0, 1, 2).
-python_method('TestCliHelp', 'test_export_help', 0, 1, 2).
-python_method('TestCliHelp', 'test_scan_help', 0, 1, 2).
+python_method('TestCliHelp', 'test_help', 0, 3, 3).
+python_method('TestCliHelp', 'test_validate_help', 0, 2, 2).
+python_method('TestCliHelp', 'test_export_help', 0, 2, 2).
+python_method('TestCliHelp', 'test_scan_help', 0, 2, 2).
 python_class('tests/test_cli.py', 'TestProjectDetection').
-python_method('TestProjectDetection', 'test_is_project_dir_accepts_language_marker', 3, 1, 4).
-python_method('TestProjectDetection', 'test_is_project_dir_accepts_glob_markers', 3, 1, 4).
-python_method('TestProjectDetection', 'test_empty_dir_is_not_project', 1, 1, 2).
-python_method('TestProjectDetection', 'test_detect_projects_finds_mixed_languages', 1, 1, 3).
-python_method('TestProjectDetection', 'test_detect_projects_non_recursive_skips_nested', 1, 1, 3).
-python_method('TestProjectDetection', 'test_detect_projects_recursive_finds_nested', 1, 1, 3).
+python_method('TestProjectDetection', 'test_is_project_dir_accepts_language_marker', 3, 3, 4).
+python_method('TestProjectDetection', 'test_is_project_dir_accepts_glob_markers', 3, 3, 4).
+python_method('TestProjectDetection', 'test_empty_dir_is_not_project', 1, 3, 2).
+python_method('TestProjectDetection', 'test_detect_projects_finds_mixed_languages', 1, 3, 3).
+python_method('TestProjectDetection', 'test_detect_projects_non_recursive_skips_nested', 1, 3, 3).
+python_method('TestProjectDetection', 'test_detect_projects_recursive_finds_nested', 1, 3, 3).
 python_class('tests/test_cli.py', 'TestNodeSpecFromPackageJson').
-python_method('TestNodeSpecFromPackageJson', 'test_framework_detection', 2, 1, 3).
-python_method('TestNodeSpecFromPackageJson', 'test_spec_uses_real_scripts_and_extras', 0, 1, 1).
-python_method('TestNodeSpecFromPackageJson', 'test_spec_falls_back_without_scripts', 0, 1, 1).
+python_method('TestNodeSpecFromPackageJson', 'test_framework_detection', 2, 2, 3).
+python_method('TestNodeSpecFromPackageJson', 'test_spec_uses_real_scripts_and_extras', 0, 8, 1).
+python_method('TestNodeSpecFromPackageJson', 'test_spec_falls_back_without_scripts', 0, 6, 1).
 python_class('tests/test_cli.py', 'TestGenerateDoqlLess').
 python_method('TestGenerateDoqlLess', '_pkg', 1, 1, 3).
-python_method('TestGenerateDoqlLess', 'test_fresh_generation_for_node_uses_real_scripts', 1, 1, 4).
-python_method('TestGenerateDoqlLess', 'test_force_regenerates_autogen_file_without_duplicating', 1, 1, 4).
-python_method('TestGenerateDoqlLess', 'test_force_preserves_user_authored_file', 1, 1, 5).
-python_method('TestGenerateDoqlLess', 'test_no_force_skips_existing', 1, 1, 4).
+python_method('TestGenerateDoqlLess', 'test_fresh_generation_for_node_uses_real_scripts', 1, 6, 4).
+python_method('TestGenerateDoqlLess', 'test_force_regenerates_autogen_file_without_duplicating', 1, 4, 4).
+python_method('TestGenerateDoqlLess', 'test_force_preserves_user_authored_file', 1, 5, 5).
+python_method('TestGenerateDoqlLess', 'test_no_force_skips_existing', 1, 3, 4).
 python_class('tests/test_cqrs_es.py', 'TestEventStore').
-python_method('TestEventStore', 'test_save_and_get_events', 0, 2, 7).
-python_method('TestEventStore', 'test_persistence', 0, 2, 7).
-python_method('TestEventStore', 'test_get_events_from_version', 0, 3, 8).
+python_method('TestEventStore', 'test_save_and_get_events', 0, 4, 7).
+python_method('TestEventStore', 'test_persistence', 0, 3, 7).
+python_method('TestEventStore', 'test_get_events_from_version', 0, 4, 8).
 python_class('tests/test_cqrs_es.py', 'TestSumdAggregate').
-python_method('TestSumdAggregate', 'test_create_document', 0, 1, 4).
-python_method('TestSumdAggregate', 'test_add_section', 0, 1, 5).
-python_method('TestSumdAggregate', 'test_remove_section', 0, 1, 6).
-python_method('TestSumdAggregate', 'test_load_from_history', 0, 3, 11).
+python_method('TestSumdAggregate', 'test_create_document', 0, 9, 4).
+python_method('TestSumdAggregate', 'test_add_section', 0, 6, 5).
+python_method('TestSumdAggregate', 'test_remove_section', 0, 3, 6).
+python_method('TestSumdAggregate', 'test_load_from_history', 0, 5, 11).
 python_class('tests/test_cqrs_es.py', 'TestCommandBus').
-python_method('TestCommandBus', 'test_dispatch_command', 0, 2, 10).
+python_method('TestCommandBus', 'test_dispatch_command', 0, 5, 10).
 python_class('tests/test_cqrs_es.py', 'TestQueryBus').
-python_method('TestQueryBus', 'test_dispatch_query', 0, 2, 11).
+python_method('TestQueryBus', 'test_dispatch_query', 0, 4, 11).
 python_class('tests/test_cqrs_es.py', 'TestEventSourcedRepository').
-python_method('TestEventSourcedRepository', 'test_save_and_get_aggregate', 0, 2, 8).
+python_method('TestEventSourcedRepository', 'test_save_and_get_aggregate', 0, 5, 8).
 python_class('tests/test_cqrs_es.py', 'TestIntegration').
-python_method('TestIntegration', 'test_full_workflow', 0, 2, 18).
+python_method('TestIntegration', 'test_full_workflow', 0, 9, 18).
 python_class('tests/test_dsl.py', 'TestDSLLexer').
-python_method('TestDSLLexer', 'test_tokenize_simple_command', 0, 1, 3).
-python_method('TestDSLLexer', 'test_tokenize_function_call', 0, 1, 3).
-python_method('TestDSLLexer', 'test_tokenize_arithmetic', 0, 1, 3).
-python_method('TestDSLLexer', 'test_tokenize_string_literals', 0, 1, 3).
-python_method('TestDSLLexer', 'test_tokenize_comments', 0, 1, 3).
+python_method('TestDSLLexer', 'test_tokenize_simple_command', 0, 7, 3).
+python_method('TestDSLLexer', 'test_tokenize_function_call', 0, 6, 3).
+python_method('TestDSLLexer', 'test_tokenize_arithmetic', 0, 7, 3).
+python_method('TestDSLLexer', 'test_tokenize_string_literals', 0, 4, 3).
+python_method('TestDSLLexer', 'test_tokenize_comments', 0, 4, 3).
 python_class('tests/test_dsl.py', 'TestDSLParser').
-python_method('TestDSLParser', 'test_parse_simple_command', 0, 1, 2).
-python_method('TestDSLParser', 'test_parse_function_call', 0, 1, 2).
-python_method('TestDSLParser', 'test_parse_arithmetic', 0, 1, 2).
-python_method('TestDSLParser', 'test_parse_assignment', 0, 1, 2).
-python_method('TestDSLParser', 'test_parse_pipeline', 0, 1, 2).
-python_method('TestDSLParser', 'test_parse_comparison', 0, 1, 2).
-python_method('TestDSLParser', 'test_parse_logical', 0, 1, 2).
+python_method('TestDSLParser', 'test_parse_simple_command', 0, 5, 2).
+python_method('TestDSLParser', 'test_parse_function_call', 0, 6, 2).
+python_method('TestDSLParser', 'test_parse_arithmetic', 0, 7, 2).
+python_method('TestDSLParser', 'test_parse_assignment', 0, 6, 2).
+python_method('TestDSLParser', 'test_parse_pipeline', 0, 5, 2).
+python_method('TestDSLParser', 'test_parse_comparison', 0, 6, 2).
+python_method('TestDSLParser', 'test_parse_logical', 0, 6, 2).
 python_class('tests/test_dsl.py', 'TestDSLEngine').
-python_method('TestDSLEngine', 'test_execute_literal', 0, 1, 4).
-python_method('TestDSLEngine', 'test_execute_arithmetic', 0, 1, 4).
-python_method('TestDSLEngine', 'test_execute_comparison', 0, 1, 4).
-python_method('TestDSLEngine', 'test_execute_logical', 0, 1, 4).
-python_method('TestDSLEngine', 'test_execute_assignment', 0, 1, 5).
-python_method('TestDSLEngine', 'test_execute_function_call', 0, 1, 4).
-python_method('TestDSLEngine', 'test_execute_pipeline', 0, 1, 5).
+python_method('TestDSLEngine', 'test_execute_literal', 0, 4, 4).
+python_method('TestDSLEngine', 'test_execute_arithmetic', 0, 4, 4).
+python_method('TestDSLEngine', 'test_execute_comparison', 0, 4, 4).
+python_method('TestDSLEngine', 'test_execute_logical', 0, 4, 4).
+python_method('TestDSLEngine', 'test_execute_assignment', 0, 3, 5).
+python_method('TestDSLEngine', 'test_execute_function_call', 0, 3, 4).
+python_method('TestDSLEngine', 'test_execute_pipeline', 0, 3, 5).
 python_class('tests/test_dsl.py', 'TestDSLCommandRegistry').
-python_method('TestDSLCommandRegistry', 'test_builtin_registry', 0, 1, 4).
-python_method('TestDSLCommandRegistry', 'test_command_categories', 0, 1, 4).
-python_method('TestDSLCommandRegistry', 'test_help_system', 0, 1, 2).
+python_method('TestDSLCommandRegistry', 'test_builtin_registry', 0, 7, 4).
+python_method('TestDSLCommandRegistry', 'test_command_categories', 0, 5, 4).
+python_method('TestDSLCommandRegistry', 'test_help_system', 0, 5, 2).
 python_class('tests/test_dsl.py', 'TestDSLShell').
-python_method('TestDSLShell', 'test_shell_initialization', 0, 2, 3).
-python_method('TestDSLShell', 'test_execute_command', 0, 2, 5).
-python_method('TestDSLShell', 'test_execute_script', 0, 2, 6).
+python_method('TestDSLShell', 'test_shell_initialization', 0, 4, 3).
+python_method('TestDSLShell', 'test_execute_command', 0, 5, 5).
+python_method('TestDSLShell', 'test_execute_script', 0, 3, 6).
 python_class('tests/test_dsl.py', 'TestDSLIntegration').
-python_method('TestDSLIntegration', 'test_dsl_with_sumd_commands', 0, 2, 6).
-python_method('TestDSLIntegration', 'test_complex_dsl_expressions', 0, 1, 4).
-python_method('TestDSLIntegration', 'test_error_handling', 0, 3, 6).
+python_method('TestDSLIntegration', 'test_dsl_with_sumd_commands', 0, 4, 6).
+python_method('TestDSLIntegration', 'test_complex_dsl_expressions', 0, 4, 4).
+python_method('TestDSLIntegration', 'test_error_handling', 0, 2, 6).
 python_class('tests/test_extractor.py', 'TestExtractPyproject').
-python_method('TestExtractPyproject', 'test_missing_file_returns_empty', 1, 1, 1).
-python_method('TestExtractPyproject', 'test_basic_fields', 1, 1, 2).
-python_method('TestExtractPyproject', 'test_dependencies_parsed', 1, 1, 2).
-python_method('TestExtractPyproject', 'test_dev_dependencies_from_optional', 1, 1, 2).
-python_method('TestExtractPyproject', 'test_fallback_name_is_dir_name', 1, 1, 2).
-python_method('TestExtractPyproject', 'test_corrupt_toml_returns_empty', 1, 1, 2).
+python_method('TestExtractPyproject', 'test_missing_file_returns_empty', 1, 2, 1).
+python_method('TestExtractPyproject', 'test_basic_fields', 1, 4, 2).
+python_method('TestExtractPyproject', 'test_dependencies_parsed', 1, 3, 2).
+python_method('TestExtractPyproject', 'test_dev_dependencies_from_optional', 1, 2, 2).
+python_method('TestExtractPyproject', 'test_fallback_name_is_dir_name', 1, 2, 2).
+python_method('TestExtractPyproject', 'test_corrupt_toml_returns_empty', 1, 2, 2).
 python_class('tests/test_extractor.py', 'TestExtractTaskfile').
-python_method('TestExtractTaskfile', 'test_missing_returns_empty', 1, 1, 1).
-python_method('TestExtractTaskfile', 'test_parses_tasks', 1, 1, 3).
-python_method('TestExtractTaskfile', 'test_task_without_desc', 1, 1, 2).
-python_method('TestExtractTaskfile', 'test_multiple_tasks', 1, 1, 2).
+python_method('TestExtractTaskfile', 'test_missing_returns_empty', 1, 2, 1).
+python_method('TestExtractTaskfile', 'test_parses_tasks', 1, 5, 3).
+python_method('TestExtractTaskfile', 'test_task_without_desc', 1, 2, 2).
+python_method('TestExtractTaskfile', 'test_multiple_tasks', 1, 4, 2).
 python_class('tests/test_extractor.py', 'TestExtractPyqual').
-python_method('TestExtractPyqual', 'test_missing_returns_empty', 1, 1, 1).
-python_method('TestExtractPyqual', 'test_parses_pipeline', 1, 1, 2).
-python_method('TestExtractPyqual', 'test_flat_format', 1, 1, 2).
+python_method('TestExtractPyqual', 'test_missing_returns_empty', 1, 2, 1).
+python_method('TestExtractPyqual', 'test_parses_pipeline', 1, 4, 2).
+python_method('TestExtractPyqual', 'test_flat_format', 1, 2, 2).
 python_class('tests/test_extractor.py', 'TestExtractPythonModules').
-python_method('TestExtractPythonModules', 'test_missing_pkg_dir_returns_empty', 1, 1, 1).
-python_method('TestExtractPythonModules', 'test_lists_modules', 1, 1, 3).
-python_method('TestExtractPythonModules', 'test_excludes_dunder_files', 1, 1, 3).
+python_method('TestExtractPythonModules', 'test_missing_pkg_dir_returns_empty', 1, 2, 1).
+python_method('TestExtractPythonModules', 'test_lists_modules', 1, 4, 3).
+python_method('TestExtractPythonModules', 'test_excludes_dunder_files', 1, 2, 3).
 python_class('tests/test_extractor.py', 'TestExtractReadmeTitle').
-python_method('TestExtractReadmeTitle', 'test_missing_returns_empty', 1, 1, 1).
-python_method('TestExtractReadmeTitle', 'test_extracts_h1', 1, 1, 2).
-python_method('TestExtractReadmeTitle', 'test_no_h1_returns_empty', 1, 1, 2).
-python_method('TestExtractReadmeTitle', 'test_first_h1_only', 1, 1, 2).
+python_method('TestExtractReadmeTitle', 'test_missing_returns_empty', 1, 2, 1).
+python_method('TestExtractReadmeTitle', 'test_extracts_h1', 1, 2, 2).
+python_method('TestExtractReadmeTitle', 'test_no_h1_returns_empty', 1, 2, 2).
+python_method('TestExtractReadmeTitle', 'test_first_h1_only', 1, 2, 2).
 python_class('tests/test_extractor.py', 'TestExtractEnv').
-python_method('TestExtractEnv', 'test_missing_returns_empty', 1, 1, 1).
-python_method('TestExtractEnv', 'test_parses_key_value', 1, 1, 2).
-python_method('TestExtractEnv', 'test_captures_preceding_comment', 1, 1, 2).
-python_method('TestExtractEnv', 'test_captures_inline_comment', 1, 1, 2).
-python_method('TestExtractEnv', 'test_empty_value_becomes_not_set', 1, 1, 2).
+python_method('TestExtractEnv', 'test_missing_returns_empty', 1, 2, 1).
+python_method('TestExtractEnv', 'test_parses_key_value', 1, 4, 2).
+python_method('TestExtractEnv', 'test_captures_preceding_comment', 1, 2, 2).
+python_method('TestExtractEnv', 'test_captures_inline_comment', 1, 3, 2).
+python_method('TestExtractEnv', 'test_empty_value_becomes_not_set', 1, 2, 2).
 python_class('tests/test_extractor.py', 'TestExtractGoal').
-python_method('TestExtractGoal', 'test_missing_returns_empty', 1, 1, 1).
-python_method('TestExtractGoal', 'test_parses_project_and_versioning', 1, 1, 2).
+python_method('TestExtractGoal', 'test_missing_returns_empty', 1, 2, 1).
+python_method('TestExtractGoal', 'test_parses_project_and_versioning', 1, 4, 2).
 python_class('tests/test_extractor.py', 'TestExtractProjectAnalysis').
-python_method('TestExtractProjectAnalysis', 'test_missing_project_dir_returns_empty', 1, 1, 1).
-python_method('TestExtractProjectAnalysis', 'test_loads_calls_toon_yaml', 1, 1, 4).
-python_method('TestExtractProjectAnalysis', 'test_refactor_mode_loads_extra_files', 1, 1, 3).
-python_method('TestExtractProjectAnalysis', 'test_missing_files_skipped', 1, 1, 2).
+python_method('TestExtractProjectAnalysis', 'test_missing_project_dir_returns_empty', 1, 2, 1).
+python_method('TestExtractProjectAnalysis', 'test_loads_calls_toon_yaml', 1, 4, 4).
+python_method('TestExtractProjectAnalysis', 'test_refactor_mode_loads_extra_files', 1, 6, 3).
+python_method('TestExtractProjectAnalysis', 'test_missing_files_skipped', 1, 2, 2).
 python_class('tests/test_extractor.py', 'TestExtractRequirements').
-python_method('TestExtractRequirements', 'test_no_requirements_returns_empty', 1, 1, 1).
-python_method('TestExtractRequirements', 'test_parses_requirements_txt', 1, 1, 3).
-python_method('TestExtractRequirements', 'test_ignores_comments_and_flags', 1, 1, 2).
+python_method('TestExtractRequirements', 'test_no_requirements_returns_empty', 1, 2, 1).
+python_method('TestExtractRequirements', 'test_parses_requirements_txt', 1, 3, 3).
+python_method('TestExtractRequirements', 'test_ignores_comments_and_flags', 1, 2, 2).
 python_class('tests/test_extractor.py', 'TestExtractMakefile').
-python_method('TestExtractMakefile', 'test_missing_returns_empty', 1, 1, 1).
-python_method('TestExtractMakefile', 'test_parses_targets', 1, 1, 2).
-python_method('TestExtractMakefile', 'test_comment_captured', 1, 1, 2).
+python_method('TestExtractMakefile', 'test_missing_returns_empty', 1, 2, 1).
+python_method('TestExtractMakefile', 'test_parses_targets', 1, 4, 2).
+python_method('TestExtractMakefile', 'test_comment_captured', 1, 2, 2).
 python_class('tests/test_mcp_cqrs_dsl.py', 'TestMCPCQRSCommands').
-python_method('TestMCPCQRSCommands', 'test_execute_command', 0, 1, 6).
-python_method('TestMCPCQRSCommands', 'test_execute_command_error', 0, 1, 4).
-python_method('TestMCPCQRSCommands', 'test_execute_query', 0, 1, 5).
-python_method('TestMCPCQRSCommands', 'test_get_events', 0, 1, 4).
-python_method('TestMCPCQRSCommands', 'test_get_aggregate', 0, 1, 5).
+python_method('TestMCPCQRSCommands', 'test_execute_command', 0, 6, 6).
+python_method('TestMCPCQRSCommands', 'test_execute_command_error', 0, 3, 4).
+python_method('TestMCPCQRSCommands', 'test_execute_query', 0, 4, 5).
+python_method('TestMCPCQRSCommands', 'test_get_events', 0, 7, 4).
+python_method('TestMCPCQRSCommands', 'test_get_aggregate', 0, 5, 5).
 python_class('tests/test_mcp_cqrs_dsl.py', 'TestMCPDSLCommands').
-python_method('TestMCPDSLCommands', 'test_execute_dsl', 0, 1, 5).
-python_method('TestMCPDSLCommands', 'test_dsl_shell_info', 0, 1, 4).
+python_method('TestMCPDSLCommands', 'test_execute_dsl', 0, 5, 5).
+python_method('TestMCPDSLCommands', 'test_dsl_shell_info', 0, 7, 4).
 python_class('tests/test_mcp_cqrs_dsl.py', 'TestMCPIntegration').
-python_method('TestMCPIntegration', 'test_full_cqrs_workflow_via_mcp', 0, 3, 17).
-python_method('TestMCPIntegration', 'test_dsl_integration_via_mcp', 0, 2, 7).
+python_method('TestMCPIntegration', 'test_full_cqrs_workflow_via_mcp', 0, 5, 17).
+python_method('TestMCPIntegration', 'test_dsl_integration_via_mcp', 0, 6, 7).
 python_class('tests/test_mcp_cqrs_dsl.py', 'TestMCPErrorHandling').
-python_method('TestMCPErrorHandling', 'test_unknown_command_type', 0, 1, 2).
-python_method('TestMCPErrorHandling', 'test_unknown_query_type', 0, 1, 2).
-python_method('TestMCPErrorHandling', 'test_aggregate_not_found', 0, 1, 3).
+python_method('TestMCPErrorHandling', 'test_unknown_command_type', 0, 3, 2).
+python_method('TestMCPErrorHandling', 'test_unknown_query_type', 0, 3, 2).
+python_method('TestMCPErrorHandling', 'test_aggregate_not_found', 0, 3, 3).
 python_class('tests/test_mcp_server.py', 'TestDocToDict').
-python_method('TestDocToDict', 'test_has_required_keys', 1, 1, 3).
-python_method('TestDocToDict', 'test_section_has_fields', 1, 2, 2).
+python_method('TestDocToDict', 'test_has_required_keys', 1, 5, 3).
+python_method('TestDocToDict', 'test_section_has_fields', 1, 6, 2).
 python_class('tests/test_mcp_server.py', 'TestResolvePath').
-python_method('TestResolvePath', 'test_absolute_path_unchanged', 1, 1, 2).
-python_method('TestResolvePath', 'test_relative_resolves_from_cwd', 0, 1, 2).
+python_method('TestResolvePath', 'test_absolute_path_unchanged', 1, 2, 2).
+python_method('TestResolvePath', 'test_relative_resolves_from_cwd', 0, 3, 2).
 python_class('tests/test_mcp_server.py', 'TestListTools').
-python_method('TestListTools', 'test_returns_thirteen_tools', 0, 1, 3).
-python_method('TestListTools', 'test_tool_names', 0, 1, 2).
-python_method('TestListTools', 'test_each_tool_has_input_schema', 0, 2, 2).
+python_method('TestListTools', 'test_returns_thirteen_tools', 0, 2, 3).
+python_method('TestListTools', 'test_tool_names', 0, 3, 2).
+python_method('TestListTools', 'test_each_tool_has_input_schema', 0, 3, 2).
 python_class('tests/test_mcp_server.py', 'TestParseSumd').
-python_method('TestParseSumd', 'test_returns_json', 1, 1, 4).
-python_method('TestParseSumd', 'test_missing_file_returns_error', 1, 1, 3).
+python_method('TestParseSumd', 'test_returns_json', 1, 3, 4).
+python_method('TestParseSumd', 'test_missing_file_returns_error', 1, 2, 3).
 python_class('tests/test_mcp_server.py', 'TestValidateSumd').
-python_method('TestValidateSumd', 'test_valid_file', 1, 1, 4).
-python_method('TestValidateSumd', 'test_missing_file_returns_error', 1, 1, 3).
+python_method('TestValidateSumd', 'test_valid_file', 1, 3, 4).
+python_method('TestValidateSumd', 'test_missing_file_returns_error', 1, 2, 3).
 python_class('tests/test_mcp_server.py', 'TestExportSumd').
-python_method('TestExportSumd', 'test_export_json', 1, 1, 3).
-python_method('TestExportSumd', 'test_export_markdown', 1, 1, 2).
-python_method('TestExportSumd', 'test_export_to_file', 2, 1, 3).
+python_method('TestExportSumd', 'test_export_json', 1, 2, 3).
+python_method('TestExportSumd', 'test_export_markdown', 1, 2, 2).
+python_method('TestExportSumd', 'test_export_to_file', 2, 3, 3).
 python_class('tests/test_mcp_server.py', 'TestListSections').
-python_method('TestListSections', 'test_returns_list', 1, 1, 5).
-python_method('TestListSections', 'test_section_has_name', 1, 1, 4).
+python_method('TestListSections', 'test_returns_list', 1, 3, 5).
+python_method('TestListSections', 'test_section_has_name', 1, 2, 4).
 python_class('tests/test_mcp_server.py', 'TestGetSection').
-python_method('TestGetSection', 'test_found_section', 1, 1, 4).
-python_method('TestGetSection', 'test_missing_section', 1, 1, 3).
+python_method('TestGetSection', 'test_found_section', 1, 2, 4).
+python_method('TestGetSection', 'test_missing_section', 1, 2, 3).
 python_class('tests/test_mcp_server.py', 'TestInfoSumd').
-python_method('TestInfoSumd', 'test_returns_info', 1, 1, 4).
+python_method('TestInfoSumd', 'test_returns_info', 1, 4, 4).
 python_class('tests/test_mcp_server.py', 'TestGenerateSumd').
-python_method('TestGenerateSumd', 'test_generate_content', 0, 1, 1).
-python_method('TestGenerateSumd', 'test_generate_to_file', 1, 1, 3).
+python_method('TestGenerateSumd', 'test_generate_content', 0, 3, 1).
+python_method('TestGenerateSumd', 'test_generate_to_file', 1, 3, 3).
 python_class('tests/test_mcp_server.py', 'TestUnknownTool').
-python_method('TestUnknownTool', 'test_unknown_returns_error', 0, 1, 2).
+python_method('TestUnknownTool', 'test_unknown_returns_error', 0, 2, 2).
 python_class('tests/test_sections.py', 'TestMetadataSection').
-python_method('TestMetadataSection', 'test_always_renders', 0, 1, 3).
-python_method('TestMetadataSection', 'test_contains_name_and_version', 0, 1, 4).
-python_method('TestMetadataSection', 'test_contains_metadata_header', 0, 1, 3).
-python_method('TestMetadataSection', 'test_optional_fields_omitted_when_empty', 0, 1, 4).
+python_method('TestMetadataSection', 'test_always_renders', 0, 2, 3).
+python_method('TestMetadataSection', 'test_contains_name_and_version', 0, 3, 4).
+python_method('TestMetadataSection', 'test_contains_metadata_header', 0, 2, 3).
+python_method('TestMetadataSection', 'test_optional_fields_omitted_when_empty', 0, 2, 4).
 python_class('tests/test_sections.py', 'TestArchitectureSection').
-python_method('TestArchitectureSection', 'test_always_renders', 0, 1, 3).
-python_method('TestArchitectureSection', 'test_header_present', 0, 1, 4).
-python_method('TestArchitectureSection', 'test_modules_listed', 0, 1, 4).
-python_method('TestArchitectureSection', 'test_no_modules_no_source_modules_section', 0, 1, 4).
+python_method('TestArchitectureSection', 'test_always_renders', 0, 2, 3).
+python_method('TestArchitectureSection', 'test_header_present', 0, 2, 4).
+python_method('TestArchitectureSection', 'test_modules_listed', 0, 3, 4).
+python_method('TestArchitectureSection', 'test_no_modules_no_source_modules_section', 0, 2, 4).
 python_class('tests/test_sections.py', 'TestDependenciesSection').
-python_method('TestDependenciesSection', 'test_renders_when_deps_present', 0, 1, 3).
-python_method('TestDependenciesSection', 'test_runtime_deps_listed', 0, 1, 4).
-python_method('TestDependenciesSection', 'test_no_deps_shows_fallback', 0, 1, 4).
-python_method('TestDependenciesSection', 'test_dev_deps_section', 0, 1, 4).
+python_method('TestDependenciesSection', 'test_renders_when_deps_present', 0, 2, 3).
+python_method('TestDependenciesSection', 'test_runtime_deps_listed', 0, 3, 4).
+python_method('TestDependenciesSection', 'test_no_deps_shows_fallback', 0, 2, 4).
+python_method('TestDependenciesSection', 'test_dev_deps_section', 0, 3, 4).
 python_class('tests/test_sections.py', 'TestWorkflowsSection').
-python_method('TestWorkflowsSection', 'test_no_render_when_empty', 0, 1, 3).
-python_method('TestWorkflowsSection', 'test_renders_with_tasks', 0, 1, 5).
-python_method('TestWorkflowsSection', 'test_header_present', 0, 1, 3).
+python_method('TestWorkflowsSection', 'test_no_render_when_empty', 0, 2, 3).
+python_method('TestWorkflowsSection', 'test_renders_with_tasks', 0, 3, 5).
+python_method('TestWorkflowsSection', 'test_header_present', 0, 2, 3).
 python_class('tests/test_sections.py', 'TestQualitySection').
-python_method('TestQualitySection', 'test_no_render_when_empty', 0, 1, 3).
-python_method('TestQualitySection', 'test_renders_with_pyqual', 0, 1, 3).
-python_method('TestQualitySection', 'test_pipeline_name_in_output', 0, 1, 4).
+python_method('TestQualitySection', 'test_no_render_when_empty', 0, 2, 3).
+python_method('TestQualitySection', 'test_renders_with_pyqual', 0, 2, 3).
+python_method('TestQualitySection', 'test_pipeline_name_in_output', 0, 2, 4).
 python_class('tests/test_sections.py', 'TestEnvironmentSection').
-python_method('TestEnvironmentSection', 'test_no_render_when_empty', 0, 1, 3).
-python_method('TestEnvironmentSection', 'test_renders_with_vars', 0, 1, 5).
+python_method('TestEnvironmentSection', 'test_no_render_when_empty', 0, 2, 3).
+python_method('TestEnvironmentSection', 'test_renders_with_vars', 0, 3, 5).
 python_class('tests/test_sections.py', 'TestCallGraphSection').
-python_method('TestCallGraphSection', 'test_no_render_without_calls', 0, 1, 3).
-python_method('TestCallGraphSection', 'test_no_render_without_calls_file', 0, 1, 3).
-python_method('TestCallGraphSection', 'test_renders_with_calls_file', 0, 1, 5).
+python_method('TestCallGraphSection', 'test_no_render_without_calls', 0, 2, 3).
+python_method('TestCallGraphSection', 'test_no_render_without_calls_file', 0, 2, 3).
+python_method('TestCallGraphSection', 'test_renders_with_calls_file', 0, 3, 5).
 python_class('tests/test_sections.py', 'TestCodeAnalysisSection').
-python_method('TestCodeAnalysisSection', 'test_no_render_when_only_calls', 0, 1, 3).
-python_method('TestCodeAnalysisSection', 'test_renders_with_map', 0, 1, 3).
+python_method('TestCodeAnalysisSection', 'test_no_render_when_only_calls', 0, 2, 3).
+python_method('TestCodeAnalysisSection', 'test_renders_with_map', 0, 2, 3).
 python_class('tests/test_sections.py', 'TestRefactorAnalysisSection').
-python_method('TestRefactorAnalysisSection', 'test_no_render_when_empty', 0, 1, 3).
-python_method('TestRefactorAnalysisSection', 'test_renders_with_analysis_files', 0, 1, 5).
-python_method('TestRefactorAnalysisSection', 'test_map_toon_excluded', 0, 1, 4).
+python_method('TestRefactorAnalysisSection', 'test_no_render_when_empty', 0, 2, 3).
+python_method('TestRefactorAnalysisSection', 'test_renders_with_analysis_files', 0, 5, 5).
+python_method('TestRefactorAnalysisSection', 'test_map_toon_excluded', 0, 2, 4).
 python_class('tests/test_sections.py', 'TestSourceSnippetsSection').
-python_method('TestSourceSnippetsSection', 'test_no_render_when_empty', 0, 1, 3).
-python_method('TestSourceSnippetsSection', 'test_renders_with_snippets', 0, 1, 5).
+python_method('TestSourceSnippetsSection', 'test_no_render_when_empty', 0, 2, 3).
+python_method('TestSourceSnippetsSection', 'test_renders_with_snippets', 0, 4, 5).
 
 % ── Dependencies ─────────────────────────────────────────
 
@@ -2600,7 +2698,7 @@ testql_scenario('sumd-cli.testql.toon.yaml', 'cli').
 
 % ── Semantic Facts from SUMD.md ──────────────────────────
 sumd_declared_file('app.doql.less', 'doql').
-sumd_declared_file('sumd/rules.pl', 'rules').
+sumd_declared_file('sumd/rules.pl', 'file').
 sumd_declared_file('.swop/manifests/core/commands.yml', 'swop').
 sumd_declared_file('.swop/manifests/core/queries.yml', 'swop').
 sumd_declared_file('.swop/manifests/core/events.yml', 'swop').
@@ -2709,52 +2807,52 @@ sumd_workflow_step('analyze', 2, 'sumd analyze . --tools code2llm,redup,vallm').
 ### `sumd.cli` (`sumd/cli.py`)
 
 ```python
-def _detect_project_type(proj_dir)  # CC=7, fan=4
-def _render_doql_boilerplate(project_name, spec, extra_workflows)  # CC=3, fan=3
-def _node_framework(deps)  # CC=4, fan=0
-def _node_spec_from_package_json(pkg_json)  # CC=6, fan=5
+def _detect_project_type(proj_dir)  # CC=8, fan=4
+def _render_doql_boilerplate(project_name, spec, extra_workflows)  # CC=4, fan=3
+def _node_framework(deps)  # CC=5, fan=0
+def _node_spec_from_package_json(pkg_json)  # CC=7, fan=5
 def _build_doql_spec(proj_dir, project_type)  # CC=3, fan=4
 def _generate_doql_less(proj_dir, project_name, version, force, project_type)  # CC=7, fan=8
 def cli()  # CC=1, fan=2
 def validate(file)  # CC=4, fan=8
-def export(file, format, output)  # CC=7, fan=11
+def export(file, format, output)  # CC=8, fan=11
 def info(file)  # CC=3, fan=7
 def generate(file, format, output)  # CC=8, fan=15
 def extract(file, section)  # CC=5, fan=8
-def _is_project_dir(d)  # CC=6, fan=4
+def _is_project_dir(d)  # CC=8, fan=4
 def _walk_projects(path, projects, max_depth, depth)  # CC=10, fan=7 ⚠
 def _detect_projects(workspace, max_depth)  # CC=1, fan=1
 def _ensure_venv(tools_dir, venv_dir, tool_list)  # CC=4, fan=4
-def _tool_bin(bin_dir, name)  # CC=1, fan=1
-def _run_one_tool(tool, bin_dir, proj_dir, project_output)  # CC=2, fan=5
+def _tool_bin(bin_dir, name)  # CC=2, fan=1
+def _run_one_tool(tool, bin_dir, proj_dir, project_output)  # CC=3, fan=5
 def _run_analysis_tools(proj_dir, tool_list, skip_tools)  # CC=5, fan=5
-def _export_sumd_json(proj_dir, doc)  # CC=1, fan=2
-def _render_write_validate(proj_dir, sumd_path, raw, profile)  # CC=1, fan=5
-def _echo_scan_result(proj_dir, doc, sources, cb_warnings)  # CC=1, fan=3
-def _maybe_generate_doql(proj_dir, fix)  # CC=6, fan=6
+def _export_sumd_json(proj_dir, doc)  # CC=2, fan=2
+def _render_write_validate(proj_dir, sumd_path, raw, profile)  # CC=5, fan=5
+def _echo_scan_result(proj_dir, doc, sources, cb_warnings)  # CC=2, fan=3
+def _maybe_generate_doql(proj_dir, fix)  # CC=7, fan=6
 def _maybe_generate_testql(proj_dir)  # CC=5, fan=5
-def _finalize_scan(proj_dir, doc, sources, cb_warnings, export_json, run_analyze, tool_list, doql_sync, sumd_path)  # CC=8, fan=9
-def _scan_one_project(proj_dir, fix, raw, export_json, run_analyze, tool_list, parser_inst, profile, generate_doql, doql_sync, generate_testql)  # CC=8, fan=9
-def scan(workspace, export_json, report, fix, raw, analyze, tools, profile, depth, recursive, generate_doql, doql_sync, generate_testql, workspace_mode)  # CC=9, fan=18
-def lint(files, workspace, as_json, strict)  # CC=7, fan=13
-def _lint_collect_paths(files, workspace)  # CC=4, fan=7
-def _lint_print_result(path, r)  # CC=4, fan=3
-def _setup_tools_venv(venv_dir, tool_list, force)  # CC=6, fan=6
-def _run_code2llm_formats(bin_dir, project, project_output)  # CC=4, fan=4
+def _finalize_scan(proj_dir, doc, sources, cb_warnings, export_json, run_analyze, tool_list, doql_sync, sumd_path)  # CC=9, fan=9
+def _scan_one_project(proj_dir, fix, raw, export_json, run_analyze, tool_list, parser_inst, profile, generate_doql, doql_sync, generate_testql)  # CC=10, fan=9 ⚠
+def scan(workspace, export_json, report, fix, raw, analyze, tools, profile, depth, recursive, generate_doql, doql_sync, generate_testql, workspace_mode)  # CC=14, fan=18 ⚠
+def lint(files, workspace, as_json, strict)  # CC=12, fan=13 ⚠
+def _lint_collect_paths(files, workspace)  # CC=6, fan=7
+def _lint_print_result(path, r)  # CC=10, fan=3 ⚠
+def _setup_tools_venv(venv_dir, tool_list, force)  # CC=7, fan=6
+def _run_code2llm_formats(bin_dir, project, project_output)  # CC=5, fan=4
 def _run_tool_subprocess(bin_dir, tool, cmd_args)  # CC=3, fan=4
-def analyze(project, tools, force)  # CC=8, fan=17
+def analyze(project, tools, force)  # CC=11, fan=17 ⚠
 def _api_scenario_template(name, scenario_type, endpoints_block, base_path)  # CC=1, fan=3
 def _scaffold_write(path, content, force, generated, skipped)  # CC=3, fan=3
-def _scaffold_smoke_scenario(paths, base, out_dir, force, generated, skipped)  # CC=1, fan=5
-def _scaffold_crud_scenarios(groups, base, out_dir, force, generated, skipped)  # CC=4, fan=7
+def _scaffold_smoke_scenario(paths, base, out_dir, force, generated, skipped)  # CC=6, fan=5
+def _scaffold_crud_scenarios(groups, base, out_dir, force, generated, skipped)  # CC=5, fan=7
 def _scaffold_from_openapi(spec, out_dir, scenario_type, force, generated, skipped)  # CC=7, fan=12
 def _scaffold_generic(out_dir, force, generated, skipped)  # CC=1, fan=3
-def scaffold(project, output, force, scenario_type)  # CC=8, fan=18
-def map_cmd(project, output, force, stdout)  # CC=6, fan=12
-def dsl(directory, command, script, interactive)  # CC=10, fan=13 ⚠
-def cqrs_command(directory, command_type, aggregate_id, data)  # CC=5, fan=19
-def nlp_command(text, directory, execute, verbose)  # CC=8, fan=13
-def main()  # CC=7, fan=3
+def scaffold(project, output, force, scenario_type)  # CC=9, fan=18
+def map_cmd(project, output, force, stdout)  # CC=7, fan=12
+def dsl(directory, command, script, interactive)  # CC=1, fan=13
+def cqrs_command(directory, command_type, aggregate_id, data)  # CC=1, fan=19
+def nlp_command(text, directory, execute, verbose)  # CC=1, fan=13
+def main()  # CC=10, fan=3 ⚠
 def main_sumr()  # CC=3, fan=2
 ```
 
@@ -2769,27 +2867,27 @@ def _parse_openapi_endpoints(paths)  # CC=8, fan=7
 def extract_openapi(proj_dir)  # CC=5, fan=7
 def _parse_doql_entities(content)  # CC=4, fan=5
 def _parse_doql_interfaces(content)  # CC=3, fan=7
-def _parse_doql_workflows(content)  # CC=3, fan=10
-def _parse_doql_content(content)  # CC=5, fan=14
+def _parse_doql_workflows(content)  # CC=7, fan=10
+def _parse_doql_content(content)  # CC=6, fan=14
 def extract_doql(proj_dir)  # CC=3, fan=3
-def extract_pyqual(proj_dir)  # CC=3, fan=5
-def extract_python_modules(proj_dir, pkg_name)  # CC=2, fan=4
+def extract_pyqual(proj_dir)  # CC=5, fan=5
+def extract_python_modules(proj_dir, pkg_name)  # CC=4, fan=4
 def extract_readme_title(proj_dir)  # CC=4, fan=5
 def extract_requirements(proj_dir)  # CC=7, fan=7
 def extract_makefile(proj_dir)  # CC=7, fan=9
 def extract_goal(proj_dir)  # CC=3, fan=7
-def extract_env(proj_dir)  # CC=8, fan=9
+def extract_env(proj_dir)  # CC=10, fan=9 ⚠
 def _parse_dockerfile_line(line, parsed)  # CC=8, fan=6
-def extract_dockerfile(proj_dir)  # CC=5, fan=5
-def extract_docker_compose(proj_dir)  # CC=9, fan=12
+def extract_dockerfile(proj_dir)  # CC=6, fan=5
+def extract_docker_compose(proj_dir)  # CC=10, fan=12 ⚠
 def extract_package_json(proj_dir)  # CC=3, fan=6
 def _lang_of(path)  # CC=1, fan=2
 def _fan_out(func_node)  # CC=5, fan=5
 def _cc_estimate(func_node)  # CC=4, fan=4
-def _try_radon_cc(src)  # CC=2, fan=1
-def _analyse_py_top_funcs(tree, radon_cc)  # CC=4, fan=6
-def _analyse_class_methods(node, radon_cc)  # CC=4, fan=6
-def _analyse_py_top_classes(tree, radon_cc)  # CC=4, fan=7
+def _try_radon_cc(src)  # CC=3, fan=1
+def _analyse_py_top_funcs(tree, radon_cc)  # CC=5, fan=6
+def _analyse_class_methods(node, radon_cc)  # CC=6, fan=6
+def _analyse_py_top_classes(tree, radon_cc)  # CC=5, fan=7
 def _analyse_py_module(path)  # CC=2, fan=6
 def _parse_ignore_file(ignore_path)  # CC=6, fan=7
 def _path_matches_pattern(path, pattern)  # CC=18, fan=4 ⚠
@@ -2797,51 +2895,51 @@ def _is_path_ignored(path, proj_dir, ignore_patterns)  # CC=7, fan=3
 def _is_map_ignored_path(p)  # CC=4, fan=1
 def _collect_map_files(proj_dir)  # CC=8, fan=12
 def _render_map_detail(proj_dir, modules)  # CC=5, fan=3
-def _map_cc_stats(all_funcs)  # CC=6, fan=8
-def _render_py_module_detail(rel, info, a)  # CC=5, fan=3
-def generate_map_toon(proj_dir)  # CC=3, fan=13
+def _map_cc_stats(all_funcs)  # CC=12, fan=8 ⚠
+def _render_py_module_detail(rel, info, a)  # CC=7, fan=3
+def generate_map_toon(proj_dir)  # CC=5, fan=13
 def generate_project_logic(proj_dir)  # CC=20, fan=18 ⚠
-def _extract_sumd_semantic_facts(proj_dir)  # CC=14, fan=10 ⚠
-def required_tools_for_profile(profile)  # CC=1, fan=0
+def _extract_sumd_semantic_facts(proj_dir)  # CC=15, fan=10 ⚠
+def required_tools_for_profile(profile)  # CC=4, fan=0
 def extract_source_snippets(proj_dir, pkg_name)  # CC=6, fan=11
 def extract_swop(proj_dir)  # CC=9, fan=8
-def extract_project_analysis(proj_dir, refactor)  # CC=5, fan=7
+def extract_project_analysis(proj_dir, refactor)  # CC=6, fan=7
 ```
 
 ### `sumd.prolog_engine` (`sumd/prolog_engine.py`)
 
 ```python
 def is_variable(x)  # CC=6, fan=4
-def to_term(x)  # CC=10, fan=14 ⚠
-def _split_body_terms(body_str)  # CC=11, fan=3 ⚠
+def to_term(x)  # CC=13, fan=14 ⚠
+def _split_body_terms(body_str)  # CC=13, fan=3 ⚠
 def unify(x, y, subst)  # CC=10, fan=7 ⚠
 def resolve_val(x, subst)  # CC=3, fan=1
-def deep_resolve(x, subst)  # CC=2, fan=4
+def deep_resolve(x, subst)  # CC=3, fan=4
 def extend_subst(v, val, subst)  # CC=2, fan=2
-def occurs_check(v, val, subst)  # CC=3, fan=4
-def rename_variables(rule, suffix)  # CC=4, fan=5
+def occurs_check(v, val, subst)  # CC=4, fan=4
+def rename_variables(rule, suffix)  # CC=2, fan=5
 class Variable:  # Represents a logical variable in our pure Python engine.
-    def __init__(name)  # CC=1
-    def __repr__()  # CC=1
-    def __eq__(other)  # CC=2
+    def __init__(name)  # CC=2
+    def __repr__()  # CC=2
+    def __eq__(other)  # CC=3
     def __hash__()  # CC=1
 class Term:  # Represents a Prolog term (e.g. parent(john, mary)).
-    def __init__(op)  # CC=1
+    def __init__(op)  # CC=2
     def __repr__()  # CC=2
     def __eq__(other)  # CC=3
 class Rule:  # Represents a Prolog rule Head :- Body.
     def __init__(head, body)  # CC=2
     def __repr__()  # CC=2
 class PythonPrologDB:  # In-memory Prolog database for pure Python execution.
-    def __init__()  # CC=1
-    def add_fact(op)  # CC=1
+    def __init__()  # CC=2
+    def add_fact(op)  # CC=2
     def add_rule(head, body)  # CC=1
-    def parse_and_load(prolog_text)  # CC=4
+    def parse_and_load(prolog_text)  # CC=6
 class PythonPrologEngine:  # SLD Resolution Logic Interpreter.
-    def __init__(db)  # CC=1
+    def __init__(db)  # CC=2
     def query(goal_str)  # CC=5
-    def _find_vars(term)  # CC=4
-    def _resolve(goals, subst)  # CC=10 ⚠
+    def _find_vars(term)  # CC=1
+    def _resolve(goals, subst)  # CC=12 ⚠
 class HybridPrologEngine:  # Hybrid Logic Engine delegating queries based on backend avai
     def __init__(prolog_file_path)  # CC=2
     def query(query_str)  # CC=5
@@ -2854,24 +2952,24 @@ class HybridPrologEngine:  # Hybrid Logic Engine delegating queries based on bac
 ### `sumd.mcp_server` (`sumd/mcp_server.py`)
 
 ```python
-def _doc_to_dict(doc)  # CC=1, fan=0
+def _doc_to_dict(doc)  # CC=2, fan=0
 def _resolve_path(path)  # CC=2, fan=3
 def list_tools()  # CC=1, fan=2
 def _tool_parse_sumd(arguments)  # CC=1, fan=5
 def _tool_validate_sumd(arguments)  # CC=1, fan=7
 def _tool_export_sumd(arguments)  # CC=5, fan=8
-def _tool_list_sections(arguments)  # CC=1, fan=4
-def _tool_get_section(arguments)  # CC=3, fan=6
-def _tool_info_sumd(arguments)  # CC=1, fan=5
+def _tool_list_sections(arguments)  # CC=2, fan=4
+def _tool_get_section(arguments)  # CC=5, fan=6
+def _tool_info_sumd(arguments)  # CC=2, fan=5
 def _tool_generate_sumd(arguments)  # CC=5, fan=5
 def _tool_execute_command(arguments)  # CC=3, fan=6
 def _tool_execute_query(arguments)  # CC=3, fan=5
-def _tool_get_events(arguments)  # CC=2, fan=6
+def _tool_get_events(arguments)  # CC=3, fan=6
 def _tool_get_aggregate(arguments)  # CC=3, fan=4
 def _tool_execute_dsl(arguments)  # CC=3, fan=5
 def _tool_dsl_shell_info(arguments)  # CC=2, fan=3
 def call_tool(name, arguments)  # CC=3, fan=4
-def main()  # CC=2, fan=3
+def main()  # CC=1, fan=3
 ```
 
 ### `sumd.pipeline` (`sumd/pipeline.py`)
@@ -2881,7 +2979,7 @@ def _refresh_map_toon(proj_dir)  # CC=5, fan=4
 def _find_tools_bin_dir(proj_dir)  # CC=3, fan=1
 def _run_tool_if_present(bin_dir, name, args, proj_dir)  # CC=3, fan=3
 def _refresh_analysis_files(proj_dir, profile)  # CC=7, fan=5
-def _collect_tool_sources(pyproj, reqs, tasks, makefile, scenarios)  # CC=6, fan=3
+def _collect_tool_sources(pyproj, reqs, tasks, makefile, scenarios)  # CC=7, fan=3
 def _doql_sources(doql)  # CC=4, fan=1
 def _collect_pkg_sources(pyproj, reqs, tasks, makefile, scenarios, openapi, doql, pyqual, goal, env_vars)  # CC=5, fan=6
 def _collect_infra_sources(dockerfile, compose, pkg_json, modules, project_analysis)  # CC=6, fan=3
@@ -2898,80 +2996,70 @@ class RenderPipeline:  # Collect project data → build sections → render → 
 
 ## Call Graph
 
-*188 nodes · 178 edges · 29 modules · CC̄=1.7*
+*215 nodes · 213 edges · 31 modules · CC̄=3.9*
 
 ### Hubs (by degree)
 
 | Function | CC | in | out | total |
 |----------|----|----|-----|-------|
 | `print` *(in test)* | 0 | 84 | 0 | **84** |
+| `generate_project_logic` *(in sumd.extractor)* | 20 ⚠ | 2 | 71 | **73** |
 | `run` *(in examples.mcp.mcp_client)* | 11 ⚠ | 1 | 53 | **54** |
-| `create_builtin_registry` *(in sumd.dsl.commands)* | 1 | 2 | 41 | **43** |
+| `create_builtin_registry` *(in sumd.dsl.commands)* | 1 | 2 | 45 | **47** |
+| `to_term` *(in sumd.prolog_engine)* | 13 ⚠ | 14 | 29 | **43** |
+| `to_term` *(in sumd_logic_validator.sumd_logic_validator.engine)* | 13 ⚠ | 4 | 29 | **33** |
 | `analyze` *(in sumd.cli)* | 11 ⚠ | 0 | 33 | **33** |
 | `_collect` *(in sumd.pipeline.RenderPipeline)* | 3 | 0 | 31 | **31** |
-| `_render_call_graph` *(in sumd.sections.call_graph)* | 7 | 0 | 28 | **28** |
-| `_handle_shell_command` *(in sumd.dsl.shell.DSLShell)* | 14 ⚠ | 0 | 24 | **24** |
-| `generate_map_toon` *(in sumd.extractor)* | 5 | 0 | 24 | **24** |
 
 ```toon markpact:analysis path=project/calls.toon.yaml
 # code2llm call graph | /home/tom/github/oqlos/sumd
-# nodes: 188 | edges: 178 | modules: 29
-# CC̄=1.7
+# generated in 0.13s
+# nodes: 215 | edges: 213 | modules: 31
+# CC̄=3.9
 
 HUBS[20]:
   test.print
     CC=0  in:84  out:0  total:84
+  sumd.extractor.generate_project_logic
+    CC=20  in:2  out:71  total:73
   examples.mcp.mcp_client.run
     CC=11  in:1  out:53  total:54
   sumd.dsl.commands.create_builtin_registry
-    CC=1  in:2  out:41  total:43
+    CC=1  in:2  out:45  total:47
+  sumd.prolog_engine.to_term
+    CC=13  in:14  out:29  total:43
+  sumd_logic_validator.sumd_logic_validator.engine.to_term
+    CC=13  in:4  out:29  total:33
   sumd.cli.analyze
     CC=11  in:0  out:33  total:33
   sumd.pipeline.RenderPipeline._collect
     CC=3  in:0  out:31  total:31
   sumd.sections.call_graph._render_call_graph
     CC=7  in:0  out:28  total:28
+  sumd.extractor.generate_map_toon
+    CC=5  in:3  out:24  total:27
   sumd.dsl.shell.DSLShell._handle_shell_command
     CC=14  in:0  out:24  total:24
-  sumd.extractor.generate_map_toon
-    CC=5  in:0  out:24  total:24
-  sumd.sections.quality._render_quality_parsed
-    CC=9  in:1  out:21  total:22
+  sumd.cli.lint
+    CC=12  in:0  out:23  total:23
+  sumd.extractor.extract_pyproject
+    CC=3  in:5  out:17  total:22
   sumd.parser.SUMDParser.parse_file
     CC=1  in:20  out:2  total:22
-  sumd.sections.interfaces._render_interfaces_openapi
-    CC=6  in:1  out:19  total:20
+  sumd.sections.quality._render_quality_parsed
+    CC=9  in:1  out:21  total:22
+  sumd.cli.map_cmd
+    CC=7  in:0  out:20  total:20
   sumd.sections.dependencies._render_deps_runtime
     CC=6  in:1  out:19  total:20
   sumd.extractor._parse_doql_content
     CC=6  in:1  out:19  total:20
+  sumd.sections.interfaces._render_interfaces_openapi
+    CC=6  in:1  out:19  total:20
   sumd.extractor._path_matches_pattern
     CC=18  in:2  out:18  total:20
-  sumd.cli.map_cmd
-    CC=7  in:0  out:20  total:20
-  sumd.extractor._parse_doql_workflows
-    CC=7  in:1  out:18  total:19
-  sumd.cli.lint
-    CC=10  in:0  out:19  total:19
-  sumd.sections.environment._render_goal_section
-    CC=9  in:1  out:17  total:18
-  sumd.validator.validate_codeblocks
-    CC=9  in:1  out:17  total:18
-  sumd.sections.workflows._render_workflows_taskfile
-    CC=6  in:1  out:17  total:18
 
 MODULES:
-  SUMR  [12 funcs]
-    extract_doql  CC=0  out:0
-    extract_makefile  CC=0  out:0
-    extract_openapi  CC=0  out:0
-    extract_package_json  CC=0  out:0
-    extract_pyproject  CC=0  out:0
-    extract_pyqual  CC=0  out:0
-    extract_python_modules  CC=0  out:0
-    extract_readme_title  CC=0  out:0
-    extract_requirements  CC=0  out:0
-    extract_taskfile  CC=0  out:0
   examples.llm.anthropic_example  [2 funcs]
     ask  CC=1  out:3
     main  CC=2  out:14
@@ -2995,10 +3083,10 @@ MODULES:
     _is_project_dir  CC=8  out:4
   sumd.cqrs.queries  [5 funcs]
     _handle_get_project_info  CC=3  out:11
-    _handle_get_sumd_document  CC=3  out:3
-    _handle_get_sumd_section  CC=4  out:6
-    _handle_get_validation_results  CC=4  out:8
-    _handle_list_sumd_sections  CC=3  out:3
+    _handle_get_sumd_document  CC=3  out:4
+    _handle_get_sumd_section  CC=4  out:7
+    _handle_get_validation_results  CC=4  out:9
+    _handle_list_sumd_sections  CC=3  out:4
   sumd.cqrs.sumd_aggregate  [1 funcs]
     create_from_file  CC=6  out:12
   sumd.dsl.commands  [5 funcs]
@@ -3006,7 +3094,7 @@ MODULES:
     _cmd_sumd_info  CC=3  out:3
     _cmd_sumd_map  CC=6  out:7
     _cmd_sumd_validate  CC=2  out:7
-    create_builtin_registry  CC=1  out:41
+    create_builtin_registry  CC=1  out:45
   sumd.dsl.engine  [2 funcs]
     _builtin_print  CC=1  out:1
     execute_text  CC=3  out:5
@@ -3024,7 +3112,7 @@ MODULES:
     execute_script  CC=9  out:17
     run  CC=9  out:15
     execute_dsl  CC=4  out:7
-  sumd.extractor  [28 funcs]
+  sumd.extractor  [37 funcs]
     _analyse_class_methods  CC=6  out:6
     _analyse_py_module  CC=2  out:6
     _analyse_py_top_classes  CC=5  out:8
@@ -3058,9 +3146,22 @@ MODULES:
     _find_tools_bin_dir  CC=3  out:1
     _inject_toc  CC=3  out:9
     _refresh_analysis_files  CC=7  out:11
-  sumd.sections.architecture  [6 funcs]
+  sumd.prolog_engine  [13 funcs]
+    add_fact  CC=2  out:4
+    parse_and_load  CC=6  out:16
+    _resolve  CC=12  out:15
+    query  CC=5  out:8
+    _split_body_terms  CC=13  out:7
+    deep_resolve  CC=3  out:4
+    extend_subst  CC=2  out:2
+    is_variable  CC=6  out:5
+    occurs_check  CC=4  out:4
+    rename_variables  CC=2  out:8
+  sumd.sections.architecture  [8 funcs]
+    _render_architecture  CC=6  out:13
     _render_architecture_doql_parsed  CC=1  out:4
     _render_architecture_doql_section  CC=6  out:14
+    _render_architecture_rules  CC=3  out:10
     _render_doql_app  CC=3  out:8
     _render_doql_entities  CC=6  out:9
     _render_doql_integrations  CC=5  out:9
@@ -3116,7 +3217,7 @@ MODULES:
     _parse_toon_block_performance  CC=7  out:8
     _parse_toon_file  CC=4  out:16
     extract_testql_scenarios  CC=7  out:12
-  sumd.validator  [9 funcs]
+  sumd.validator  [10 funcs]
     _check_empty_links  CC=2  out:1
     _check_h1  CC=3  out:2
     _check_metadata_fields  CC=9  out:7
@@ -3125,7 +3226,23 @@ MODULES:
     _validate_markpact_meta  CC=5  out:9
     validate_codeblocks  CC=9  out:17
     validate_markdown  CC=1  out:6
-    validate_sumd_file  CC=3  out:5
+    validate_project_architecture  CC=8  out:15
+    validate_sumd_file  CC=4  out:8
+  sumd_logic_validator.sumd_logic_validator.cli  [3 funcs]
+    get_engine  CC=4  out:9
+    query  CC=6  out:14
+    shell  CC=10  out:16
+  sumd_logic_validator.sumd_logic_validator.engine  [11 funcs]
+    add_fact  CC=2  out:4
+    parse_and_load  CC=7  out:17
+    _resolve  CC=12  out:15
+    query  CC=5  out:8
+    deep_resolve  CC=3  out:4
+    extend_subst  CC=2  out:2
+    is_variable  CC=6  out:4
+    occurs_check  CC=4  out:4
+    resolve_val  CC=3  out:1
+    to_term  CC=13  out:29
   test  [1 funcs]
     print  CC=0  out:0
 
@@ -3151,35 +3268,35 @@ EDGES:
   sumd.validator.validate_markdown → sumd.validator._check_metadata_fields
   sumd.validator.validate_markdown → sumd.validator._check_h1
   sumd.validator.validate_markdown → sumd.validator._check_required_sections
+  sumd.validator.validate_project_architecture → sumd.extractor.generate_project_logic
   sumd.validator.validate_sumd_file → sumd.validator.validate_markdown
   sumd.validator.validate_sumd_file → sumd.validator.validate_codeblocks
-  sumd.pipeline._refresh_map_toon → SUMR.generate_map_toon
-  sumd.pipeline._refresh_analysis_files → SUMR.required_tools_for_profile
-  sumd.pipeline._refresh_analysis_files → sumd.pipeline._find_tools_bin_dir
-  sumd.pipeline._refresh_analysis_files → sumd.pipeline._run_tool_if_present
-  sumd.pipeline._collect_pkg_sources → sumd.pipeline._collect_tool_sources
-  sumd.pipeline._collect_pkg_sources → sumd.pipeline._doql_sources
-  sumd.pipeline._collect_sources → sumd.pipeline._collect_pkg_sources
-  sumd.pipeline._collect_sources → sumd.pipeline._collect_infra_sources
-  sumd.pipeline.RenderPipeline._collect → SUMR.extract_pyproject
-  sumd.pipeline.RenderPipeline._collect → SUMR.extract_taskfile
-  sumd.pipeline.RenderPipeline._collect → sumd.toon_parser.extract_testql_scenarios
-  sumd.pipeline.RenderPipeline._collect → SUMR.extract_openapi
-  sumd.pipeline.RenderPipeline._collect → SUMR.extract_doql
-  sumd.pipeline.RenderPipeline._collect → SUMR.extract_pyqual
-  sumd.pipeline.RenderPipeline._collect → SUMR.extract_python_modules
-  sumd.pipeline.RenderPipeline._collect → SUMR.extract_readme_title
-  sumd.pipeline.RenderPipeline._collect → SUMR.extract_requirements
-  sumd.pipeline.RenderPipeline._collect → SUMR.extract_makefile
-  sumd.pipeline.RenderPipeline.run → sumd.pipeline._inject_toc
-  sumd.sections.code_analysis.CodeAnalysisSection.render → sumd.sections.code_analysis._render_code_analysis
-  sumd.sections.environment.EnvironmentSection.render → sumd.sections.environment._render_env_section
-  sumd.sections.environment.EnvironmentSection.render → sumd.sections.environment._render_goal_section
-  sumd.sections.dependencies._render_dependencies → sumd.sections.dependencies._render_deps_runtime
-  sumd.sections.dependencies._render_dependencies → sumd.sections.dependencies._render_deps_dev
-  sumd.extractor.extract_pyproject → sumd.extractor._read_toml
-  sumd.extractor.extract_taskfile → sumd.extractor._first_task_cmd
-  sumd.extractor._parse_doql_content → sumd.extractor._parse_doql_interfaces
+  sumd.validator.validate_sumd_file → sumd.validator.validate_project_architecture
+  sumd.cli._node_spec_from_package_json → sumd.cli._node_framework
+  sumd.cli._build_doql_spec → sumd.extractor.extract_package_json
+  sumd.cli._build_doql_spec → sumd.cli._node_spec_from_package_json
+  sumd.cli._generate_doql_less → sumd.cli._build_doql_spec
+  sumd.cli._generate_doql_less → sumd.cli._render_doql_boilerplate
+  sumd.cli.validate → sumd.parser.SUMDParser.parse_file
+  sumd.cli.export → sumd.parser.SUMDParser.parse_file
+  sumd.cli.info → sumd.parser.SUMDParser.parse_file
+  sumd.cli.extract → sumd.parser.SUMDParser.parse_file
+  sumd.cli._walk_projects → sumd.cli._is_project_dir
+  sumd.cli._detect_projects → sumd.cli._walk_projects
+  sumd.cli._run_one_tool → sumd.cli._tool_bin
+  sumd.cli._run_analysis_tools → sumd.cli._ensure_venv
+  sumd.cli._run_analysis_tools → sumd.cli._run_one_tool
+  sumd.cli._render_write_validate → sumd.validator.validate_sumd_file
+  sumd.cli._render_write_validate → sumd.parser.SUMDParser.parse_file
+  sumd.cli._maybe_generate_doql → sumd.cli._detect_project_type
+  sumd.cli._maybe_generate_doql → sumd.extractor.extract_pyproject
+  sumd.cli._maybe_generate_doql → sumd.cli._generate_doql_less
+  sumd.cli._maybe_generate_doql → sumd.extractor.extract_package_json
+  sumd.cli._finalize_scan → sumd.cli._echo_scan_result
+  sumd.cli._finalize_scan → sumd.cli._export_sumd_json
+  sumd.cli._finalize_scan → sumd.cli._run_analysis_tools
+  sumd.cli._scan_one_project → sumd.cli._render_write_validate
+  sumd.cli._scan_one_project → sumd.cli._finalize_scan
 ```
 
 ## Test Contracts

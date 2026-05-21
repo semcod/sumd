@@ -4,12 +4,12 @@
 
 - **Project**: /home/tom/github/oqlos/sumd
 - **Primary Language**: python
-- **Languages**: python: 52, shell: 5, perl: 2
+- **Languages**: python: 58, shell: 6, perl: 4
 - **Analysis Mode**: static
-- **Total Functions**: 505
-- **Total Classes**: 103
-- **Modules**: 59
-- **Entry Points**: 347
+- **Total Functions**: 542
+- **Total Classes**: 109
+- **Modules**: 68
+- **Entry Points**: 375
 
 ## Architecture by Module
 
@@ -35,6 +35,11 @@
 - **Functions**: 32
 - **Classes**: 6
 - **File**: `prolog_engine.py`
+
+### sumd_logic_validator.sumd_logic_validator.engine
+- **Functions**: 32
+- **Classes**: 6
+- **File**: `engine.py`
 
 ### sumd.dsl.commands
 - **Functions**: 30
@@ -103,11 +108,6 @@
 - **Functions**: 8
 - **Classes**: 1
 - **File**: `interfaces.py`
-
-### sumd.cqrs.events
-- **Functions**: 8
-- **Classes**: 8
-- **File**: `events.py`
 
 ## Key Entry Points
 
@@ -224,6 +224,10 @@ with module in
 > Execute a DSL script file.
 - **Calls**: print, script_path.exists, ValueError, script_path.read_text, content.splitlines, enumerate, line.strip, print
 
+### sumd_logic_validator.sumd_logic_validator.engine.PythonPrologDB.parse_and_load
+> Parses a simple Prolog file into rules/facts.
+- **Calls**: re.sub, re.sub, c.strip, re.split, c.strip, c.split, sumd.prolog_engine.to_term, self.add_rule
+
 ### sumd.prolog_engine.PythonPrologDB.parse_and_load
 > Parses a simple Prolog file into rules/facts.
 - **Calls**: re.sub, re.sub, c.strip, re.split, c.strip, c.split, sumd.prolog_engine.to_term, sumd.prolog_engine._split_body_terms
@@ -238,6 +242,10 @@ FILE: Path to the SUMD markdown file
 > Render top-N modules with function/class signatures for LLM orientation.
 - **Calls**: a, a, a, a, a, a, a, a
 
+### sumd_logic_validator.sumd_logic_validator.cli.shell
+> Start interactive logic query shell.
+- **Calls**: main.command, sumd_logic_validator.sumd_logic_validator.cli.get_engine, console.print, Panel, None.strip, engine.query, q.lower, console.print
+
 ### examples.llm.openai_example.main
 - **Calls**: argparse.ArgumentParser, parser.add_argument, parser.add_argument, parser.add_argument, parser.parse_args, Path, print, print
 
@@ -251,13 +259,6 @@ FILE: Path to the SUMD markdown file
 ### sumd.dsl.shell.DSLShell.run
 > Run the interactive shell.
 - **Calls**: print, print, print, print, print, self._get_prompt, None.strip, line.startswith
-
-### sumd.dsl.schema_commands.SchemaBasedCommands.execute_command
-> Execute a schema-based command.
-- **Calls**: time.time, self.registry.validate_command_call, self.registry.get_command, DSLCommandResult, DSLCommandResult, time.time, DSLCommandResult, self._execute_sumd_command
-
-### examples.llm.anthropic_example.main
-- **Calls**: argparse.ArgumentParser, parser.add_argument, parser.add_argument, parser.add_argument, parser.parse_args, Path, print, print
 
 ## Process Flows
 
@@ -328,15 +329,15 @@ _render_api_stubs [sumd.sections.api_stubs]
 - **Methods**: 33
 - **Key Methods**: sumd.dsl.engine.DSLEngine.__init__, sumd.dsl.engine.DSLEngine.execute, sumd.dsl.engine.DSLEngine.execute_text, sumd.dsl.engine.DSLEngine._is_natural_language, sumd.dsl.engine.DSLEngine.process_natural_language, sumd.dsl.engine.DSLEngine.get_suggestions, sumd.dsl.engine.DSLEngine._execute_expression, sumd.dsl.engine.DSLEngine._execute_assignment, sumd.dsl.engine.DSLEngine._execute_command, sumd.dsl.engine.DSLEngine._execute_function_call
 
-### sumd.dsl.schema_commands.SchemaBasedCommands
-> Implementation of schema-based DSL commands.
-- **Methods**: 25
-- **Key Methods**: sumd.dsl.schema_commands.SchemaBasedCommands.__init__, sumd.dsl.schema_commands.SchemaBasedCommands.execute_command, sumd.dsl.schema_commands.SchemaBasedCommands._execute_sumd_command, sumd.dsl.schema_commands.SchemaBasedCommands._execute_file_command, sumd.dsl.schema_commands.SchemaBasedCommands._execute_search_command, sumd.dsl.schema_commands.SchemaBasedCommands._execute_utility_command, sumd.dsl.schema_commands.SchemaBasedCommands._execute_nlp_command, sumd.dsl.schema_commands.SchemaBasedCommands._execute_schema_command, sumd.dsl.schema_commands.SchemaBasedCommands._cmd_sumd_scan, sumd.dsl.schema_commands.SchemaBasedCommands._cmd_sumd_validate
-
 ### sumd.dsl.parser.DSLParser
 > Parser for DSL expressions.
 - **Methods**: 25
 - **Key Methods**: sumd.dsl.parser.DSLParser.__init__, sumd.dsl.parser.DSLParser.parse, sumd.dsl.parser.DSLParser._parse_statement, sumd.dsl.parser.DSLParser._parse_pipeline, sumd.dsl.parser.DSLParser._parse_assignment, sumd.dsl.parser.DSLParser._parse_logical_or, sumd.dsl.parser.DSLParser._parse_logical_and, sumd.dsl.parser.DSLParser._parse_comparison, sumd.dsl.parser.DSLParser._parse_arithmetic, sumd.dsl.parser.DSLParser._parse_term
+
+### sumd.dsl.schema_commands.SchemaBasedCommands
+> Implementation of schema-based DSL commands.
+- **Methods**: 25
+- **Key Methods**: sumd.dsl.schema_commands.SchemaBasedCommands.__init__, sumd.dsl.schema_commands.SchemaBasedCommands.execute_command, sumd.dsl.schema_commands.SchemaBasedCommands._execute_sumd_command, sumd.dsl.schema_commands.SchemaBasedCommands._execute_file_command, sumd.dsl.schema_commands.SchemaBasedCommands._execute_search_command, sumd.dsl.schema_commands.SchemaBasedCommands._execute_utility_command, sumd.dsl.schema_commands.SchemaBasedCommands._execute_nlp_command, sumd.dsl.schema_commands.SchemaBasedCommands._execute_schema_command, sumd.dsl.schema_commands.SchemaBasedCommands._cmd_sumd_scan, sumd.dsl.schema_commands.SchemaBasedCommands._cmd_sumd_validate
 
 ### sumd.cqrs.sumd_aggregate.SumdAggregate
 > SUMD document aggregate root.
@@ -376,15 +377,15 @@ _render_api_stubs [sumd.sections.api_stubs]
 - **Methods**: 7
 - **Key Methods**: sumd.dsl.nlp.NLPIntegration.__init__, sumd.dsl.nlp.NLPIntegration.process_natural_language, sumd.dsl.nlp.NLPIntegration.get_suggestions, sumd.dsl.nlp.NLPIntegration.add_custom_intent, sumd.dsl.nlp.NLPIntegration.add_custom_entity, sumd.dsl.nlp.NLPIntegration.get_available_intents, sumd.dsl.nlp.NLPIntegration.get_intent_examples
 
-### sumd.prolog_engine.HybridPrologEngine
-> Hybrid Logic Engine delegating queries based on backend availability.
-- **Methods**: 6
-- **Key Methods**: sumd.prolog_engine.HybridPrologEngine.__init__, sumd.prolog_engine.HybridPrologEngine.query, sumd.prolog_engine.HybridPrologEngine._query_pyswip, sumd.prolog_engine.HybridPrologEngine._query_subprocess, sumd.prolog_engine.HybridPrologEngine._query_python, sumd.prolog_engine.HybridPrologEngine._swipl_executable_exists
-
 ### sumd.parser.SUMDParser
 > Parser for SUMD markdown documents.
 - **Methods**: 6
 - **Key Methods**: sumd.parser.SUMDParser.__init__, sumd.parser.SUMDParser.parse, sumd.parser.SUMDParser.parse_file, sumd.parser.SUMDParser._parse_header, sumd.parser.SUMDParser._parse_sections, sumd.parser.SUMDParser.validate
+
+### sumd.prolog_engine.HybridPrologEngine
+> Hybrid Logic Engine delegating queries based on backend availability.
+- **Methods**: 6
+- **Key Methods**: sumd.prolog_engine.HybridPrologEngine.__init__, sumd.prolog_engine.HybridPrologEngine.query, sumd.prolog_engine.HybridPrologEngine._query_pyswip, sumd.prolog_engine.HybridPrologEngine._query_subprocess, sumd.prolog_engine.HybridPrologEngine._query_python, sumd.prolog_engine.HybridPrologEngine._swipl_executable_exists
 
 ### sumd.pipeline.RenderPipeline
 > Collect project data → build sections → render → inject TOC.
@@ -394,21 +395,26 @@ Usage:
 - **Methods**: 6
 - **Key Methods**: sumd.pipeline.RenderPipeline.__init__, sumd.pipeline.RenderPipeline._collect, sumd.pipeline.RenderPipeline._build_registered_sections, sumd.pipeline.RenderPipeline._render_legacy_sections, sumd.pipeline.RenderPipeline._assemble, sumd.pipeline.RenderPipeline.run
 
+### sumd.cqrs.events.EventStore
+> In-memory event store with optional file persistence.
+- **Methods**: 6
+- **Key Methods**: sumd.cqrs.events.EventStore.__init__, sumd.cqrs.events.EventStore.save_event, sumd.cqrs.events.EventStore.get_events, sumd.cqrs.events.EventStore.get_all_events, sumd.cqrs.events.EventStore._persist_event, sumd.cqrs.events.EventStore._load_events
+
 ### sumd.cqrs.aggregates.Entity
 > Base entity for domain objects.
 - **Methods**: 6
 - **Key Methods**: sumd.cqrs.aggregates.Entity.__init__, sumd.cqrs.aggregates.Entity.id, sumd.cqrs.aggregates.Entity.domain_events, sumd.cqrs.aggregates.Entity.add_domain_event, sumd.cqrs.aggregates.Entity.clear_domain_events, sumd.cqrs.aggregates.Entity.get_state
 - **Inherits**: ABC
 
-### sumd.cqrs.events.EventStore
-> In-memory event store with optional file persistence.
-- **Methods**: 6
-- **Key Methods**: sumd.cqrs.events.EventStore.__init__, sumd.cqrs.events.EventStore.save_event, sumd.cqrs.events.EventStore.get_events, sumd.cqrs.events.EventStore.get_all_events, sumd.cqrs.events.EventStore._persist_event, sumd.cqrs.events.EventStore._load_events
-
 ### sumd.dsl.commands.DSLCommandRegistry
 > Registry for DSL commands.
 - **Methods**: 6
 - **Key Methods**: sumd.dsl.commands.DSLCommandRegistry.__init__, sumd.dsl.commands.DSLCommandRegistry.register, sumd.dsl.commands.DSLCommandRegistry.get_command, sumd.dsl.commands.DSLCommandRegistry.list_commands, sumd.dsl.commands.DSLCommandRegistry.list_categories, sumd.dsl.commands.DSLCommandRegistry.get_help
+
+### sumd_logic_validator.sumd_logic_validator.engine.HybridPrologEngine
+> Hybrid Logic Engine delegating queries based on backend availability.
+- **Methods**: 6
+- **Key Methods**: sumd_logic_validator.sumd_logic_validator.engine.HybridPrologEngine.__init__, sumd_logic_validator.sumd_logic_validator.engine.HybridPrologEngine.query, sumd_logic_validator.sumd_logic_validator.engine.HybridPrologEngine._query_pyswip, sumd_logic_validator.sumd_logic_validator.engine.HybridPrologEngine._query_subprocess, sumd_logic_validator.sumd_logic_validator.engine.HybridPrologEngine._query_python, sumd_logic_validator.sumd_logic_validator.engine.HybridPrologEngine._swipl_executable_exists
 
 ### sumd.cqrs.aggregates.EventSourcedRepository
 > Event-sourced repository implementation.
@@ -425,11 +431,6 @@ Usage:
 > Represents a logical variable in our pure Python engine.
 - **Methods**: 4
 - **Key Methods**: sumd.prolog_engine.Variable.__init__, sumd.prolog_engine.Variable.__repr__, sumd.prolog_engine.Variable.__eq__, sumd.prolog_engine.Variable.__hash__
-
-### sumd.prolog_engine.PythonPrologDB
-> In-memory Prolog database for pure Python execution.
-- **Methods**: 4
-- **Key Methods**: sumd.prolog_engine.PythonPrologDB.__init__, sumd.prolog_engine.PythonPrologDB.add_fact, sumd.prolog_engine.PythonPrologDB.add_rule, sumd.prolog_engine.PythonPrologDB.parse_and_load
 
 ## Data Transformation Functions
 
@@ -463,13 +464,64 @@ Key functions that process and transform data:
 > Parse a single *.testql.toon.yaml file into a scenario dict.
 - **Output to**: f.read_text, content.splitlines, re.search, str, sumd.dsl.parser.DSLParser._match
 
-### sumd.prolog_engine.PythonPrologDB.parse_and_load
-> Parses a simple Prolog file into rules/facts.
-- **Output to**: re.sub, re.sub, c.strip, re.split, c.strip
+### sumd.validator._validate_yaml_body
+> Check YAML body is parseable.
+- **Output to**: yaml.safe_load
 
-### sumd.prolog_engine.HybridPrologEngine._query_subprocess
-> Executes query by spawning a swipl process.
-- **Output to**: list, subprocess.run, res.stdout.splitlines, set, subprocess.run
+### sumd.validator._validate_less_css_body
+> Basic sanity: balanced braces.
+- **Output to**: body.count, body.count
+
+### sumd.validator._validate_mermaid_body
+> Check mermaid block starts with a valid diagram type.
+- **Output to**: None.strip, any, None.split, first.startswith, body.strip
+
+### sumd.validator._validate_toon_body
+> Check toon block has at least one recognised section header.
+- **Output to**: re.findall
+
+### sumd.validator._validate_bash_body
+> Check bash block is non-empty and doesn't contain obvious placeholders.
+- **Output to**: body.strip
+
+### sumd.validator._validate_deps_body
+> Each line of a deps block should be a valid pip requirement or empty.
+- **Output to**: enumerate, body.splitlines, line.strip, line.startswith, re.match
+
+### sumd.validator._validate_markpact_meta
+> Check markpact annotation kind and required attributes.
+- **Output to**: mp.group, _MARKPACT_REQUIRED_ATTRS.get, mp.group, issues.append, issues.append
+
+### sumd.validator.validate_codeblocks
+> Validate all fenced code blocks in *content*.
+
+Checks:
+- markpact annotation syntax (kind, required 
+- **Output to**: _CODEBLOCK_RE.finditer, None.strip, None.strip, None.strip, _MARKPACT_META_RE.search
+
+### sumd.validator.validate_markdown
+> Validate SUMD markdown structure.
+
+Checks:
+- H1 title present
+- Required H2 sections present (profil
+- **Output to**: content.splitlines, sumd.validator._check_empty_links, sumd.validator._check_unclosed_fences, sumd.validator._check_metadata_fields, sumd.validator._check_h1
+
+### sumd.validator.validate_project_architecture
+> Run Prolog-based architectural consistency checks on the project.
+
+Returns:
+    list[str]: list of l
+- **Output to**: sumd.extractor.generate_project_logic, rules_path.read_text, PythonPrologDB, db.parse_and_load, db.parse_and_load
+
+### sumd.validator.validate_sumd_file
+> Run all validators on a SUMD.md file.
+
+Returns:
+    {
+      "source": str,
+      "markdown": list[st
+- **Output to**: path.read_text, sumd.validator.validate_markdown, sumd.validator.validate_codeblocks, None.parent.resolve, sumd.validator.validate_project_architecture
 
 ### sumd.parser.SUMDParser.parse
 > Parse a SUMD markdown document.
@@ -534,51 +586,6 @@ Returns:
     SUMDDocument: Parse
 - **Output to**: SUMDParser, parser.parse_file
 
-### sumd.parser.validate
-> Validate a SUMD document.
-
-Args:
-    document: The document to validate
-
-Returns:
-    List of valida
-- **Output to**: SUMDParser, parser.validate
-
-### sumd.validator._validate_yaml_body
-> Check YAML body is parseable.
-- **Output to**: yaml.safe_load
-
-### sumd.validator._validate_less_css_body
-> Basic sanity: balanced braces.
-- **Output to**: body.count, body.count
-
-### sumd.validator._validate_mermaid_body
-> Check mermaid block starts with a valid diagram type.
-- **Output to**: None.strip, any, None.split, first.startswith, body.strip
-
-### sumd.validator._validate_toon_body
-> Check toon block has at least one recognised section header.
-- **Output to**: re.findall
-
-### sumd.validator._validate_bash_body
-> Check bash block is non-empty and doesn't contain obvious placeholders.
-- **Output to**: body.strip
-
-### sumd.validator._validate_deps_body
-> Each line of a deps block should be a valid pip requirement or empty.
-- **Output to**: enumerate, body.splitlines, line.strip, line.startswith, re.match
-
-### sumd.validator._validate_markpact_meta
-> Check markpact annotation kind and required attributes.
-- **Output to**: mp.group, _MARKPACT_REQUIRED_ATTRS.get, mp.group, issues.append, issues.append
-
-### sumd.validator.validate_codeblocks
-> Validate all fenced code blocks in *content*.
-
-Checks:
-- markpact annotation syntax (kind, required 
-- **Output to**: _CODEBLOCK_RE.finditer, None.strip, None.strip, None.strip, _MARKPACT_META_RE.search
-
 ## Behavioral Patterns
 
 ### recursion_to_term
@@ -606,6 +613,26 @@ Checks:
 - **Confidence**: 0.90
 - **Functions**: sumd.cli._walk_projects
 
+### recursion_to_term
+- **Type**: recursion
+- **Confidence**: 0.90
+- **Functions**: sumd_logic_validator.sumd_logic_validator.engine.to_term
+
+### recursion_unify
+- **Type**: recursion
+- **Confidence**: 0.90
+- **Functions**: sumd_logic_validator.sumd_logic_validator.engine.unify
+
+### recursion_deep_resolve
+- **Type**: recursion
+- **Confidence**: 0.90
+- **Functions**: sumd_logic_validator.sumd_logic_validator.engine.deep_resolve
+
+### recursion_occurs_check
+- **Type**: recursion
+- **Confidence**: 0.90
+- **Functions**: sumd_logic_validator.sumd_logic_validator.engine.occurs_check
+
 ### state_machine_SumdAggregate
 - **Type**: state_machine
 - **Confidence**: 0.70
@@ -624,6 +651,7 @@ Functions exposed as public API (no underscore prefix):
 - `sumd.cli.nlp_command` - 33 calls
 - `sumd.cli.generate` - 30 calls
 - `sumd.prolog_engine.to_term` - 29 calls
+- `sumd_logic_validator.sumd_logic_validator.engine.to_term` - 29 calls
 - `sumd.cli.cqrs_command` - 28 calls
 - `sumd.extractor.extract_goal` - 24 calls
 - `sumd.extractor.generate_map_toon` - 24 calls
@@ -636,8 +664,10 @@ Functions exposed as public API (no underscore prefix):
 - `sumd.validator.validate_codeblocks` - 17 calls
 - `sumd.extractor.extract_pyproject` - 17 calls
 - `sumd.dsl.shell.DSLShell.execute_script` - 17 calls
+- `sumd_logic_validator.sumd_logic_validator.engine.PythonPrologDB.parse_and_load` - 17 calls
 - `sumd.prolog_engine.PythonPrologDB.parse_and_load` - 16 calls
 - `sumd.cli.export` - 16 calls
+- `sumd_logic_validator.sumd_logic_validator.cli.shell` - 16 calls
 - `examples.llm.openai_example.main` - 15 calls
 - `sumd.validator.validate_project_architecture` - 15 calls
 - `sumd.extractor.extract_package_json` - 15 calls
@@ -646,15 +676,12 @@ Functions exposed as public API (no underscore prefix):
 - `examples.llm.anthropic_example.main` - 14 calls
 - `sumd.mcp_server.list_tools` - 14 calls
 - `sumd.sections.metadata.MetadataSection.render` - 14 calls
+- `sumd_logic_validator.sumd_logic_validator.cli.query` - 14 calls
 - `sumd.prolog_engine.unify` - 13 calls
-- `sumd.extractor.extract_openapi` - 13 calls
-- `sumd.extractor.extract_env` - 13 calls
 - `sumd.cli.validate` - 13 calls
 - `sumd.cli.extract` - 13 calls
-- `examples.mcp.mcp_client.main` - 12 calls
-- `sumd.toon_parser.extract_testql_scenarios` - 12 calls
-- `sumd.extractor.extract_pyqual` - 12 calls
-- `sumd.extractor.extract_makefile` - 12 calls
+- `sumd.extractor.extract_openapi` - 13 calls
+- `sumd.extractor.extract_env` - 13 calls
 
 ## System Interactions
 

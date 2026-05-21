@@ -1,53 +1,246 @@
-# redup/duplication | 3 groups | 48f 11859L | 2026-05-02
+# redup/duplication | 27 groups | 57f 13292L | 2026-05-21
 
 SUMMARY:
-  files_scanned: 48
-  total_lines:   11859
-  dup_groups:    3
-  dup_fragments: 6
-  saved_lines:   35
-  scan_ms:       11252
+  files_scanned: 57
+  total_lines:   13292
+  dup_groups:    27
+  dup_fragments: 54
+  saved_lines:   247
+  scan_ms:       18652
 
-HOTSPOTS[3] (files with most duplication):
+HOTSPOTS[7] (files with most duplication):
+  sumd_logic_validator/sumd_logic_validator/engine.py  dup=210L  groups=21  frags=21  (1.6%)
+  sumd/prolog_engine.py  dup=203L  groups=21  frags=21  (1.5%)
   sumd/toon_parser.py  dup=28L  groups=1  frags=2  (0.2%)
   sumd/parser.py  dup=22L  groups=1  frags=2  (0.2%)
   sumd/dsl/commands.py  dup=20L  groups=1  frags=2  (0.2%)
+  sumd/dsl/engine.py  dup=6L  groups=2  frags=2  (0.0%)
+  sumd/dsl/schema.py  dup=6L  groups=2  frags=2  (0.0%)
 
-DUPLICATES[3] (ranked by impact):
+DUPLICATES[27] (ranked by impact):
+  [6c27a8b7267e13d7] ! EXAC  _query_subprocess  L=42 N=2 saved=42 sim=1.00
+      sumd/prolog_engine.py:378-419  (_query_subprocess)
+      sumd_logic_validator/sumd_logic_validator/engine.py:375-423  (_query_subprocess)
+  [a9a2b89811f17647]   EXAC  unify  L=22 N=2 saved=22 sim=1.00
+      sumd/prolog_engine.py:168-189  (unify)
+      sumd_logic_validator/sumd_logic_validator/engine.py:166-187  (unify)
+  [a67c25b9011708c8]   EXAC  query  L=22 N=2 saved=22 sim=1.00
+      sumd/prolog_engine.py:246-267  (query)
+      sumd_logic_validator/sumd_logic_validator/engine.py:244-265  (query)
+  [841890ca83127ecd]   EXAC  rename_variables  L=16 N=2 saved=16 sim=1.00
+      sumd/prolog_engine.py:222-237  (rename_variables)
+      sumd_logic_validator/sumd_logic_validator/engine.py:220-235  (rename_variables)
+  [6bc9796b08ce37e6]   EXAC  _query_pyswip  L=16 N=2 saved=16 sim=1.00
+      sumd/prolog_engine.py:361-376  (_query_pyswip)
+      sumd_logic_validator/sumd_logic_validator/engine.py:358-373  (_query_pyswip)
   [ec6388d8055c3e57]   STRU  _parse_toon_block_performance  L=14 N=2 saved=14 sim=1.00
       sumd/toon_parser.py:70-83  (_parse_toon_block_performance)
       sumd/toon_parser.py:102-115  (_parse_toon_block_gui)
   [d1ab1a804f1b435b]   STRU  parse  L=11 N=2 saved=11 sim=1.00
       sumd/parser.py:150-160  (parse)
       sumd/parser.py:163-173  (parse_file)
+  [9b8c09535672da3f]   EXAC  _find_vars  L=10 N=2 saved=10 sim=1.00
+      sumd/prolog_engine.py:269-278  (_find_vars)
+      sumd_logic_validator/sumd_logic_validator/engine.py:267-276  (_find_vars)
   [a73c4e5f2b96ddaa]   STRU  _cmd_cat  L=10 N=2 saved=10 sim=1.00
       sumd/dsl/commands.py:313-322  (_cmd_cat)
       sumd/dsl/commands.py:647-656  (_cmd_read_file)
+  [5257855825b21dc5]   EXAC  __init__  L=9 N=2 saved=9 sim=1.00
+      sumd/prolog_engine.py:328-336  (__init__)
+      sumd_logic_validator/sumd_logic_validator/engine.py:325-333  (__init__)
+  [bcd1189046b690c0]   EXAC  rename  L=8 N=2 saved=8 sim=1.00
+      sumd/prolog_engine.py:226-233  (rename)
+      sumd_logic_validator/sumd_logic_validator/engine.py:224-231  (rename)
+  [a5b94fdf8e33a4d1]   EXAC  occurs_check  L=7 N=2 saved=7 sim=1.00
+      sumd/prolog_engine.py:213-219  (occurs_check)
+      sumd_logic_validator/sumd_logic_validator/engine.py:211-217  (occurs_check)
+  [43d89fdde36f380f]   EXAC  extend_subst  L=6 N=2 saved=6 sim=1.00
+      sumd/prolog_engine.py:205-210  (extend_subst)
+      sumd_logic_validator/sumd_logic_validator/engine.py:203-208  (extend_subst)
+  [85268e3910522b4b]   EXAC  _swipl_executable_exists  L=6 N=2 saved=6 sim=1.00
+      sumd/prolog_engine.py:425-430  (_swipl_executable_exists)
+      sumd_logic_validator/sumd_logic_validator/engine.py:429-434  (_swipl_executable_exists)
+  [d48551a6bad80f43]   EXAC  collect  L=6 N=2 saved=6 sim=1.00
+      sumd/prolog_engine.py:271-276  (collect)
+      sumd_logic_validator/sumd_logic_validator/engine.py:269-274  (collect)
+  [2974f1521921ca23]   EXAC  deep_resolve  L=5 N=2 saved=5 sim=1.00
+      sumd/prolog_engine.py:198-202  (deep_resolve)
+      sumd_logic_validator/sumd_logic_validator/engine.py:196-200  (deep_resolve)
+  [80e26c3323c304e6]   EXAC  resolve_val  L=4 N=2 saved=4 sim=1.00
+      sumd/prolog_engine.py:192-195  (resolve_val)
+      sumd_logic_validator/sumd_logic_validator/engine.py:190-193  (resolve_val)
+  [b34584e45495fb0a]   EXAC  __repr__  L=4 N=2 saved=4 sim=1.00
+      sumd/prolog_engine.py:40-43  (__repr__)
+      sumd_logic_validator/sumd_logic_validator/engine.py:40-43  (__repr__)
+  [2cbecec5d6886745]   EXAC  __eq__  L=4 N=2 saved=4 sim=1.00
+      sumd/prolog_engine.py:45-48  (__eq__)
+      sumd_logic_validator/sumd_logic_validator/engine.py:45-48  (__eq__)
+  [f1a0f3644b1097f5]   EXAC  __repr__  L=4 N=2 saved=4 sim=1.00
+      sumd/prolog_engine.py:57-60  (__repr__)
+      sumd_logic_validator/sumd_logic_validator/engine.py:57-60  (__repr__)
+  [fa6ad8230cb122f6]   EXAC  set_variable  L=3 N=2 saved=3 sim=1.00
+      sumd/dsl/engine.py:35-37  (set_variable)
+      sumd/dsl/schema.py:163-165  (set_variable)
+  [f59133a9d98b31d5]   EXAC  get_variable  L=3 N=2 saved=3 sim=1.00
+      sumd/dsl/engine.py:39-41  (get_variable)
+      sumd/dsl/schema.py:167-169  (get_variable)
+  [0622d41f358b07b3]   EXAC  __init__  L=3 N=2 saved=3 sim=1.00
+      sumd/prolog_engine.py:36-38  (__init__)
+      sumd_logic_validator/sumd_logic_validator/engine.py:36-38  (__init__)
+  [eaae1aeec51c77d3]   EXAC  __init__  L=3 N=2 saved=3 sim=1.00
+      sumd/prolog_engine.py:53-55  (__init__)
+      sumd_logic_validator/sumd_logic_validator/engine.py:53-55  (__init__)
+  [6e1ae427e1b0dd92]   EXAC  __init__  L=3 N=2 saved=3 sim=1.00
+      sumd/prolog_engine.py:242-244  (__init__)
+      sumd_logic_validator/sumd_logic_validator/engine.py:240-242  (__init__)
+  [85a8a3cd76963d11]   EXAC  _query_python  L=3 N=2 saved=3 sim=1.00
+      sumd/prolog_engine.py:421-423  (_query_python)
+      sumd_logic_validator/sumd_logic_validator/engine.py:425-427  (_query_python)
+  [aaae754bdb04529d]   STRU  cli  L=3 N=2 saved=3 sim=1.00
+      sumd/cli.py:454-456  (cli)
+      sumd_logic_validator/sumd_logic_validator/cli.py:29-31  (main)
 
-REFACTOR[3] (ranked by priority):
-  [1] ○ extract_function   → sumd/utils/_parse_toon_block_performance.py
+REFACTOR[27] (ranked by priority):
+  [1] ◐ extract_class      → utils/_query_subprocess.py
+      WHY: 2 occurrences of 42-line block across 2 files — saves 42 lines
+      FILES: sumd/prolog_engine.py, sumd_logic_validator/sumd_logic_validator/engine.py
+  [2] ○ extract_function   → utils/unify.py
+      WHY: 2 occurrences of 22-line block across 2 files — saves 22 lines
+      FILES: sumd/prolog_engine.py, sumd_logic_validator/sumd_logic_validator/engine.py
+  [3] ○ extract_class      → utils/query.py
+      WHY: 2 occurrences of 22-line block across 2 files — saves 22 lines
+      FILES: sumd/prolog_engine.py, sumd_logic_validator/sumd_logic_validator/engine.py
+  [4] ○ extract_function   → utils/rename_variables.py
+      WHY: 2 occurrences of 16-line block across 2 files — saves 16 lines
+      FILES: sumd/prolog_engine.py, sumd_logic_validator/sumd_logic_validator/engine.py
+  [5] ○ extract_class      → utils/_query_pyswip.py
+      WHY: 2 occurrences of 16-line block across 2 files — saves 16 lines
+      FILES: sumd/prolog_engine.py, sumd_logic_validator/sumd_logic_validator/engine.py
+  [6] ○ extract_function   → sumd/utils/_parse_toon_block_performance.py
       WHY: 2 occurrences of 14-line block across 1 files — saves 14 lines
       FILES: sumd/toon_parser.py
-  [2] ○ extract_function   → sumd/utils/parse.py
+  [7] ○ extract_function   → sumd/utils/parse.py
       WHY: 2 occurrences of 11-line block across 1 files — saves 11 lines
       FILES: sumd/parser.py
-  [3] ○ extract_function   → sumd/dsl/utils/_cmd_cat.py
+  [8] ○ extract_class      → utils/_find_vars.py
+      WHY: 2 occurrences of 10-line block across 2 files — saves 10 lines
+      FILES: sumd/prolog_engine.py, sumd_logic_validator/sumd_logic_validator/engine.py
+  [9] ○ extract_function   → sumd/dsl/utils/_cmd_cat.py
       WHY: 2 occurrences of 10-line block across 1 files — saves 10 lines
       FILES: sumd/dsl/commands.py
+  [10] ○ extract_class      → utils/__init__.py
+      WHY: 2 occurrences of 9-line block across 2 files — saves 9 lines
+      FILES: sumd/prolog_engine.py, sumd_logic_validator/sumd_logic_validator/engine.py
+  [11] ○ extract_function   → utils/rename.py
+      WHY: 2 occurrences of 8-line block across 2 files — saves 8 lines
+      FILES: sumd/prolog_engine.py, sumd_logic_validator/sumd_logic_validator/engine.py
+  [12] ○ extract_function   → utils/occurs_check.py
+      WHY: 2 occurrences of 7-line block across 2 files — saves 7 lines
+      FILES: sumd/prolog_engine.py, sumd_logic_validator/sumd_logic_validator/engine.py
+  [13] ○ extract_function   → utils/extend_subst.py
+      WHY: 2 occurrences of 6-line block across 2 files — saves 6 lines
+      FILES: sumd/prolog_engine.py, sumd_logic_validator/sumd_logic_validator/engine.py
+  [14] ○ extract_class      → utils/_swipl_executable_exists.py
+      WHY: 2 occurrences of 6-line block across 2 files — saves 6 lines
+      FILES: sumd/prolog_engine.py, sumd_logic_validator/sumd_logic_validator/engine.py
+  [15] ○ extract_function   → utils/collect.py
+      WHY: 2 occurrences of 6-line block across 2 files — saves 6 lines
+      FILES: sumd/prolog_engine.py, sumd_logic_validator/sumd_logic_validator/engine.py
+  [16] ○ extract_function   → utils/deep_resolve.py
+      WHY: 2 occurrences of 5-line block across 2 files — saves 5 lines
+      FILES: sumd/prolog_engine.py, sumd_logic_validator/sumd_logic_validator/engine.py
+  [17] ○ extract_function   → utils/resolve_val.py
+      WHY: 2 occurrences of 4-line block across 2 files — saves 4 lines
+      FILES: sumd/prolog_engine.py, sumd_logic_validator/sumd_logic_validator/engine.py
+  [18] ○ extract_class      → utils/__repr__.py
+      WHY: 2 occurrences of 4-line block across 2 files — saves 4 lines
+      FILES: sumd/prolog_engine.py, sumd_logic_validator/sumd_logic_validator/engine.py
+  [19] ○ extract_class      → utils/__eq__.py
+      WHY: 2 occurrences of 4-line block across 2 files — saves 4 lines
+      FILES: sumd/prolog_engine.py, sumd_logic_validator/sumd_logic_validator/engine.py
+  [20] ○ extract_class      → utils/__repr__.py
+      WHY: 2 occurrences of 4-line block across 2 files — saves 4 lines
+      FILES: sumd/prolog_engine.py, sumd_logic_validator/sumd_logic_validator/engine.py
+  [21] ○ extract_class      → sumd/dsl/utils/set_variable.py
+      WHY: 2 occurrences of 3-line block across 2 files — saves 3 lines
+      FILES: sumd/dsl/engine.py, sumd/dsl/schema.py
+  [22] ○ extract_class      → sumd/dsl/utils/get_variable.py
+      WHY: 2 occurrences of 3-line block across 2 files — saves 3 lines
+      FILES: sumd/dsl/engine.py, sumd/dsl/schema.py
+  [23] ○ extract_class      → utils/__init__.py
+      WHY: 2 occurrences of 3-line block across 2 files — saves 3 lines
+      FILES: sumd/prolog_engine.py, sumd_logic_validator/sumd_logic_validator/engine.py
+  [24] ○ extract_class      → utils/__init__.py
+      WHY: 2 occurrences of 3-line block across 2 files — saves 3 lines
+      FILES: sumd/prolog_engine.py, sumd_logic_validator/sumd_logic_validator/engine.py
+  [25] ○ extract_class      → utils/__init__.py
+      WHY: 2 occurrences of 3-line block across 2 files — saves 3 lines
+      FILES: sumd/prolog_engine.py, sumd_logic_validator/sumd_logic_validator/engine.py
+  [26] ○ extract_class      → utils/_query_python.py
+      WHY: 2 occurrences of 3-line block across 2 files — saves 3 lines
+      FILES: sumd/prolog_engine.py, sumd_logic_validator/sumd_logic_validator/engine.py
+  [27] ○ extract_function   → utils/cli.py
+      WHY: 2 occurrences of 3-line block across 2 files — saves 3 lines
+      FILES: sumd/cli.py, sumd_logic_validator/sumd_logic_validator/cli.py
 
-QUICK_WINS[3] (low risk, high savings — do first):
-  [1] extract_function   saved=14L  → sumd/utils/_parse_toon_block_performance.py
+QUICK_WINS[14] (low risk, high savings — do first):
+  [2] extract_function   saved=22L  → utils/unify.py
+      FILES: prolog_engine.py, engine.py
+  [3] extract_class      saved=22L  → utils/query.py
+      FILES: prolog_engine.py, engine.py
+  [4] extract_function   saved=16L  → utils/rename_variables.py
+      FILES: prolog_engine.py, engine.py
+  [5] extract_class      saved=16L  → utils/_query_pyswip.py
+      FILES: prolog_engine.py, engine.py
+  [6] extract_function   saved=14L  → sumd/utils/_parse_toon_block_performance.py
       FILES: toon_parser.py
-  [2] extract_function   saved=11L  → sumd/utils/parse.py
+  [7] extract_function   saved=11L  → sumd/utils/parse.py
       FILES: parser.py
-  [3] extract_function   saved=10L  → sumd/dsl/utils/_cmd_cat.py
+  [8] extract_class      saved=10L  → utils/_find_vars.py
+      FILES: prolog_engine.py, engine.py
+  [9] extract_function   saved=10L  → sumd/dsl/utils/_cmd_cat.py
       FILES: commands.py
+  [10] extract_class      saved=9L  → utils/__init__.py
+      FILES: prolog_engine.py, engine.py
+  [11] extract_function   saved=8L  → utils/rename.py
+      FILES: prolog_engine.py, engine.py
 
-EFFORT_ESTIMATE (total ≈ 1.2h):
+DEPENDENCY_RISK[22] (duplicates spanning multiple packages):
+  _query_subprocess  packages=2  files=2
+      sumd/prolog_engine.py
+      sumd_logic_validator/sumd_logic_validator/engine.py
+  unify  packages=2  files=2
+      sumd/prolog_engine.py
+      sumd_logic_validator/sumd_logic_validator/engine.py
+  query  packages=2  files=2
+      sumd/prolog_engine.py
+      sumd_logic_validator/sumd_logic_validator/engine.py
+  rename_variables  packages=2  files=2
+      sumd/prolog_engine.py
+      sumd_logic_validator/sumd_logic_validator/engine.py
+  _query_pyswip  packages=2  files=2
+      sumd/prolog_engine.py
+      sumd_logic_validator/sumd_logic_validator/engine.py
+  _find_vars  packages=2  files=2
+      sumd/prolog_engine.py
+      sumd_logic_validator/sumd_logic_validator/engine.py
+  __init__  packages=2  files=2
+      sumd/prolog_engine.py
+      sumd_logic_validator/sumd_logic_validator/engine.py
+
+EFFORT_ESTIMATE (total ≈ 16.5h):
+  hard   _query_subprocess                   saved=42L  ~252min
+  medium unify                               saved=22L  ~88min
+  medium query                               saved=22L  ~88min
+  medium rename_variables                    saved=16L  ~64min
+  medium _query_pyswip                       saved=16L  ~64min
   easy   _parse_toon_block_performance       saved=14L  ~28min
   easy   parse                               saved=11L  ~22min
+  medium _find_vars                          saved=10L  ~40min
   easy   _cmd_cat                            saved=10L  ~20min
+  medium __init__                            saved=9L  ~36min
+  ... +17 more (~288min)
 
 METRICS-TARGET:
-  dup_groups:  3 → 0
-  saved_lines: 35 lines recoverable
+  dup_groups:  27 → 0
+  saved_lines: 247 lines recoverable

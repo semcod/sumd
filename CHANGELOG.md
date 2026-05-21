@@ -37,6 +37,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added support for standard gitignore patterns including wildcards, directory patterns, and negation
 - Improved file collection performance by skipping ignored files and directories
 
+## [0.3.48] - 2026-05-21
+
+### Docs
+- Update README.md
+- Update SUMD.md
+- Update SUMR.md
+- Update docs/README.md
+- Update project/README.md
+- Update project/context.md
+
+### Other
+- Update .code2llm_cache/CHANGELOG_1779369542938918821_23281.pkl
+- Update .code2llm_cache/README_1779369515747267462_22533.pkl
+- Update .code2llm_cache/README_1779369542476943815_21853.pkl
+- Update .code2llm_cache/__init___1779369542477957807_771.pkl
+- Update .code2llm_cache/__init___1779369542733974491_65.pkl
+- Update .code2llm_cache/pyproject_1779369542473943784_2355.pkl
+- Update app.doql.less
+- Update project.sh
+- Update project/analysis.toon.yaml
+- Update project/calls.mmd
+- ... and 19 more files
+
 ## [0.3.47] - 2026-05-21
 
 ### Docs

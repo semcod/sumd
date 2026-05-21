@@ -1,8 +1,8 @@
-# code2llm | 53f 13805L | python:49,shell:2,perl:2 | 2026-05-21
-# CC̄=4.0 | critical:6/505 | dups:1 | cycles:0
+# code2llm | 62f 16900L | python:55,perl:4,shell:3 | 2026-05-21
+# CC̄=4.0 | critical:6/542 | dups:6 | cycles:0
 
 HEALTH[8]:
-  🔴 DUP   1 classes duplicated
+  🔴 DUP   6 classes duplicated
   🔴 GOD   sumd/dsl/parser.py = 666L, 6 classes, 29m, max CC=23
   🟡 CC    _path_matches_pattern CC=18 (limit:15)
   🟡 CC    generate_project_logic CC=20 (limit:15)
@@ -12,24 +12,24 @@ HEALTH[8]:
   🟡 CC    _parse_primary CC=22 (limit:15)
 
 REFACTOR[3]:
-  1. rm duplicates  (-1 dup classes)
+  1. rm duplicates  (-6 dup classes)
   2. split sumd/dsl/parser.py  (god module)
   3. split 6 high-CC methods  (CC>15)
 
-PIPELINES[294]:
+PIPELINES[317]:
   [1] Src [main]: main → ask → parse_file
       PURITY: 100% pure
   [2] Src [main]: main → ask → build_context → parse_file
       PURITY: 100% pure
   [3] Src [main]: main → run
       PURITY: 100% pure
-  [4] Src [__eq__]: __eq__
+  [4] Src [_validate_yaml_body]: _validate_yaml_body
       PURITY: 100% pure
-  [5] Src [__hash__]: __hash__
+  [5] Src [_validate_less_css_body]: _validate_less_css_body
       PURITY: 100% pure
 
 LAYERS:
-  sumd/                           CC̄=4.0    ←in:17  →out:4  ×DUP
+  sumd/                           CC̄=4.0    ←in:28  →out:4  ×DUP
   │ !! cli                       1999L  0C   47m  CC=14     ←0
   │ !! extractor                 1282L  0C   45m  CC=20     ←6
   │ !! mcp_server                 714L  0C   18m  CC=5      ←0
@@ -39,7 +39,7 @@ LAYERS:
   │ !! schema_commands            517L  2C   33m  CC=10     ←0
   │ pipeline                   451L  1C   16m  CC=7      ←0
   │ nlp                        447L  3C   21m  CC=7      ←0
-  │ prolog_engine              430L  6C   32m  CC=13     ←0
+  │ prolog_engine              430L  6C   32m  CC=13     ←1  ×DUP
   │ queries                    419L  13C   17m  CC=10     ←0
   │ validator                  383L  1C   16m  CC=9      ←4
   │ shell                      359L  2C   14m  CC=14     ←0
@@ -80,25 +80,38 @@ LAYERS:
   │ __init__                    12L  0C    0m  CC=0.0    ←0
   │ __main__                     5L  0C    0m  CC=0.0    ←0
   │
+  sumd_logic_validator/           CC̄=4.0    ←in:0  →out:0  ×DUP
+  │ !! rules.pl                  1234L  0C    0m  CC=0.0    ←0
+  │ !! rules.pl                  1234L  0C    0m  CC=0.0    ←0
+  │ engine                     434L  6C   32m  CC=14     ←0  ×DUP
+  │ cli                        114L  0C    5m  CC=10     ←0
+  │ main                         4L  0C    0m  CC=0.0    ←0
+  │ __init__                     3L  0C    0m  CC=0.0    ←0
+  │ __init__                     1L  0C    0m  CC=0.0    ←0
+  │ __init__                     1L  0C    0m  CC=0.0    ←0
+  │
   ./                              CC̄=0.0    ←in:0  →out:0
-  │ project.sh                  41L  0C    0m  CC=0.0    ←0
+  │ project.sh                  55L  0C    0m  CC=0.0    ←0
   │ print_errors                 6L  0C    0m  CC=0.0    ←0
+  │ tree.sh                      1L  0C    0m  CC=0.0    ←0
   │
   scripts/                        CC̄=0.0    ←in:0  →out:0
   │ bootstrap.sh                69L  0C    0m  CC=0.0    ←0
   │
   project/                        CC̄=0.0    ←in:0  →out:0
-  │ !! logic.pl                  1133L  0C    0m  CC=0.0    ←0
+  │ !! logic.pl                  1188L  0C    0m  CC=0.0    ←0
   │
 
 COUPLING:
-                  sumd   sumd.dsl  sumd.cqrs
-       sumd         ──          4        ←10  hub
-   sumd.dsl          7         ──           
-  sumd.cqrs         10                    ──  !! fan-out
+                                                                                  sumd                                   sumd.dsl  sumd_logic_validator.sumd_logic_validator                                  sumd.cqrs
+                                       sumd                                         ──                                          4                                        ←11                                        ←10  hub
+                                   sumd.dsl                                          7                                         ──                                                                                      
+  sumd_logic_validator.sumd_logic_validator                                         11                                                                                    ──                                             !! fan-out
+                                  sumd.cqrs                                         10                                                                                                                               ──  !! fan-out
   CYCLES: none
-  HUB: sumd/ (fan-in=17)
+  HUB: sumd/ (fan-in=28)
   SMELL: sumd.cqrs/ fan-out=10 → split needed
+  SMELL: sumd_logic_validator.sumd_logic_validator/ fan-out=11 → split needed
 
 EXTERNAL:
   validation: run `vallm batch .` → validation.toon

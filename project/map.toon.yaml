@@ -1,10 +1,10 @@
-# sumd | 75f 16783L | python:67,shell:6,less:2 | 2026-05-21
-# stats: 284 func | 159 cls | 75 mod | CC̄=3.9 | critical:10 | cycles:0
-# alerts[5]: CC generate_project_logic=20; CC _path_matches_pattern=18; CC _extract_sumd_semantic_facts=14; CC run=12; CC _split_body_terms=11
+# sumd | 84f 17392L | python:75,shell:7,less:2 | 2026-05-21
+# stats: 301 func | 165 cls | 84 mod | CC̄=4.6 | critical:23 | cycles:0
+# alerts[5]: CC generate_project_logic=20; CC _path_matches_pattern=18; CC _extract_sumd_semantic_facts=15; CC scan=14; CC _split_body_terms=14
 # hotspots[5]: cqrs_command fan=19; scan fan=18; scaffold fan=18; generate_project_logic fan=18; analyze fan=17
 # evolution: baseline
 # Keys: M=modules, D=details, i=imports, e=exports, c=classes, f=functions, m=methods
-M[75]:
+M[84]:
   app.doql.less,261
   examples/app.doql.less,60
   examples/basic/demo.sh,50
@@ -14,7 +14,7 @@ M[75]:
   examples/llm/openai_example.py,89
   examples/mcp/mcp_client.py,139
   print_errors.py,7
-  project.sh,41
+  project.sh,55
   scripts/bootstrap.sh,70
   scripts/install_testql_autoloop.sh,157
   sumd/__init__.py,36
@@ -66,6 +66,14 @@ M[75]:
   sumd/sections/workflows.py,87
   sumd/toon_parser.py,174
   sumd/validator.py,384
+  sumd_logic_validator/logic/__init__.py,2
+  sumd_logic_validator/sumd_logic_validator/__init__.py,4
+  sumd_logic_validator/sumd_logic_validator/cli.py,115
+  sumd_logic_validator/sumd_logic_validator/engine.py,435
+  sumd_logic_validator/sumd_logic_validator/logic/__init__.py,2
+  sumd_logic_validator/sumd_logic_validator/main.py,5
+  sumd_logic_validator/tests/__init__.py,1
+  sumd_logic_validator/tests/test_engine.py,29
   test_gitignore.py,1
   test_ignore.py,1
   tests/test_architectural_logic.py,167
@@ -80,6 +88,7 @@ M[75]:
   tests/test_pipeline.py,136
   tests/test_sections.py,298
   tests/test_statement.py,12
+  tree.sh,2
 D:
   examples/llm/anthropic_example.py:
     e: ask,main
@@ -523,6 +532,40 @@ D:
     validate_markdown(content;source;profile)
     validate_project_architecture(proj_dir)
     validate_sumd_file(path;profile)
+  sumd_logic_validator/logic/__init__.py:
+  sumd_logic_validator/sumd_logic_validator/__init__.py:
+  sumd_logic_validator/sumd_logic_validator/cli.py:
+    e: get_engine,main,info,query,shell
+    get_engine()
+    main()
+    info()
+    query(query_str)
+    shell()
+  sumd_logic_validator/sumd_logic_validator/engine.py:
+    e: is_variable,to_term,_split_body_terms,unify,resolve_val,deep_resolve,extend_subst,occurs_check,rename_variables,Variable,Term,Rule,PythonPrologDB,PythonPrologEngine,HybridPrologEngine
+    Variable: __init__(1),__repr__(0),__eq__(1),__hash__(0)  # Represents a logical variable in our pure Python engine.
+    Term: __init__(1),__repr__(0),__eq__(1)  # Represents a Prolog term (e.g. parent(john, mary)).
+    Rule: __init__(2),__repr__(0)  # Represents a Prolog rule Head :- Body.
+    PythonPrologDB: __init__(0),add_fact(1),add_rule(2),parse_and_load(1)  # In-memory Prolog database for pure Python execution.
+    PythonPrologEngine: __init__(1),query(1),_find_vars(1),_resolve(2)  # SLD Resolution Logic Interpreter.
+    HybridPrologEngine: __init__(1),query(1),_query_pyswip(1),_query_subprocess(1),_query_python(1),_swipl_executable_exists(0)  # Hybrid Logic Engine delegating queries based on backend avai
+    is_variable(x)
+    to_term(x)
+    _split_body_terms(body_str)
+    unify(x;y;subst)
+    resolve_val(x;subst)
+    deep_resolve(x;subst)
+    extend_subst(v;val;subst)
+    occurs_check(v;val;subst)
+    rename_variables(rule;suffix)
+  sumd_logic_validator/sumd_logic_validator/logic/__init__.py:
+  sumd_logic_validator/sumd_logic_validator/main.py:
+  sumd_logic_validator/tests/__init__.py:
+  sumd_logic_validator/tests/test_engine.py:
+    e: engine,test_detects_architectural_inconsistencies,test_project_structure_facts
+    engine()
+    test_detects_architectural_inconsistencies(engine)
+    test_project_structure_facts(engine)
   test_gitignore.py:
   test_ignore.py:
   tests/test_architectural_logic.py:

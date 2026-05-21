@@ -1,33 +1,54 @@
-# vallm batch | 132f | 75✓ 5⚠ 10✗ | 2026-05-02
+# vallm batch | 162f | 89✓ 8⚠ 13✗ | 2026-05-21
 
 SUMMARY:
-  scanned: 132  passed: 75 (56.8%)  warnings: 5  errors: 10  unsupported: 47
+  scanned: 162  passed: 89 (54.9%)  warnings: 8  errors: 13  unsupported: 57
 
-WARNINGS[5]{path,score}:
+WARNINGS[8]{path,score}:
+  /home/tom/github/oqlos/sumd/project/logic.pl,0.78
+    issues[1]{rule,severity,message,line}:
+      syntax.unsupported,warning,Could not parse perl: maximum recursion depth exceeded,
+  /home/tom/github/oqlos/sumd/sumd_logic_validator/logic/rules.pl,0.78
+    issues[1]{rule,severity,message,line}:
+      syntax.unsupported,warning,Could not parse perl: maximum recursion depth exceeded,
+  /home/tom/github/oqlos/sumd/sumd_logic_validator/sumd_logic_validator/logic/rules.pl,0.78
+    issues[1]{rule,severity,message,line}:
+      syntax.unsupported,warning,Could not parse perl: maximum recursion depth exceeded,
+  /home/tom/github/oqlos/sumd/sumd/dsl/parser.py,0.93
+    issues[4]{rule,severity,message,line}:
+      complexity.cyclomatic,warning,_parse_statement has cyclomatic complexity 23 (max: 15),213
+      complexity.cyclomatic,warning,_parse_primary has cyclomatic complexity 22 (max: 15),411
+      complexity.lizard_cc,warning,_parse_statement: CC=23 exceeds limit 15,213
+      complexity.lizard_cc,warning,_parse_primary: CC=22 exceeds limit 15,411
   /home/tom/github/oqlos/sumd/sumd/dsl/commands.py,0.97
     issues[1]{rule,severity,message,line}:
       complexity.lizard_length,warning,create_builtin_registry: 177 lines exceeds limit 100,104
   /home/tom/github/oqlos/sumd/sumd/dsl/nlp.py,0.97
     issues[1]{rule,severity,message,line}:
       complexity.lizard_length,warning,_initialize_default_intents: 106 lines exceeds limit 100,32
-  /home/tom/github/oqlos/sumd/sumd/dsl/parser.py,0.97
-    issues[2]{rule,severity,message,line}:
-      complexity.cyclomatic,warning,_parse_primary has cyclomatic complexity 19 (max: 15),363
-      complexity.lizard_cc,warning,_parse_primary: CC=19 exceeds limit 15,363
   /home/tom/github/oqlos/sumd/sumd/dsl/engine.py,0.98
     issues[1]{rule,severity,message,line}:
-      complexity.maintainability,warning,Low maintainability index: 20.0 (threshold: 20),
+      complexity.maintainability,warning,Low maintainability index: 19.9 (threshold: 20),
   /home/tom/github/oqlos/sumd/sumd/dsl/schema_commands.py,0.98
     issues[1]{rule,severity,message,line}:
       complexity.maintainability,warning,Low maintainability index: 19.3 (threshold: 20),
 
-ERRORS[10]{path,score}:
+ERRORS[13]{path,score}:
+  /home/tom/github/oqlos/sumd/sumd/rules.pl,0.00
+    issues[1]{rule,severity,message,line}:
+      syntax.tree_sitter,error,tree-sitter found 21 parse error(s) in perl,
+  /home/tom/github/oqlos/sumd/sumd_logic_validator/tests/test_engine.py,0.71
+    issues[2]{rule,severity,message,line}:
+      python.import.resolvable,error,Module 'pytest' not found,1
+      python.import.resolvable,error,Module 'sumd_logic_validator.engine' not found,3
   /home/tom/github/oqlos/sumd/sumd/mcp_server.py,0.91
     issues[4]{rule,severity,message,line}:
       python.import.resolvable,error,Module 'mcp.server.stdio' not found,30
       python.import.resolvable,error,Module 'mcp.types' not found,31
       python.import.resolvable,error,Module 'mcp.server' not found,32
       python.import.resolvable,error,Module 'toml' not found,417
+  /home/tom/github/oqlos/sumd/tests/test_architectural_logic.py,0.91
+    issues[1]{rule,severity,message,line}:
+      python.import.resolvable,error,Module 'pytest' not found,1
   /home/tom/github/oqlos/sumd/tests/test_cli.py,0.93
     issues[1]{rule,severity,message,line}:
       python.import.resolvable,error,Module 'pytest' not found,7
@@ -58,8 +79,8 @@ ERRORS[10]{path,score}:
       python.import.resolvable,error,Module 'pytest' not found,3
 
 UNSUPPORTED[5]{bucket,count}:
-  *.md,23
+  *.md,24
   Dockerfile*,1
-  *.txt,1
+  *.txt,3
   *.yml,6
-  other,16
+  other,23

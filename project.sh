@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -e
-clear
+clear || true
 
 VENV=".venv"
 PIP="$VENV/bin/pip"
@@ -27,6 +27,9 @@ $PIP install code2docs --upgrade --quiet
 $VENV/bin/code2docs ./ --readme-only
 $VENV/bin/redup scan . --format toon --output ./project
 #$VENV/bin/redup scan . --functions-only -f toon --output ./project
+
+# Generate project logic facts database (logic.pl)
+$VENV/bin/python -c "from sumd.extractor import generate_project_logic; from pathlib import Path; (Path('project') / 'logic.pl').write_text(generate_project_logic(Path('.')), encoding='utf-8')"
 #$VENV/bin/vallm batch ./src --recursive --semantic --model qwen2.5-coder:7b
 #$VENV/bin/vallm batch --parallel .
 #$VENV/bin/vallm batch . --recursive --format toon --output ./project

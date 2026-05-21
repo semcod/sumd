@@ -1,30 +1,36 @@
 flowchart TD
-    SUMR["SUMR<br/>125 funcs"]
+%% generated in 0.02s
     examples__llm["examples.llm<br/>5 funcs"]
     examples__mcp["examples.mcp<br/>2 funcs"]
     sumd__cli["sumd.cli<br/>47 funcs"]
     sumd__cqrs["sumd.cqrs<br/>74 funcs"]
-    sumd__dsl["sumd.dsl<br/>165 funcs"]
+    sumd__dsl["sumd.dsl<br/>168 funcs"]
+    sumd__extractor["sumd.extractor<br/>45 funcs"]
     sumd__mcp_server["sumd.mcp_server<br/>18 funcs"]
     sumd__parser["sumd.parser<br/>9 funcs"]
     sumd__pipeline["sumd.pipeline<br/>16 funcs"]
+    sumd__prolog_engine["sumd.prolog_engine<br/>32 funcs"]
     sumd__toon_parser["sumd.toon_parser<br/>8 funcs"]
-    sumd__validator["sumd.validator<br/>15 funcs"]
+    sumd__validator["sumd.validator<br/>16 funcs"]
+    sumd_logic_validator__sumd_logic_validator["sumd_logic_validator.sumd_logic_validator<br/>37 funcs"]
     test["test<br/>1 funcs"]
     sumd__dsl ==>|42| test
     examples__mcp ==>|31| test
-    sumd__pipeline ==>|19| SUMR
+    sumd__pipeline ==>|20| sumd__extractor
     examples__llm ==>|11| test
+    sumd_logic_validator__sumd_logic_validator ==>|11| sumd__prolog_engine
     sumd__mcp_server ==>|6| sumd__parser
     sumd__cli ==>|5| sumd__parser
     sumd__toon_parser ==>|4| sumd__dsl
-    sumd__cli ==>|4| SUMR
+    sumd__cli ==>|4| sumd__extractor
     sumd__cqrs ==>|4| sumd__parser
-    sumd__cqrs ==>|4| SUMR
+    sumd__cqrs ==>|4| sumd__extractor
     sumd__dsl -->|3| sumd__parser
     examples__llm -->|2| sumd__parser
     sumd__cli -->|2| sumd__validator
     sumd__cqrs -->|2| sumd__validator
+    sumd__validator -->|1| sumd__extractor
+    sumd__extractor -->|1| sumd__toon_parser
     sumd__pipeline -->|1| sumd__toon_parser
-    sumd__dsl -->|1| SUMR
+    sumd__dsl -->|1| sumd__extractor
     sumd__dsl -->|1| sumd__validator

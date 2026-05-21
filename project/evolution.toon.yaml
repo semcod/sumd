@@ -1,33 +1,50 @@
-# code2llm/evolution | 1040 func | 48f | 2026-05-02
+# code2llm/evolution | 541 func | 46f | 2026-05-21
+# generated in 0.00s
 
-NEXT[4] (ranked by impact):
+NEXT[8] (ranked by impact):
   [1] !! SPLIT           sumd/cli.py
-      WHY: 1984L, 0 classes, max CC=14
-      EFFORT: ~4h  IMPACT: 27776
+      WHY: 1999L, 0 classes, max CC=14
+      EFFORT: ~4h  IMPACT: 27986
 
   [2] !! SPLIT           sumd/extractor.py
-      WHY: 1077L, 0 classes, max CC=18
-      EFFORT: ~4h  IMPACT: 19386
+      WHY: 1282L, 0 classes, max CC=20
+      EFFORT: ~4h  IMPACT: 25640
 
-  [3] !! SPLIT           sumd/mcp_server.py
-      WHY: 714L, 0 classes, max CC=5
-      EFFORT: ~4h  IMPACT: 3570
+  [3] !  SPLIT-FUNC      generate_project_logic  CC=20  fan=22
+      WHY: CC=20 exceeds 15
+      EFFORT: ~1h  IMPACT: 440
 
-  [4] !  SPLIT-FUNC      DSLEngine._execute_expression  CC=15  fan=13
+  [4] !  SPLIT-FUNC      DSLParser._parse_primary  CC=22  fan=18
+      WHY: CC=22 exceeds 15
+      EFFORT: ~1h  IMPACT: 396
+
+  [5] !  SPLIT-FUNC      _extract_sumd_semantic_facts  CC=15  fan=19
+      WHY: CC=15 exceeds 15
+      EFFORT: ~1h  IMPACT: 285
+
+  [6] !  SPLIT-FUNC      DSLParser._parse_statement  CC=23  fan=10
+      WHY: CC=23 exceeds 15
+      EFFORT: ~1h  IMPACT: 230
+
+  [7] !  SPLIT-FUNC      DSLEngine._execute_expression  CC=15  fan=13
       WHY: CC=15 exceeds 15
       EFFORT: ~1h  IMPACT: 195
+
+  [8] !! SPLIT           sumd_logic_validator/sumd_logic_validator/logic/rules.pl
+      WHY: 1234L, 0 classes, max CC=0
+      EFFORT: ~4h  IMPACT: 0
 
 
 RISKS[3]:
   ⚠ Splitting sumd/cli.py may break 47 import paths
-  ⚠ Splitting sumd/extractor.py may break 43 import paths
-  ⚠ Splitting sumd/mcp_server.py may break 18 import paths
+  ⚠ Splitting sumd/extractor.py may break 45 import paths
+  ⚠ Splitting sumd_logic_validator/sumd_logic_validator/logic/rules.pl may break 0 import paths
 
 METRICS-TARGET:
-  CC̄:          1.7 → ≤1.2
-  max-CC:      18 → ≤9
-  god-modules: 7 → 0
-  high-CC(≥15): 2 → ≤1
+  CC̄:          3.9 → ≤2.7
+  max-CC:      23 → ≤11
+  god-modules: 12 → 0
+  high-CC(≥15): 6 → ≤3
   hub-types:   0 → ≤0
 
 PATTERNS (language parser shared logic):
@@ -55,4 +72,4 @@ PATTERNS (language parser shared logic):
     - Standardized FunctionInfo/ClassInfo models
 
 HISTORY:
-  prev CC̄=1.2 → now CC̄=1.7
+  prev CC̄=3.9 → now CC̄=3.9

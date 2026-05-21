@@ -18,12 +18,12 @@ SUMD - Structured Unified Markdown Descriptor for AI-aware project refactorizati
 ## Metadata
 
 - **name**: `sumd`
-- **version**: `0.3.46`
+- **version**: `0.3.47`
 - **python_requires**: `>=3.10`
-- **license**: Apache-2.0
+- **license**: {'text': 'Apache-2.0'}
 - **ai_model**: `openrouter/qwen/qwen3-coder-next`
 - **ecosystem**: SUMD + DOQL + testql + taskfile
-- **generated_from**: pyproject.toml, Taskfile.yml, Makefile, testql(2), app.doql.less, pyqual.yaml, goal.yaml, .env.example, src(10 mod), project/(6 analysis files), .swop/manifests/core/commands.yml, .swop/manifests/core/queries.yml, .swop/manifests/core/events.yml
+- **generated_from**: pyproject.toml, Taskfile.yml, Makefile, testql(3), app.doql.less, pyqual.yaml, goal.yaml, .env.example, src(11 mod), project/(6 analysis files), .swop/manifests/core/commands.yml, .swop/manifests/core/queries.yml, .swop/manifests/core/events.yml
 
 ## Architecture
 
@@ -38,11 +38,11 @@ SUMD (description) → DOQL/source (code) → taskfile (automation) → testql (
 
 app {
   name: sumd;
-  version: 0.3.46;
+  version: 0.3.47;
 }
 
 dependencies {
-  runtime: "click>=8.3.3, pyyaml>=6.0.3, toml>=0.10.2, goal>=2.1.190, costs>=0.1.50, pfix>=0.1.72";
+  runtime: "click>=8.3.3, pyyaml>=6.0.3, toml>=0.10.2, goal>=2.1.190, costs>=0.1.50, pfix>=0.1.72, mcp>=1.27.0";
   dev: "pytest>=9.0.3, pytest-asyncio>=0.21.0, pytest-cov>=7.1.0, ruff>=0.15.11, build>=1.4.4, twine>=6.2.0, pyqual>=0.1.143, goal>=2.1.190, costs>=0.1.50, pfix>=0.1.72, mcp>=1.27.0";
 }
 
@@ -305,9 +305,56 @@ environment[name="local"] {
 - `sumd.models`
 - `sumd.parser`
 - `sumd.pipeline`
+- `sumd.prolog_engine`
 - `sumd.renderer`
 - `sumd.toon_parser`
 - `sumd.validator`
+
+### Architecture Consistency Rules (sumd/rules.pl)
+
+```prolog markpact:file path=sumd/rules.pl
+% ─────────────────────────────────────────────────────────────
+% 🧠 SUMD ARCHITECTURAL CONSISTENCY RULES
+% ─────────────────────────────────────────────────────────────
+
+% ── Layer 1: Structural Consistency ─────────────────────────────
+
+% A workflow must have a trigger
+invalid(workflow_missing_trigger(W)) :-
+    sumd_workflow(W, '').
+
+% A workflow must have at least one step
+invalid(workflow_missing_steps(W)) :-
+    sumd_workflow(W, _),
+    \+ sumd_workflow_step(W, _, _).
+
+
+% ── Layer 2: Semantic Consistency ───────────────────────────────
+
+% If deploy target is docker_compose, a compose file must be declared
+invalid(deploy_missing_compose_file) :-
+    sumd_deploy_target(docker_compose),
+    \+ sumd_deploy_compose_file(_).
+
+% If a quality:Gate workflow exists, the gate itself must be declared/expected
+invalid(missing_gate_for_quality_workflow(W, Gate)) :-
+    sumd_quality_workflow(W, Gate),
+    \+ sumd_gate(Gate).
+
+
+% ── Layer 3: Consistency between Artifacts ─────────────────────
+
+% Any file declared in SUMD.md (via markpact annotations) must exist in the workspace
+invalid(declared_file_missing(Path, Kind)) :-
+    sumd_declared_file(Path, Kind),
+    \+ project_file(Path, _, _).
+
+% Any workflow declared in app.doql.less should have a matching automation task in Makefile or Taskfile
+invalid(workflow_missing_automation(W)) :-
+    sumd_workflow(W, _),
+    \+ makefile_target(W, _),
+    \+ taskfile_task(W, _).
+```
 
 ## Workflows
 
@@ -634,6 +681,7 @@ toml>=0.10.2
 goal>=2.1.190
 costs>=0.1.50
 pfix>=0.1.72
+mcp>=1.27.0
 ```
 
 ### Development
@@ -686,9 +734,9 @@ def _maybe_generate_testql(proj_dir)  # CC=5, fan=5
 def _finalize_scan(proj_dir, doc, sources, cb_warnings, export_json, run_analyze, tool_list, doql_sync, sumd_path)  # CC=9, fan=9
 def _scan_one_project(proj_dir, fix, raw, export_json, run_analyze, tool_list, parser_inst, profile, generate_doql, doql_sync, generate_testql)  # CC=10, fan=9 ⚠
 def scan(workspace, export_json, report, fix, raw, analyze, tools, profile, depth, recursive, generate_doql, doql_sync, generate_testql, workspace_mode)  # CC=14, fan=18 ⚠
-def lint(files, workspace, as_json)  # CC=10, fan=12 ⚠
+def lint(files, workspace, as_json, strict)  # CC=12, fan=13 ⚠
 def _lint_collect_paths(files, workspace)  # CC=6, fan=7
-def _lint_print_result(path, r)  # CC=9, fan=2
+def _lint_print_result(path, r)  # CC=10, fan=3 ⚠
 def _setup_tools_venv(venv_dir, tool_list, force)  # CC=7, fan=6
 def _run_code2llm_formats(bin_dir, project, project_output)  # CC=5, fan=4
 def _run_tool_subprocess(bin_dir, tool, cmd_args)  # CC=3, fan=4
@@ -750,10 +798,55 @@ def _render_map_detail(proj_dir, modules)  # CC=5, fan=3
 def _map_cc_stats(all_funcs)  # CC=12, fan=8 ⚠
 def _render_py_module_detail(rel, info, a)  # CC=7, fan=3
 def generate_map_toon(proj_dir)  # CC=5, fan=13
+def generate_project_logic(proj_dir)  # CC=20, fan=18 ⚠
+def _extract_sumd_semantic_facts(proj_dir)  # CC=15, fan=10 ⚠
 def required_tools_for_profile(profile)  # CC=4, fan=0
 def extract_source_snippets(proj_dir, pkg_name)  # CC=6, fan=11
 def extract_swop(proj_dir)  # CC=9, fan=8
 def extract_project_analysis(proj_dir, refactor)  # CC=6, fan=7
+```
+
+### `sumd.prolog_engine` (`sumd/prolog_engine.py`)
+
+```python
+def is_variable(x)  # CC=6, fan=4
+def to_term(x)  # CC=13, fan=14 ⚠
+def _split_body_terms(body_str)  # CC=13, fan=3 ⚠
+def unify(x, y, subst)  # CC=10, fan=7 ⚠
+def resolve_val(x, subst)  # CC=3, fan=1
+def deep_resolve(x, subst)  # CC=3, fan=4
+def extend_subst(v, val, subst)  # CC=2, fan=2
+def occurs_check(v, val, subst)  # CC=4, fan=4
+def rename_variables(rule, suffix)  # CC=2, fan=5
+class Variable:  # Represents a logical variable in our pure Python engine.
+    def __init__(name)  # CC=2
+    def __repr__()  # CC=2
+    def __eq__(other)  # CC=3
+    def __hash__()  # CC=1
+class Term:  # Represents a Prolog term (e.g. parent(john, mary)).
+    def __init__(op)  # CC=2
+    def __repr__()  # CC=2
+    def __eq__(other)  # CC=3
+class Rule:  # Represents a Prolog rule Head :- Body.
+    def __init__(head, body)  # CC=2
+    def __repr__()  # CC=2
+class PythonPrologDB:  # In-memory Prolog database for pure Python execution.
+    def __init__()  # CC=2
+    def add_fact(op)  # CC=2
+    def add_rule(head, body)  # CC=1
+    def parse_and_load(prolog_text)  # CC=6
+class PythonPrologEngine:  # SLD Resolution Logic Interpreter.
+    def __init__(db)  # CC=2
+    def query(goal_str)  # CC=5
+    def _find_vars(term)  # CC=1
+    def _resolve(goals, subst)  # CC=12 ⚠
+class HybridPrologEngine:  # Hybrid Logic Engine delegating queries based on backend avai
+    def __init__(prolog_file_path)  # CC=2
+    def query(query_str)  # CC=5
+    def _query_pyswip(query_str)  # CC=4
+    def _query_subprocess(query_str)  # CC=9
+    def _query_python(query_str)  # CC=1
+    def _swipl_executable_exists()  # CC=2
 ```
 
 ### `sumd.mcp_server` (`sumd/mcp_server.py`)
@@ -782,7 +875,7 @@ def main()  # CC=1, fan=3
 ### `sumd.pipeline` (`sumd/pipeline.py`)
 
 ```python
-def _refresh_map_toon(proj_dir)  # CC=3, fan=3
+def _refresh_map_toon(proj_dir)  # CC=5, fan=4
 def _find_tools_bin_dir(proj_dir)  # CC=3, fan=1
 def _run_tool_if_present(bin_dir, name, args, proj_dir)  # CC=3, fan=3
 def _refresh_analysis_files(proj_dir, profile)  # CC=7, fan=5
@@ -801,103 +894,72 @@ class RenderPipeline:  # Collect project data → build sections → render → 
     def run(profile, return_sources)  # CC=2
 ```
 
-### `sumd.validator` (`sumd/validator.py`)
-
-```python
-def _validate_yaml_body(body, path)  # CC=2, fan=1
-def _validate_less_css_body(body, path)  # CC=2, fan=1
-def _validate_mermaid_body(body, path)  # CC=3, fan=4
-def _validate_toon_body(body, path)  # CC=2, fan=1
-def _validate_bash_body(body, path)  # CC=4, fan=1
-def _validate_deps_body(body, path)  # CC=5, fan=6
-def _validate_markpact_meta(mp, line_no, lang, meta, issues)  # CC=5, fan=6
-def validate_codeblocks(content, source)  # CC=9, fan=11
-def _check_h1(lines, source)  # CC=3, fan=2
-def _check_required_sections(lines, source, profile)  # CC=7, fan=6
-def _check_metadata_fields(lines, source)  # CC=9, fan=6
-def _check_unclosed_fences(lines, source)  # CC=4, fan=2
-def _check_empty_links(content, source)  # CC=2, fan=1
-def validate_markdown(content, source, profile)  # CC=1, fan=6
-def validate_sumd_file(path, profile)  # CC=3, fan=5
-class CodeBlockIssue:
-```
-
 ## Call Graph
 
-*188 nodes · 178 edges · 29 modules · CC̄=1.7*
+*215 nodes · 213 edges · 31 modules · CC̄=3.9*
 
 ### Hubs (by degree)
 
 | Function | CC | in | out | total |
 |----------|----|----|-----|-------|
 | `print` *(in test)* | 0 | 84 | 0 | **84** |
+| `generate_project_logic` *(in sumd.extractor)* | 20 ⚠ | 2 | 71 | **73** |
 | `run` *(in examples.mcp.mcp_client)* | 11 ⚠ | 1 | 53 | **54** |
-| `create_builtin_registry` *(in sumd.dsl.commands)* | 1 | 2 | 41 | **43** |
+| `create_builtin_registry` *(in sumd.dsl.commands)* | 1 | 2 | 45 | **47** |
+| `to_term` *(in sumd.prolog_engine)* | 13 ⚠ | 14 | 29 | **43** |
+| `to_term` *(in sumd_logic_validator.sumd_logic_validator.engine)* | 13 ⚠ | 4 | 29 | **33** |
 | `analyze` *(in sumd.cli)* | 11 ⚠ | 0 | 33 | **33** |
 | `_collect` *(in sumd.pipeline.RenderPipeline)* | 3 | 0 | 31 | **31** |
-| `_render_call_graph` *(in sumd.sections.call_graph)* | 7 | 0 | 28 | **28** |
-| `_handle_shell_command` *(in sumd.dsl.shell.DSLShell)* | 14 ⚠ | 0 | 24 | **24** |
-| `generate_map_toon` *(in sumd.extractor)* | 5 | 0 | 24 | **24** |
 
 ```toon markpact:analysis path=project/calls.toon.yaml
 # code2llm call graph | /home/tom/github/oqlos/sumd
-# nodes: 188 | edges: 178 | modules: 29
-# CC̄=1.7
+# generated in 0.13s
+# nodes: 215 | edges: 213 | modules: 31
+# CC̄=3.9
 
 HUBS[20]:
   test.print
     CC=0  in:84  out:0  total:84
+  sumd.extractor.generate_project_logic
+    CC=20  in:2  out:71  total:73
   examples.mcp.mcp_client.run
     CC=11  in:1  out:53  total:54
   sumd.dsl.commands.create_builtin_registry
-    CC=1  in:2  out:41  total:43
+    CC=1  in:2  out:45  total:47
+  sumd.prolog_engine.to_term
+    CC=13  in:14  out:29  total:43
+  sumd_logic_validator.sumd_logic_validator.engine.to_term
+    CC=13  in:4  out:29  total:33
   sumd.cli.analyze
     CC=11  in:0  out:33  total:33
   sumd.pipeline.RenderPipeline._collect
     CC=3  in:0  out:31  total:31
   sumd.sections.call_graph._render_call_graph
     CC=7  in:0  out:28  total:28
+  sumd.extractor.generate_map_toon
+    CC=5  in:3  out:24  total:27
   sumd.dsl.shell.DSLShell._handle_shell_command
     CC=14  in:0  out:24  total:24
-  sumd.extractor.generate_map_toon
-    CC=5  in:0  out:24  total:24
-  sumd.sections.quality._render_quality_parsed
-    CC=9  in:1  out:21  total:22
+  sumd.cli.lint
+    CC=12  in:0  out:23  total:23
+  sumd.extractor.extract_pyproject
+    CC=3  in:5  out:17  total:22
   sumd.parser.SUMDParser.parse_file
     CC=1  in:20  out:2  total:22
-  sumd.sections.interfaces._render_interfaces_openapi
-    CC=6  in:1  out:19  total:20
+  sumd.sections.quality._render_quality_parsed
+    CC=9  in:1  out:21  total:22
+  sumd.cli.map_cmd
+    CC=7  in:0  out:20  total:20
   sumd.sections.dependencies._render_deps_runtime
     CC=6  in:1  out:19  total:20
   sumd.extractor._parse_doql_content
     CC=6  in:1  out:19  total:20
+  sumd.sections.interfaces._render_interfaces_openapi
+    CC=6  in:1  out:19  total:20
   sumd.extractor._path_matches_pattern
     CC=18  in:2  out:18  total:20
-  sumd.cli.map_cmd
-    CC=7  in:0  out:20  total:20
-  sumd.extractor._parse_doql_workflows
-    CC=7  in:1  out:18  total:19
-  sumd.cli.lint
-    CC=10  in:0  out:19  total:19
-  sumd.sections.environment._render_goal_section
-    CC=9  in:1  out:17  total:18
-  sumd.validator.validate_codeblocks
-    CC=9  in:1  out:17  total:18
-  sumd.sections.workflows._render_workflows_taskfile
-    CC=6  in:1  out:17  total:18
 
 MODULES:
-  SUMR  [12 funcs]
-    extract_doql  CC=0  out:0
-    extract_makefile  CC=0  out:0
-    extract_openapi  CC=0  out:0
-    extract_package_json  CC=0  out:0
-    extract_pyproject  CC=0  out:0
-    extract_pyqual  CC=0  out:0
-    extract_python_modules  CC=0  out:0
-    extract_readme_title  CC=0  out:0
-    extract_requirements  CC=0  out:0
-    extract_taskfile  CC=0  out:0
   examples.llm.anthropic_example  [2 funcs]
     ask  CC=1  out:3
     main  CC=2  out:14
@@ -921,10 +983,10 @@ MODULES:
     _is_project_dir  CC=8  out:4
   sumd.cqrs.queries  [5 funcs]
     _handle_get_project_info  CC=3  out:11
-    _handle_get_sumd_document  CC=3  out:3
-    _handle_get_sumd_section  CC=4  out:6
-    _handle_get_validation_results  CC=4  out:8
-    _handle_list_sumd_sections  CC=3  out:3
+    _handle_get_sumd_document  CC=3  out:4
+    _handle_get_sumd_section  CC=4  out:7
+    _handle_get_validation_results  CC=4  out:9
+    _handle_list_sumd_sections  CC=3  out:4
   sumd.cqrs.sumd_aggregate  [1 funcs]
     create_from_file  CC=6  out:12
   sumd.dsl.commands  [5 funcs]
@@ -932,7 +994,7 @@ MODULES:
     _cmd_sumd_info  CC=3  out:3
     _cmd_sumd_map  CC=6  out:7
     _cmd_sumd_validate  CC=2  out:7
-    create_builtin_registry  CC=1  out:41
+    create_builtin_registry  CC=1  out:45
   sumd.dsl.engine  [2 funcs]
     _builtin_print  CC=1  out:1
     execute_text  CC=3  out:5
@@ -950,7 +1012,7 @@ MODULES:
     execute_script  CC=9  out:17
     run  CC=9  out:15
     execute_dsl  CC=4  out:7
-  sumd.extractor  [28 funcs]
+  sumd.extractor  [37 funcs]
     _analyse_class_methods  CC=6  out:6
     _analyse_py_module  CC=2  out:6
     _analyse_py_top_classes  CC=5  out:8
@@ -984,9 +1046,22 @@ MODULES:
     _find_tools_bin_dir  CC=3  out:1
     _inject_toc  CC=3  out:9
     _refresh_analysis_files  CC=7  out:11
-  sumd.sections.architecture  [6 funcs]
+  sumd.prolog_engine  [13 funcs]
+    add_fact  CC=2  out:4
+    parse_and_load  CC=6  out:16
+    _resolve  CC=12  out:15
+    query  CC=5  out:8
+    _split_body_terms  CC=13  out:7
+    deep_resolve  CC=3  out:4
+    extend_subst  CC=2  out:2
+    is_variable  CC=6  out:5
+    occurs_check  CC=4  out:4
+    rename_variables  CC=2  out:8
+  sumd.sections.architecture  [8 funcs]
+    _render_architecture  CC=6  out:13
     _render_architecture_doql_parsed  CC=1  out:4
     _render_architecture_doql_section  CC=6  out:14
+    _render_architecture_rules  CC=3  out:10
     _render_doql_app  CC=3  out:8
     _render_doql_entities  CC=6  out:9
     _render_doql_integrations  CC=5  out:9
@@ -1042,7 +1117,7 @@ MODULES:
     _parse_toon_block_performance  CC=7  out:8
     _parse_toon_file  CC=4  out:16
     extract_testql_scenarios  CC=7  out:12
-  sumd.validator  [9 funcs]
+  sumd.validator  [10 funcs]
     _check_empty_links  CC=2  out:1
     _check_h1  CC=3  out:2
     _check_metadata_fields  CC=9  out:7
@@ -1051,7 +1126,23 @@ MODULES:
     _validate_markpact_meta  CC=5  out:9
     validate_codeblocks  CC=9  out:17
     validate_markdown  CC=1  out:6
-    validate_sumd_file  CC=3  out:5
+    validate_project_architecture  CC=8  out:15
+    validate_sumd_file  CC=4  out:8
+  sumd_logic_validator.sumd_logic_validator.cli  [3 funcs]
+    get_engine  CC=4  out:9
+    query  CC=6  out:14
+    shell  CC=10  out:16
+  sumd_logic_validator.sumd_logic_validator.engine  [11 funcs]
+    add_fact  CC=2  out:4
+    parse_and_load  CC=7  out:17
+    _resolve  CC=12  out:15
+    query  CC=5  out:8
+    deep_resolve  CC=3  out:4
+    extend_subst  CC=2  out:2
+    is_variable  CC=6  out:4
+    occurs_check  CC=4  out:4
+    resolve_val  CC=3  out:1
+    to_term  CC=13  out:29
   test  [1 funcs]
     print  CC=0  out:0
 
@@ -1077,44 +1168,51 @@ EDGES:
   sumd.validator.validate_markdown → sumd.validator._check_metadata_fields
   sumd.validator.validate_markdown → sumd.validator._check_h1
   sumd.validator.validate_markdown → sumd.validator._check_required_sections
+  sumd.validator.validate_project_architecture → sumd.extractor.generate_project_logic
   sumd.validator.validate_sumd_file → sumd.validator.validate_markdown
   sumd.validator.validate_sumd_file → sumd.validator.validate_codeblocks
-  sumd.pipeline._refresh_map_toon → SUMR.generate_map_toon
-  sumd.pipeline._refresh_analysis_files → SUMR.required_tools_for_profile
-  sumd.pipeline._refresh_analysis_files → sumd.pipeline._find_tools_bin_dir
-  sumd.pipeline._refresh_analysis_files → sumd.pipeline._run_tool_if_present
-  sumd.pipeline._collect_pkg_sources → sumd.pipeline._collect_tool_sources
-  sumd.pipeline._collect_pkg_sources → sumd.pipeline._doql_sources
-  sumd.pipeline._collect_sources → sumd.pipeline._collect_pkg_sources
-  sumd.pipeline._collect_sources → sumd.pipeline._collect_infra_sources
-  sumd.pipeline.RenderPipeline._collect → SUMR.extract_pyproject
-  sumd.pipeline.RenderPipeline._collect → SUMR.extract_taskfile
-  sumd.pipeline.RenderPipeline._collect → sumd.toon_parser.extract_testql_scenarios
-  sumd.pipeline.RenderPipeline._collect → SUMR.extract_openapi
-  sumd.pipeline.RenderPipeline._collect → SUMR.extract_doql
-  sumd.pipeline.RenderPipeline._collect → SUMR.extract_pyqual
-  sumd.pipeline.RenderPipeline._collect → SUMR.extract_python_modules
-  sumd.pipeline.RenderPipeline._collect → SUMR.extract_readme_title
-  sumd.pipeline.RenderPipeline._collect → SUMR.extract_requirements
-  sumd.pipeline.RenderPipeline._collect → SUMR.extract_makefile
-  sumd.pipeline.RenderPipeline.run → sumd.pipeline._inject_toc
-  sumd.sections.code_analysis.CodeAnalysisSection.render → sumd.sections.code_analysis._render_code_analysis
-  sumd.sections.environment.EnvironmentSection.render → sumd.sections.environment._render_env_section
-  sumd.sections.environment.EnvironmentSection.render → sumd.sections.environment._render_goal_section
-  sumd.sections.dependencies._render_dependencies → sumd.sections.dependencies._render_deps_runtime
-  sumd.sections.dependencies._render_dependencies → sumd.sections.dependencies._render_deps_dev
-  sumd.extractor.extract_pyproject → sumd.extractor._read_toml
-  sumd.extractor.extract_taskfile → sumd.extractor._first_task_cmd
-  sumd.extractor._parse_doql_content → sumd.extractor._parse_doql_interfaces
+  sumd.validator.validate_sumd_file → sumd.validator.validate_project_architecture
+  sumd.cli._node_spec_from_package_json → sumd.cli._node_framework
+  sumd.cli._build_doql_spec → sumd.extractor.extract_package_json
+  sumd.cli._build_doql_spec → sumd.cli._node_spec_from_package_json
+  sumd.cli._generate_doql_less → sumd.cli._build_doql_spec
+  sumd.cli._generate_doql_less → sumd.cli._render_doql_boilerplate
+  sumd.cli.validate → sumd.parser.SUMDParser.parse_file
+  sumd.cli.export → sumd.parser.SUMDParser.parse_file
+  sumd.cli.info → sumd.parser.SUMDParser.parse_file
+  sumd.cli.extract → sumd.parser.SUMDParser.parse_file
+  sumd.cli._walk_projects → sumd.cli._is_project_dir
+  sumd.cli._detect_projects → sumd.cli._walk_projects
+  sumd.cli._run_one_tool → sumd.cli._tool_bin
+  sumd.cli._run_analysis_tools → sumd.cli._ensure_venv
+  sumd.cli._run_analysis_tools → sumd.cli._run_one_tool
+  sumd.cli._render_write_validate → sumd.validator.validate_sumd_file
+  sumd.cli._render_write_validate → sumd.parser.SUMDParser.parse_file
+  sumd.cli._maybe_generate_doql → sumd.cli._detect_project_type
+  sumd.cli._maybe_generate_doql → sumd.extractor.extract_pyproject
+  sumd.cli._maybe_generate_doql → sumd.cli._generate_doql_less
+  sumd.cli._maybe_generate_doql → sumd.extractor.extract_package_json
+  sumd.cli._finalize_scan → sumd.cli._echo_scan_result
+  sumd.cli._finalize_scan → sumd.cli._export_sumd_json
+  sumd.cli._finalize_scan → sumd.cli._run_analysis_tools
+  sumd.cli._scan_one_project → sumd.cli._render_write_validate
+  sumd.cli._scan_one_project → sumd.cli._finalize_scan
 ```
 
 ## Test Contracts
 
 *Scenarios as contract signatures — what the system guarantees.*
 
-### Cli (1)
+### Cli (2)
 
 **`CLI Command Tests`**
+
+**`sumd-cli.testql.toon.yaml — CLI command and pipeline validation`**
+- assert `command_scan_status == 0`
+- assert `command_lint_status == 0`
+- assert `command_info_status == 0`
+- perf `execution_time_ms < 5000`
+- perf `memory_peak_mb < 128`
 
 ### Integration (1)
 
@@ -1128,63 +1226,53 @@ EDGES:
 
 ```toon markpact:analysis path=project/calls.toon.yaml
 # code2llm call graph | /home/tom/github/oqlos/sumd
-# nodes: 188 | edges: 178 | modules: 29
-# CC̄=1.7
+# generated in 0.13s
+# nodes: 215 | edges: 213 | modules: 31
+# CC̄=3.9
 
 HUBS[20]:
   test.print
     CC=0  in:84  out:0  total:84
+  sumd.extractor.generate_project_logic
+    CC=20  in:2  out:71  total:73
   examples.mcp.mcp_client.run
     CC=11  in:1  out:53  total:54
   sumd.dsl.commands.create_builtin_registry
-    CC=1  in:2  out:41  total:43
+    CC=1  in:2  out:45  total:47
+  sumd.prolog_engine.to_term
+    CC=13  in:14  out:29  total:43
+  sumd_logic_validator.sumd_logic_validator.engine.to_term
+    CC=13  in:4  out:29  total:33
   sumd.cli.analyze
     CC=11  in:0  out:33  total:33
   sumd.pipeline.RenderPipeline._collect
     CC=3  in:0  out:31  total:31
   sumd.sections.call_graph._render_call_graph
     CC=7  in:0  out:28  total:28
+  sumd.extractor.generate_map_toon
+    CC=5  in:3  out:24  total:27
   sumd.dsl.shell.DSLShell._handle_shell_command
     CC=14  in:0  out:24  total:24
-  sumd.extractor.generate_map_toon
-    CC=5  in:0  out:24  total:24
-  sumd.sections.quality._render_quality_parsed
-    CC=9  in:1  out:21  total:22
+  sumd.cli.lint
+    CC=12  in:0  out:23  total:23
+  sumd.extractor.extract_pyproject
+    CC=3  in:5  out:17  total:22
   sumd.parser.SUMDParser.parse_file
     CC=1  in:20  out:2  total:22
-  sumd.sections.interfaces._render_interfaces_openapi
-    CC=6  in:1  out:19  total:20
+  sumd.sections.quality._render_quality_parsed
+    CC=9  in:1  out:21  total:22
+  sumd.cli.map_cmd
+    CC=7  in:0  out:20  total:20
   sumd.sections.dependencies._render_deps_runtime
     CC=6  in:1  out:19  total:20
   sumd.extractor._parse_doql_content
     CC=6  in:1  out:19  total:20
+  sumd.sections.interfaces._render_interfaces_openapi
+    CC=6  in:1  out:19  total:20
   sumd.extractor._path_matches_pattern
     CC=18  in:2  out:18  total:20
-  sumd.cli.map_cmd
-    CC=7  in:0  out:20  total:20
-  sumd.extractor._parse_doql_workflows
-    CC=7  in:1  out:18  total:19
-  sumd.cli.lint
-    CC=10  in:0  out:19  total:19
-  sumd.sections.environment._render_goal_section
-    CC=9  in:1  out:17  total:18
-  sumd.validator.validate_codeblocks
-    CC=9  in:1  out:17  total:18
-  sumd.sections.workflows._render_workflows_taskfile
-    CC=6  in:1  out:17  total:18
 
 MODULES:
-  SUMR  [12 funcs]
-    extract_doql  CC=0  out:0
-    extract_makefile  CC=0  out:0
-    extract_openapi  CC=0  out:0
-    extract_package_json  CC=0  out:0
-    extract_pyproject  CC=0  out:0
-    extract_pyqual  CC=0  out:0
-    extract_python_modules  CC=0  out:0
-    extract_readme_title  CC=0  out:0
-    extract_requirements  CC=0  out:0
-    extract_taskfile  CC=0  out:0
   examples.llm.anthropic_example  [2 funcs]
     ask  CC=1  out:3
     main  CC=2  out:14
@@ -1208,10 +1296,10 @@ MODULES:
     _is_project_dir  CC=8  out:4
   sumd.cqrs.queries  [5 funcs]
     _handle_get_project_info  CC=3  out:11
-    _handle_get_sumd_document  CC=3  out:3
-    _handle_get_sumd_section  CC=4  out:6
-    _handle_get_validation_results  CC=4  out:8
-    _handle_list_sumd_sections  CC=3  out:3
+    _handle_get_sumd_document  CC=3  out:4
+    _handle_get_sumd_section  CC=4  out:7
+    _handle_get_validation_results  CC=4  out:9
+    _handle_list_sumd_sections  CC=3  out:4
   sumd.cqrs.sumd_aggregate  [1 funcs]
     create_from_file  CC=6  out:12
   sumd.dsl.commands  [5 funcs]
@@ -1219,7 +1307,7 @@ MODULES:
     _cmd_sumd_info  CC=3  out:3
     _cmd_sumd_map  CC=6  out:7
     _cmd_sumd_validate  CC=2  out:7
-    create_builtin_registry  CC=1  out:41
+    create_builtin_registry  CC=1  out:45
   sumd.dsl.engine  [2 funcs]
     _builtin_print  CC=1  out:1
     execute_text  CC=3  out:5
@@ -1237,7 +1325,7 @@ MODULES:
     execute_script  CC=9  out:17
     run  CC=9  out:15
     execute_dsl  CC=4  out:7
-  sumd.extractor  [28 funcs]
+  sumd.extractor  [37 funcs]
     _analyse_class_methods  CC=6  out:6
     _analyse_py_module  CC=2  out:6
     _analyse_py_top_classes  CC=5  out:8
@@ -1271,9 +1359,22 @@ MODULES:
     _find_tools_bin_dir  CC=3  out:1
     _inject_toc  CC=3  out:9
     _refresh_analysis_files  CC=7  out:11
-  sumd.sections.architecture  [6 funcs]
+  sumd.prolog_engine  [13 funcs]
+    add_fact  CC=2  out:4
+    parse_and_load  CC=6  out:16
+    _resolve  CC=12  out:15
+    query  CC=5  out:8
+    _split_body_terms  CC=13  out:7
+    deep_resolve  CC=3  out:4
+    extend_subst  CC=2  out:2
+    is_variable  CC=6  out:5
+    occurs_check  CC=4  out:4
+    rename_variables  CC=2  out:8
+  sumd.sections.architecture  [8 funcs]
+    _render_architecture  CC=6  out:13
     _render_architecture_doql_parsed  CC=1  out:4
     _render_architecture_doql_section  CC=6  out:14
+    _render_architecture_rules  CC=3  out:10
     _render_doql_app  CC=3  out:8
     _render_doql_entities  CC=6  out:9
     _render_doql_integrations  CC=5  out:9
@@ -1329,7 +1430,7 @@ MODULES:
     _parse_toon_block_performance  CC=7  out:8
     _parse_toon_file  CC=4  out:16
     extract_testql_scenarios  CC=7  out:12
-  sumd.validator  [9 funcs]
+  sumd.validator  [10 funcs]
     _check_empty_links  CC=2  out:1
     _check_h1  CC=3  out:2
     _check_metadata_fields  CC=9  out:7
@@ -1338,7 +1439,23 @@ MODULES:
     _validate_markpact_meta  CC=5  out:9
     validate_codeblocks  CC=9  out:17
     validate_markdown  CC=1  out:6
-    validate_sumd_file  CC=3  out:5
+    validate_project_architecture  CC=8  out:15
+    validate_sumd_file  CC=4  out:8
+  sumd_logic_validator.sumd_logic_validator.cli  [3 funcs]
+    get_engine  CC=4  out:9
+    query  CC=6  out:14
+    shell  CC=10  out:16
+  sumd_logic_validator.sumd_logic_validator.engine  [11 funcs]
+    add_fact  CC=2  out:4
+    parse_and_load  CC=7  out:17
+    _resolve  CC=12  out:15
+    query  CC=5  out:8
+    deep_resolve  CC=3  out:4
+    extend_subst  CC=2  out:2
+    is_variable  CC=6  out:4
+    occurs_check  CC=4  out:4
+    resolve_val  CC=3  out:1
+    to_term  CC=13  out:29
   test  [1 funcs]
     print  CC=0  out:0
 
@@ -1364,88 +1481,95 @@ EDGES:
   sumd.validator.validate_markdown → sumd.validator._check_metadata_fields
   sumd.validator.validate_markdown → sumd.validator._check_h1
   sumd.validator.validate_markdown → sumd.validator._check_required_sections
+  sumd.validator.validate_project_architecture → sumd.extractor.generate_project_logic
   sumd.validator.validate_sumd_file → sumd.validator.validate_markdown
   sumd.validator.validate_sumd_file → sumd.validator.validate_codeblocks
-  sumd.pipeline._refresh_map_toon → SUMR.generate_map_toon
-  sumd.pipeline._refresh_analysis_files → SUMR.required_tools_for_profile
-  sumd.pipeline._refresh_analysis_files → sumd.pipeline._find_tools_bin_dir
-  sumd.pipeline._refresh_analysis_files → sumd.pipeline._run_tool_if_present
-  sumd.pipeline._collect_pkg_sources → sumd.pipeline._collect_tool_sources
-  sumd.pipeline._collect_pkg_sources → sumd.pipeline._doql_sources
-  sumd.pipeline._collect_sources → sumd.pipeline._collect_pkg_sources
-  sumd.pipeline._collect_sources → sumd.pipeline._collect_infra_sources
-  sumd.pipeline.RenderPipeline._collect → SUMR.extract_pyproject
-  sumd.pipeline.RenderPipeline._collect → SUMR.extract_taskfile
-  sumd.pipeline.RenderPipeline._collect → sumd.toon_parser.extract_testql_scenarios
-  sumd.pipeline.RenderPipeline._collect → SUMR.extract_openapi
-  sumd.pipeline.RenderPipeline._collect → SUMR.extract_doql
-  sumd.pipeline.RenderPipeline._collect → SUMR.extract_pyqual
-  sumd.pipeline.RenderPipeline._collect → SUMR.extract_python_modules
-  sumd.pipeline.RenderPipeline._collect → SUMR.extract_readme_title
-  sumd.pipeline.RenderPipeline._collect → SUMR.extract_requirements
-  sumd.pipeline.RenderPipeline._collect → SUMR.extract_makefile
-  sumd.pipeline.RenderPipeline.run → sumd.pipeline._inject_toc
-  sumd.sections.code_analysis.CodeAnalysisSection.render → sumd.sections.code_analysis._render_code_analysis
-  sumd.sections.environment.EnvironmentSection.render → sumd.sections.environment._render_env_section
-  sumd.sections.environment.EnvironmentSection.render → sumd.sections.environment._render_goal_section
-  sumd.sections.dependencies._render_dependencies → sumd.sections.dependencies._render_deps_runtime
-  sumd.sections.dependencies._render_dependencies → sumd.sections.dependencies._render_deps_dev
-  sumd.extractor.extract_pyproject → sumd.extractor._read_toml
-  sumd.extractor.extract_taskfile → sumd.extractor._first_task_cmd
-  sumd.extractor._parse_doql_content → sumd.extractor._parse_doql_interfaces
+  sumd.validator.validate_sumd_file → sumd.validator.validate_project_architecture
+  sumd.cli._node_spec_from_package_json → sumd.cli._node_framework
+  sumd.cli._build_doql_spec → sumd.extractor.extract_package_json
+  sumd.cli._build_doql_spec → sumd.cli._node_spec_from_package_json
+  sumd.cli._generate_doql_less → sumd.cli._build_doql_spec
+  sumd.cli._generate_doql_less → sumd.cli._render_doql_boilerplate
+  sumd.cli.validate → sumd.parser.SUMDParser.parse_file
+  sumd.cli.export → sumd.parser.SUMDParser.parse_file
+  sumd.cli.info → sumd.parser.SUMDParser.parse_file
+  sumd.cli.extract → sumd.parser.SUMDParser.parse_file
+  sumd.cli._walk_projects → sumd.cli._is_project_dir
+  sumd.cli._detect_projects → sumd.cli._walk_projects
+  sumd.cli._run_one_tool → sumd.cli._tool_bin
+  sumd.cli._run_analysis_tools → sumd.cli._ensure_venv
+  sumd.cli._run_analysis_tools → sumd.cli._run_one_tool
+  sumd.cli._render_write_validate → sumd.validator.validate_sumd_file
+  sumd.cli._render_write_validate → sumd.parser.SUMDParser.parse_file
+  sumd.cli._maybe_generate_doql → sumd.cli._detect_project_type
+  sumd.cli._maybe_generate_doql → sumd.extractor.extract_pyproject
+  sumd.cli._maybe_generate_doql → sumd.cli._generate_doql_less
+  sumd.cli._maybe_generate_doql → sumd.extractor.extract_package_json
+  sumd.cli._finalize_scan → sumd.cli._echo_scan_result
+  sumd.cli._finalize_scan → sumd.cli._export_sumd_json
+  sumd.cli._finalize_scan → sumd.cli._run_analysis_tools
+  sumd.cli._scan_one_project → sumd.cli._render_write_validate
+  sumd.cli._scan_one_project → sumd.cli._finalize_scan
 ```
 
 ### Code Analysis (`project/analysis.toon.yaml`)
 
 ```toon markpact:analysis path=project/analysis.toon.yaml
-# code2llm | 48f 11752L | python:46,shell:2 | 2026-05-02
-# CC̄=3.8 | critical:2/466 | dups:0 | cycles:0
+# code2llm | 62f 16900L | python:55,perl:4,shell:3 | 2026-05-21
+# CC̄=4.0 | critical:6/542 | dups:6 | cycles:0
 
-HEALTH[3]:
-  🔴 GOD   sumd/dsl/parser.py = 586L, 6 classes, 29m, max CC=14
+HEALTH[8]:
+  🔴 DUP   6 classes duplicated
+  🔴 GOD   sumd/dsl/parser.py = 666L, 6 classes, 29m, max CC=23
   🟡 CC    _path_matches_pattern CC=18 (limit:15)
+  🟡 CC    generate_project_logic CC=20 (limit:15)
+  🟡 CC    _extract_sumd_semantic_facts CC=15 (limit:15)
   🟡 CC    _execute_expression CC=15 (limit:15)
+  🟡 CC    _parse_statement CC=23 (limit:15)
+  🟡 CC    _parse_primary CC=22 (limit:15)
 
-REFACTOR[2]:
-  1. split sumd/dsl/parser.py  (god module)
-  2. split 2 high-CC methods  (CC>15)
+REFACTOR[3]:
+  1. rm duplicates  (-6 dup classes)
+  2. split sumd/dsl/parser.py  (god module)
+  3. split 6 high-CC methods  (CC>15)
 
-PIPELINES[275]:
-  [1] Src [main]: main → ask → build_context → parse_file
+PIPELINES[317]:
+  [1] Src [main]: main → ask → parse_file
       PURITY: 100% pure
-  [2] Src [main]: main → ask → parse_file
+  [2] Src [main]: main → ask → build_context → parse_file
       PURITY: 100% pure
   [3] Src [main]: main → run
       PURITY: 100% pure
-  [4] Src [parse]: parse
+  [4] Src [_validate_yaml_body]: _validate_yaml_body
       PURITY: 100% pure
-  [5] Src [_parse_header]: _parse_header
+  [5] Src [_validate_less_css_body]: _validate_less_css_body
       PURITY: 100% pure
 
 LAYERS:
-  sumd/                           CC̄=3.8    ←in:17  →out:4
-  │ !! cli                       1984L  0C   47m  CC=14     ←0
-  │ !! extractor                 1077L  0C   43m  CC=18     ←5
+  sumd/                           CC̄=4.0    ←in:28  →out:4  ×DUP
+  │ !! cli                       1999L  0C   47m  CC=14     ←0
+  │ !! extractor                 1282L  0C   45m  CC=20     ←6
   │ !! mcp_server                 714L  0C   18m  CC=5      ←0
+  │ !! parser                     666L  6C   29m  CC=23     ←3
   │ !! commands                   656L  2C   30m  CC=9      ←1
-  │ !! parser                     586L  6C   29m  CC=14     ←3
-  │ !! engine                     556L  2C   38m  CC=15     ←0
+  │ !! engine                     594L  2C   38m  CC=15     ←0  ×DUP
   │ !! schema_commands            517L  2C   33m  CC=10     ←0
+  │ pipeline                   451L  1C   16m  CC=7      ←0
   │ nlp                        447L  3C   21m  CC=7      ←0
-  │ pipeline                   443L  1C   16m  CC=7      ←0
-  │ queries                    415L  13C   17m  CC=10     ←0
+  │ prolog_engine              430L  6C   32m  CC=13     ←1  ×DUP
+  │ queries                    419L  13C   17m  CC=10     ←0
+  │ validator                  383L  1C   16m  CC=9      ←4
   │ shell                      359L  2C   14m  CC=14     ←0
+  │ schema                     351L  14C    3m  CC=1      ←0  ×DUP
   │ sumd_aggregate             344L  3C   18m  CC=6      ←0
-  │ schema                     339L  14C    0m  CC=0.0    ←0
-  │ validator                  331L  1C   15m  CC=9      ←4
   │ commands                   265L  12C    8m  CC=9      ←0
-  │ aggregates                 219L  6C   23m  CC=4      ←0
+  │ aggregates                 220L  6C   23m  CC=4      ←0
   │ parser                     195L  1C    9m  CC=9      ←9
-  │ events                     176L  8C    8m  CC=7      ←0
-  │ toon_parser                173L  0C    8m  CC=9      ←1
+  │ events                     184L  8C    8m  CC=7      ←0
+  │ toon_parser                173L  0C    8m  CC=9      ←2
+  │ architecture               170L  1C    9m  CC=6      ←0
   │ interfaces                 157L  1C    8m  CC=7      ←0
   │ call_graph                 156L  1C    7m  CC=8      ←0
-  │ architecture               155L  1C    8m  CC=6      ←0
   │ deployment                 110L  1C    5m  CC=8      ←0
   │ __init__                   106L  0C    0m  CC=0.0    ←0
   │ dependencies                97L  1C    4m  CC=6      ←0
@@ -1462,6 +1586,7 @@ LAYERS:
   │ metadata                    51L  1C    1m  CC=5      ←0
   │ models                      45L  3C    0m  CC=0.0    ←0
   │ configuration               43L  1C    1m  CC=1      ←0
+  │ rules.pl                    41L  0C    0m  CC=0.0    ←0
   │ __init__                    35L  0C    0m  CC=0.0    ←0
   │ renderer                    29L  0C    1m  CC=1      ←0
   │ render                      25L  0C    1m  CC=1      ←0
@@ -1470,22 +1595,40 @@ LAYERS:
   │ generator                   15L  0C    0m  CC=0.0    ←0
   │ __init__                    14L  0C    0m  CC=0.0    ←0
   │ __init__                    12L  0C    0m  CC=0.0    ←0
+  │ __main__                     5L  0C    0m  CC=0.0    ←0
+  │
+  sumd_logic_validator/           CC̄=4.0    ←in:0  →out:0  ×DUP
+  │ !! rules.pl                  1234L  0C    0m  CC=0.0    ←0
+  │ !! rules.pl                  1234L  0C    0m  CC=0.0    ←0
+  │ engine                     434L  6C   32m  CC=14     ←0  ×DUP
+  │ cli                        114L  0C    5m  CC=10     ←0
+  │ main                         4L  0C    0m  CC=0.0    ←0
+  │ __init__                     3L  0C    0m  CC=0.0    ←0
+  │ __init__                     1L  0C    0m  CC=0.0    ←0
+  │ __init__                     1L  0C    0m  CC=0.0    ←0
   │
   ./                              CC̄=0.0    ←in:0  →out:0
-  │ project.sh                  41L  0C    0m  CC=0.0    ←0
+  │ project.sh                  55L  0C    0m  CC=0.0    ←0
+  │ print_errors                 6L  0C    0m  CC=0.0    ←0
+  │ tree.sh                      1L  0C    0m  CC=0.0    ←0
   │
   scripts/                        CC̄=0.0    ←in:0  →out:0
   │ bootstrap.sh                69L  0C    0m  CC=0.0    ←0
   │
+  project/                        CC̄=0.0    ←in:0  →out:0
+  │ !! logic.pl                  1188L  0C    0m  CC=0.0    ←0
+  │
 
 COUPLING:
-                  sumd   sumd.dsl  sumd.cqrs
-       sumd         ──          4        ←10  hub
-   sumd.dsl          7         ──           
-  sumd.cqrs         10                    ──  !! fan-out
+                                                                                  sumd                                   sumd.dsl  sumd_logic_validator.sumd_logic_validator                                  sumd.cqrs
+                                       sumd                                         ──                                          4                                        ←11                                        ←10  hub
+                                   sumd.dsl                                          7                                         ──                                                                                      
+  sumd_logic_validator.sumd_logic_validator                                         11                                                                                    ──                                             !! fan-out
+                                  sumd.cqrs                                         10                                                                                                                               ──  !! fan-out
   CYCLES: none
-  HUB: sumd/ (fan-in=17)
+  HUB: sumd/ (fan-in=28)
   SMELL: sumd.cqrs/ fan-out=10 → split needed
+  SMELL: sumd_logic_validator.sumd_logic_validator/ fan-out=11 → split needed
 
 EXTERNAL:
   validation: run `vallm batch .` → validation.toon
@@ -1495,94 +1638,304 @@ EXTERNAL:
 ### Duplication (`project/duplication.toon.yaml`)
 
 ```toon markpact:analysis path=project/duplication.toon.yaml
-# redup/duplication | 3 groups | 48f 11859L | 2026-05-02
+# redup/duplication | 27 groups | 57f 13292L | 2026-05-21
 
 SUMMARY:
-  files_scanned: 48
-  total_lines:   11859
-  dup_groups:    3
-  dup_fragments: 6
-  saved_lines:   35
-  scan_ms:       11252
+  files_scanned: 57
+  total_lines:   13292
+  dup_groups:    27
+  dup_fragments: 54
+  saved_lines:   247
+  scan_ms:       18652
 
-HOTSPOTS[3] (files with most duplication):
+HOTSPOTS[7] (files with most duplication):
+  sumd_logic_validator/sumd_logic_validator/engine.py  dup=210L  groups=21  frags=21  (1.6%)
+  sumd/prolog_engine.py  dup=203L  groups=21  frags=21  (1.5%)
   sumd/toon_parser.py  dup=28L  groups=1  frags=2  (0.2%)
   sumd/parser.py  dup=22L  groups=1  frags=2  (0.2%)
   sumd/dsl/commands.py  dup=20L  groups=1  frags=2  (0.2%)
+  sumd/dsl/engine.py  dup=6L  groups=2  frags=2  (0.0%)
+  sumd/dsl/schema.py  dup=6L  groups=2  frags=2  (0.0%)
 
-DUPLICATES[3] (ranked by impact):
+DUPLICATES[27] (ranked by impact):
+  [6c27a8b7267e13d7] ! EXAC  _query_subprocess  L=42 N=2 saved=42 sim=1.00
+      sumd/prolog_engine.py:378-419  (_query_subprocess)
+      sumd_logic_validator/sumd_logic_validator/engine.py:375-423  (_query_subprocess)
+  [a9a2b89811f17647]   EXAC  unify  L=22 N=2 saved=22 sim=1.00
+      sumd/prolog_engine.py:168-189  (unify)
+      sumd_logic_validator/sumd_logic_validator/engine.py:166-187  (unify)
+  [a67c25b9011708c8]   EXAC  query  L=22 N=2 saved=22 sim=1.00
+      sumd/prolog_engine.py:246-267  (query)
+      sumd_logic_validator/sumd_logic_validator/engine.py:244-265  (query)
+  [841890ca83127ecd]   EXAC  rename_variables  L=16 N=2 saved=16 sim=1.00
+      sumd/prolog_engine.py:222-237  (rename_variables)
+      sumd_logic_validator/sumd_logic_validator/engine.py:220-235  (rename_variables)
+  [6bc9796b08ce37e6]   EXAC  _query_pyswip  L=16 N=2 saved=16 sim=1.00
+      sumd/prolog_engine.py:361-376  (_query_pyswip)
+      sumd_logic_validator/sumd_logic_validator/engine.py:358-373  (_query_pyswip)
   [ec6388d8055c3e57]   STRU  _parse_toon_block_performance  L=14 N=2 saved=14 sim=1.00
       sumd/toon_parser.py:70-83  (_parse_toon_block_performance)
       sumd/toon_parser.py:102-115  (_parse_toon_block_gui)
   [d1ab1a804f1b435b]   STRU  parse  L=11 N=2 saved=11 sim=1.00
       sumd/parser.py:150-160  (parse)
       sumd/parser.py:163-173  (parse_file)
+  [9b8c09535672da3f]   EXAC  _find_vars  L=10 N=2 saved=10 sim=1.00
+      sumd/prolog_engine.py:269-278  (_find_vars)
+      sumd_logic_validator/sumd_logic_validator/engine.py:267-276  (_find_vars)
   [a73c4e5f2b96ddaa]   STRU  _cmd_cat  L=10 N=2 saved=10 sim=1.00
       sumd/dsl/commands.py:313-322  (_cmd_cat)
       sumd/dsl/commands.py:647-656  (_cmd_read_file)
+  [5257855825b21dc5]   EXAC  __init__  L=9 N=2 saved=9 sim=1.00
+      sumd/prolog_engine.py:328-336  (__init__)
+      sumd_logic_validator/sumd_logic_validator/engine.py:325-333  (__init__)
+  [bcd1189046b690c0]   EXAC  rename  L=8 N=2 saved=8 sim=1.00
+      sumd/prolog_engine.py:226-233  (rename)
+      sumd_logic_validator/sumd_logic_validator/engine.py:224-231  (rename)
+  [a5b94fdf8e33a4d1]   EXAC  occurs_check  L=7 N=2 saved=7 sim=1.00
+      sumd/prolog_engine.py:213-219  (occurs_check)
+      sumd_logic_validator/sumd_logic_validator/engine.py:211-217  (occurs_check)
+  [43d89fdde36f380f]   EXAC  extend_subst  L=6 N=2 saved=6 sim=1.00
+      sumd/prolog_engine.py:205-210  (extend_subst)
+      sumd_logic_validator/sumd_logic_validator/engine.py:203-208  (extend_subst)
+  [85268e3910522b4b]   EXAC  _swipl_executable_exists  L=6 N=2 saved=6 sim=1.00
+      sumd/prolog_engine.py:425-430  (_swipl_executable_exists)
+      sumd_logic_validator/sumd_logic_validator/engine.py:429-434  (_swipl_executable_exists)
+  [d48551a6bad80f43]   EXAC  collect  L=6 N=2 saved=6 sim=1.00
+      sumd/prolog_engine.py:271-276  (collect)
+      sumd_logic_validator/sumd_logic_validator/engine.py:269-274  (collect)
+  [2974f1521921ca23]   EXAC  deep_resolve  L=5 N=2 saved=5 sim=1.00
+      sumd/prolog_engine.py:198-202  (deep_resolve)
+      sumd_logic_validator/sumd_logic_validator/engine.py:196-200  (deep_resolve)
+  [80e26c3323c304e6]   EXAC  resolve_val  L=4 N=2 saved=4 sim=1.00
+      sumd/prolog_engine.py:192-195  (resolve_val)
+      sumd_logic_validator/sumd_logic_validator/engine.py:190-193  (resolve_val)
+  [b34584e45495fb0a]   EXAC  __repr__  L=4 N=2 saved=4 sim=1.00
+      sumd/prolog_engine.py:40-43  (__repr__)
+      sumd_logic_validator/sumd_logic_validator/engine.py:40-43  (__repr__)
+  [2cbecec5d6886745]   EXAC  __eq__  L=4 N=2 saved=4 sim=1.00
+      sumd/prolog_engine.py:45-48  (__eq__)
+      sumd_logic_validator/sumd_logic_validator/engine.py:45-48  (__eq__)
+  [f1a0f3644b1097f5]   EXAC  __repr__  L=4 N=2 saved=4 sim=1.00
+      sumd/prolog_engine.py:57-60  (__repr__)
+      sumd_logic_validator/sumd_logic_validator/engine.py:57-60  (__repr__)
+  [fa6ad8230cb122f6]   EXAC  set_variable  L=3 N=2 saved=3 sim=1.00
+      sumd/dsl/engine.py:35-37  (set_variable)
+      sumd/dsl/schema.py:163-165  (set_variable)
+  [f59133a9d98b31d5]   EXAC  get_variable  L=3 N=2 saved=3 sim=1.00
+      sumd/dsl/engine.py:39-41  (get_variable)
+      sumd/dsl/schema.py:167-169  (get_variable)
+  [0622d41f358b07b3]   EXAC  __init__  L=3 N=2 saved=3 sim=1.00
+      sumd/prolog_engine.py:36-38  (__init__)
+      sumd_logic_validator/sumd_logic_validator/engine.py:36-38  (__init__)
+  [eaae1aeec51c77d3]   EXAC  __init__  L=3 N=2 saved=3 sim=1.00
+      sumd/prolog_engine.py:53-55  (__init__)
+      sumd_logic_validator/sumd_logic_validator/engine.py:53-55  (__init__)
+  [6e1ae427e1b0dd92]   EXAC  __init__  L=3 N=2 saved=3 sim=1.00
+      sumd/prolog_engine.py:242-244  (__init__)
+      sumd_logic_validator/sumd_logic_validator/engine.py:240-242  (__init__)
+  [85a8a3cd76963d11]   EXAC  _query_python  L=3 N=2 saved=3 sim=1.00
+      sumd/prolog_engine.py:421-423  (_query_python)
+      sumd_logic_validator/sumd_logic_validator/engine.py:425-427  (_query_python)
+  [aaae754bdb04529d]   STRU  cli  L=3 N=2 saved=3 sim=1.00
+      sumd/cli.py:454-456  (cli)
+      sumd_logic_validator/sumd_logic_validator/cli.py:29-31  (main)
 
-REFACTOR[3] (ranked by priority):
-  [1] ○ extract_function   → sumd/utils/_parse_toon_block_performance.py
+REFACTOR[27] (ranked by priority):
+  [1] ◐ extract_class      → utils/_query_subprocess.py
+      WHY: 2 occurrences of 42-line block across 2 files — saves 42 lines
+      FILES: sumd/prolog_engine.py, sumd_logic_validator/sumd_logic_validator/engine.py
+  [2] ○ extract_function   → utils/unify.py
+      WHY: 2 occurrences of 22-line block across 2 files — saves 22 lines
+      FILES: sumd/prolog_engine.py, sumd_logic_validator/sumd_logic_validator/engine.py
+  [3] ○ extract_class      → utils/query.py
+      WHY: 2 occurrences of 22-line block across 2 files — saves 22 lines
+      FILES: sumd/prolog_engine.py, sumd_logic_validator/sumd_logic_validator/engine.py
+  [4] ○ extract_function   → utils/rename_variables.py
+      WHY: 2 occurrences of 16-line block across 2 files — saves 16 lines
+      FILES: sumd/prolog_engine.py, sumd_logic_validator/sumd_logic_validator/engine.py
+  [5] ○ extract_class      → utils/_query_pyswip.py
+      WHY: 2 occurrences of 16-line block across 2 files — saves 16 lines
+      FILES: sumd/prolog_engine.py, sumd_logic_validator/sumd_logic_validator/engine.py
+  [6] ○ extract_function   → sumd/utils/_parse_toon_block_performance.py
       WHY: 2 occurrences of 14-line block across 1 files — saves 14 lines
       FILES: sumd/toon_parser.py
-  [2] ○ extract_function   → sumd/utils/parse.py
+  [7] ○ extract_function   → sumd/utils/parse.py
       WHY: 2 occurrences of 11-line block across 1 files — saves 11 lines
       FILES: sumd/parser.py
-  [3] ○ extract_function   → sumd/dsl/utils/_cmd_cat.py
+  [8] ○ extract_class      → utils/_find_vars.py
+      WHY: 2 occurrences of 10-line block across 2 files — saves 10 lines
+      FILES: sumd/prolog_engine.py, sumd_logic_validator/sumd_logic_validator/engine.py
+  [9] ○ extract_function   → sumd/dsl/utils/_cmd_cat.py
       WHY: 2 occurrences of 10-line block across 1 files — saves 10 lines
       FILES: sumd/dsl/commands.py
+  [10] ○ extract_class      → utils/__init__.py
+      WHY: 2 occurrences of 9-line block across 2 files — saves 9 lines
+      FILES: sumd/prolog_engine.py, sumd_logic_validator/sumd_logic_validator/engine.py
+  [11] ○ extract_function   → utils/rename.py
+      WHY: 2 occurrences of 8-line block across 2 files — saves 8 lines
+      FILES: sumd/prolog_engine.py, sumd_logic_validator/sumd_logic_validator/engine.py
+  [12] ○ extract_function   → utils/occurs_check.py
+      WHY: 2 occurrences of 7-line block across 2 files — saves 7 lines
+      FILES: sumd/prolog_engine.py, sumd_logic_validator/sumd_logic_validator/engine.py
+  [13] ○ extract_function   → utils/extend_subst.py
+      WHY: 2 occurrences of 6-line block across 2 files — saves 6 lines
+      FILES: sumd/prolog_engine.py, sumd_logic_validator/sumd_logic_validator/engine.py
+  [14] ○ extract_class      → utils/_swipl_executable_exists.py
+      WHY: 2 occurrences of 6-line block across 2 files — saves 6 lines
+      FILES: sumd/prolog_engine.py, sumd_logic_validator/sumd_logic_validator/engine.py
+  [15] ○ extract_function   → utils/collect.py
+      WHY: 2 occurrences of 6-line block across 2 files — saves 6 lines
+      FILES: sumd/prolog_engine.py, sumd_logic_validator/sumd_logic_validator/engine.py
+  [16] ○ extract_function   → utils/deep_resolve.py
+      WHY: 2 occurrences of 5-line block across 2 files — saves 5 lines
+      FILES: sumd/prolog_engine.py, sumd_logic_validator/sumd_logic_validator/engine.py
+  [17] ○ extract_function   → utils/resolve_val.py
+      WHY: 2 occurrences of 4-line block across 2 files — saves 4 lines
+      FILES: sumd/prolog_engine.py, sumd_logic_validator/sumd_logic_validator/engine.py
+  [18] ○ extract_class      → utils/__repr__.py
+      WHY: 2 occurrences of 4-line block across 2 files — saves 4 lines
+      FILES: sumd/prolog_engine.py, sumd_logic_validator/sumd_logic_validator/engine.py
+  [19] ○ extract_class      → utils/__eq__.py
+      WHY: 2 occurrences of 4-line block across 2 files — saves 4 lines
+      FILES: sumd/prolog_engine.py, sumd_logic_validator/sumd_logic_validator/engine.py
+  [20] ○ extract_class      → utils/__repr__.py
+      WHY: 2 occurrences of 4-line block across 2 files — saves 4 lines
+      FILES: sumd/prolog_engine.py, sumd_logic_validator/sumd_logic_validator/engine.py
+  [21] ○ extract_class      → sumd/dsl/utils/set_variable.py
+      WHY: 2 occurrences of 3-line block across 2 files — saves 3 lines
+      FILES: sumd/dsl/engine.py, sumd/dsl/schema.py
+  [22] ○ extract_class      → sumd/dsl/utils/get_variable.py
+      WHY: 2 occurrences of 3-line block across 2 files — saves 3 lines
+      FILES: sumd/dsl/engine.py, sumd/dsl/schema.py
+  [23] ○ extract_class      → utils/__init__.py
+      WHY: 2 occurrences of 3-line block across 2 files — saves 3 lines
+      FILES: sumd/prolog_engine.py, sumd_logic_validator/sumd_logic_validator/engine.py
+  [24] ○ extract_class      → utils/__init__.py
+      WHY: 2 occurrences of 3-line block across 2 files — saves 3 lines
+      FILES: sumd/prolog_engine.py, sumd_logic_validator/sumd_logic_validator/engine.py
+  [25] ○ extract_class      → utils/__init__.py
+      WHY: 2 occurrences of 3-line block across 2 files — saves 3 lines
+      FILES: sumd/prolog_engine.py, sumd_logic_validator/sumd_logic_validator/engine.py
+  [26] ○ extract_class      → utils/_query_python.py
+      WHY: 2 occurrences of 3-line block across 2 files — saves 3 lines
+      FILES: sumd/prolog_engine.py, sumd_logic_validator/sumd_logic_validator/engine.py
+  [27] ○ extract_function   → utils/cli.py
+      WHY: 2 occurrences of 3-line block across 2 files — saves 3 lines
+      FILES: sumd/cli.py, sumd_logic_validator/sumd_logic_validator/cli.py
 
-QUICK_WINS[3] (low risk, high savings — do first):
-  [1] extract_function   saved=14L  → sumd/utils/_parse_toon_block_performance.py
+QUICK_WINS[14] (low risk, high savings — do first):
+  [2] extract_function   saved=22L  → utils/unify.py
+      FILES: prolog_engine.py, engine.py
+  [3] extract_class      saved=22L  → utils/query.py
+      FILES: prolog_engine.py, engine.py
+  [4] extract_function   saved=16L  → utils/rename_variables.py
+      FILES: prolog_engine.py, engine.py
+  [5] extract_class      saved=16L  → utils/_query_pyswip.py
+      FILES: prolog_engine.py, engine.py
+  [6] extract_function   saved=14L  → sumd/utils/_parse_toon_block_performance.py
       FILES: toon_parser.py
-  [2] extract_function   saved=11L  → sumd/utils/parse.py
+  [7] extract_function   saved=11L  → sumd/utils/parse.py
       FILES: parser.py
-  [3] extract_function   saved=10L  → sumd/dsl/utils/_cmd_cat.py
+  [8] extract_class      saved=10L  → utils/_find_vars.py
+      FILES: prolog_engine.py, engine.py
+  [9] extract_function   saved=10L  → sumd/dsl/utils/_cmd_cat.py
       FILES: commands.py
+  [10] extract_class      saved=9L  → utils/__init__.py
+      FILES: prolog_engine.py, engine.py
+  [11] extract_function   saved=8L  → utils/rename.py
+      FILES: prolog_engine.py, engine.py
 
-EFFORT_ESTIMATE (total ≈ 1.2h):
+DEPENDENCY_RISK[22] (duplicates spanning multiple packages):
+  _query_subprocess  packages=2  files=2
+      sumd/prolog_engine.py
+      sumd_logic_validator/sumd_logic_validator/engine.py
+  unify  packages=2  files=2
+      sumd/prolog_engine.py
+      sumd_logic_validator/sumd_logic_validator/engine.py
+  query  packages=2  files=2
+      sumd/prolog_engine.py
+      sumd_logic_validator/sumd_logic_validator/engine.py
+  rename_variables  packages=2  files=2
+      sumd/prolog_engine.py
+      sumd_logic_validator/sumd_logic_validator/engine.py
+  _query_pyswip  packages=2  files=2
+      sumd/prolog_engine.py
+      sumd_logic_validator/sumd_logic_validator/engine.py
+  _find_vars  packages=2  files=2
+      sumd/prolog_engine.py
+      sumd_logic_validator/sumd_logic_validator/engine.py
+  __init__  packages=2  files=2
+      sumd/prolog_engine.py
+      sumd_logic_validator/sumd_logic_validator/engine.py
+
+EFFORT_ESTIMATE (total ≈ 16.5h):
+  hard   _query_subprocess                   saved=42L  ~252min
+  medium unify                               saved=22L  ~88min
+  medium query                               saved=22L  ~88min
+  medium rename_variables                    saved=16L  ~64min
+  medium _query_pyswip                       saved=16L  ~64min
   easy   _parse_toon_block_performance       saved=14L  ~28min
   easy   parse                               saved=11L  ~22min
+  medium _find_vars                          saved=10L  ~40min
   easy   _cmd_cat                            saved=10L  ~20min
+  medium __init__                            saved=9L  ~36min
+  ... +17 more (~288min)
 
 METRICS-TARGET:
-  dup_groups:  3 → 0
-  saved_lines: 35 lines recoverable
+  dup_groups:  27 → 0
+  saved_lines: 247 lines recoverable
 ```
 
 ### Evolution / Churn (`project/evolution.toon.yaml`)
 
 ```toon markpact:analysis path=project/evolution.toon.yaml
-# code2llm/evolution | 1040 func | 48f | 2026-05-02
+# code2llm/evolution | 541 func | 46f | 2026-05-21
+# generated in 0.00s
 
-NEXT[4] (ranked by impact):
+NEXT[8] (ranked by impact):
   [1] !! SPLIT           sumd/cli.py
-      WHY: 1984L, 0 classes, max CC=14
-      EFFORT: ~4h  IMPACT: 27776
+      WHY: 1999L, 0 classes, max CC=14
+      EFFORT: ~4h  IMPACT: 27986
 
   [2] !! SPLIT           sumd/extractor.py
-      WHY: 1077L, 0 classes, max CC=18
-      EFFORT: ~4h  IMPACT: 19386
+      WHY: 1282L, 0 classes, max CC=20
+      EFFORT: ~4h  IMPACT: 25640
 
-  [3] !! SPLIT           sumd/mcp_server.py
-      WHY: 714L, 0 classes, max CC=5
-      EFFORT: ~4h  IMPACT: 3570
+  [3] !  SPLIT-FUNC      generate_project_logic  CC=20  fan=22
+      WHY: CC=20 exceeds 15
+      EFFORT: ~1h  IMPACT: 440
 
-  [4] !  SPLIT-FUNC      DSLEngine._execute_expression  CC=15  fan=13
+  [4] !  SPLIT-FUNC      DSLParser._parse_primary  CC=22  fan=18
+      WHY: CC=22 exceeds 15
+      EFFORT: ~1h  IMPACT: 396
+
+  [5] !  SPLIT-FUNC      _extract_sumd_semantic_facts  CC=15  fan=19
+      WHY: CC=15 exceeds 15
+      EFFORT: ~1h  IMPACT: 285
+
+  [6] !  SPLIT-FUNC      DSLParser._parse_statement  CC=23  fan=10
+      WHY: CC=23 exceeds 15
+      EFFORT: ~1h  IMPACT: 230
+
+  [7] !  SPLIT-FUNC      DSLEngine._execute_expression  CC=15  fan=13
       WHY: CC=15 exceeds 15
       EFFORT: ~1h  IMPACT: 195
+
+  [8] !! SPLIT           sumd_logic_validator/sumd_logic_validator/logic/rules.pl
+      WHY: 1234L, 0 classes, max CC=0
+      EFFORT: ~4h  IMPACT: 0
 
 
 RISKS[3]:
   ⚠ Splitting sumd/cli.py may break 47 import paths
-  ⚠ Splitting sumd/extractor.py may break 43 import paths
-  ⚠ Splitting sumd/mcp_server.py may break 18 import paths
+  ⚠ Splitting sumd/extractor.py may break 45 import paths
+  ⚠ Splitting sumd_logic_validator/sumd_logic_validator/logic/rules.pl may break 0 import paths
 
 METRICS-TARGET:
-  CC̄:          1.7 → ≤1.2
-  max-CC:      18 → ≤9
-  god-modules: 7 → 0
-  high-CC(≥15): 2 → ≤1
+  CC̄:          3.9 → ≤2.7
+  max-CC:      23 → ≤11
+  god-modules: 12 → 0
+  high-CC(≥15): 6 → ≤3
   hub-types:   0 → ≤0
 
 PATTERNS (language parser shared logic):
@@ -1610,42 +1963,63 @@ PATTERNS (language parser shared logic):
     - Standardized FunctionInfo/ClassInfo models
 
 HISTORY:
-  prev CC̄=1.2 → now CC̄=1.7
+  prev CC̄=3.9 → now CC̄=3.9
 ```
 
 ### Validation (`project/validation.toon.yaml`)
 
 ```toon markpact:analysis path=project/validation.toon.yaml
-# vallm batch | 132f | 75✓ 5⚠ 10✗ | 2026-05-02
+# vallm batch | 162f | 89✓ 8⚠ 13✗ | 2026-05-21
 
 SUMMARY:
-  scanned: 132  passed: 75 (56.8%)  warnings: 5  errors: 10  unsupported: 47
+  scanned: 162  passed: 89 (54.9%)  warnings: 8  errors: 13  unsupported: 57
 
-WARNINGS[5]{path,score}:
+WARNINGS[8]{path,score}:
+  /home/tom/github/oqlos/sumd/project/logic.pl,0.78
+    issues[1]{rule,severity,message,line}:
+      syntax.unsupported,warning,Could not parse perl: maximum recursion depth exceeded,
+  /home/tom/github/oqlos/sumd/sumd_logic_validator/logic/rules.pl,0.78
+    issues[1]{rule,severity,message,line}:
+      syntax.unsupported,warning,Could not parse perl: maximum recursion depth exceeded,
+  /home/tom/github/oqlos/sumd/sumd_logic_validator/sumd_logic_validator/logic/rules.pl,0.78
+    issues[1]{rule,severity,message,line}:
+      syntax.unsupported,warning,Could not parse perl: maximum recursion depth exceeded,
+  /home/tom/github/oqlos/sumd/sumd/dsl/parser.py,0.93
+    issues[4]{rule,severity,message,line}:
+      complexity.cyclomatic,warning,_parse_statement has cyclomatic complexity 23 (max: 15),213
+      complexity.cyclomatic,warning,_parse_primary has cyclomatic complexity 22 (max: 15),411
+      complexity.lizard_cc,warning,_parse_statement: CC=23 exceeds limit 15,213
+      complexity.lizard_cc,warning,_parse_primary: CC=22 exceeds limit 15,411
   /home/tom/github/oqlos/sumd/sumd/dsl/commands.py,0.97
     issues[1]{rule,severity,message,line}:
       complexity.lizard_length,warning,create_builtin_registry: 177 lines exceeds limit 100,104
   /home/tom/github/oqlos/sumd/sumd/dsl/nlp.py,0.97
     issues[1]{rule,severity,message,line}:
       complexity.lizard_length,warning,_initialize_default_intents: 106 lines exceeds limit 100,32
-  /home/tom/github/oqlos/sumd/sumd/dsl/parser.py,0.97
-    issues[2]{rule,severity,message,line}:
-      complexity.cyclomatic,warning,_parse_primary has cyclomatic complexity 19 (max: 15),363
-      complexity.lizard_cc,warning,_parse_primary: CC=19 exceeds limit 15,363
   /home/tom/github/oqlos/sumd/sumd/dsl/engine.py,0.98
     issues[1]{rule,severity,message,line}:
-      complexity.maintainability,warning,Low maintainability index: 20.0 (threshold: 20),
+      complexity.maintainability,warning,Low maintainability index: 19.9 (threshold: 20),
   /home/tom/github/oqlos/sumd/sumd/dsl/schema_commands.py,0.98
     issues[1]{rule,severity,message,line}:
       complexity.maintainability,warning,Low maintainability index: 19.3 (threshold: 20),
 
-ERRORS[10]{path,score}:
+ERRORS[13]{path,score}:
+  /home/tom/github/oqlos/sumd/sumd/rules.pl,0.00
+    issues[1]{rule,severity,message,line}:
+      syntax.tree_sitter,error,tree-sitter found 21 parse error(s) in perl,
+  /home/tom/github/oqlos/sumd/sumd_logic_validator/tests/test_engine.py,0.71
+    issues[2]{rule,severity,message,line}:
+      python.import.resolvable,error,Module 'pytest' not found,1
+      python.import.resolvable,error,Module 'sumd_logic_validator.engine' not found,3
   /home/tom/github/oqlos/sumd/sumd/mcp_server.py,0.91
     issues[4]{rule,severity,message,line}:
       python.import.resolvable,error,Module 'mcp.server.stdio' not found,30
       python.import.resolvable,error,Module 'mcp.types' not found,31
       python.import.resolvable,error,Module 'mcp.server' not found,32
       python.import.resolvable,error,Module 'toml' not found,417
+  /home/tom/github/oqlos/sumd/tests/test_architectural_logic.py,0.91
+    issues[1]{rule,severity,message,line}:
+      python.import.resolvable,error,Module 'pytest' not found,1
   /home/tom/github/oqlos/sumd/tests/test_cli.py,0.93
     issues[1]{rule,severity,message,line}:
       python.import.resolvable,error,Module 'pytest' not found,7
@@ -1676,11 +2050,11 @@ ERRORS[10]{path,score}:
       python.import.resolvable,error,Module 'pytest' not found,3
 
 UNSUPPORTED[5]{bucket,count}:
-  *.md,23
+  *.md,24
   Dockerfile*,1
-  *.txt,1
+  *.txt,3
   *.yml,6
-  other,16
+  other,23
 ```
 
 ## Intent
