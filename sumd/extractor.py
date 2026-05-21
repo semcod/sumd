@@ -833,20 +833,11 @@ def _map_cc_stats(
     critical = sum(1 for c in cc_vals if c >= _CC_THRESHOLD)
     by_cc = sorted(all_funcs, key=lambda x: -x["cc"])[:5]
     by_fan = sorted(all_funcs, key=lambda x: -x["fan"])[:5]
-    seen: set[str] = set()
-    alert_items: list[str] = []
-    for f in by_cc:
-        k = f"CC {f['name']}={f['cc']}"
-        if k not in seen:
-            alert_items.append(k)
-            seen.add(k)
-    for f in by_fan:
-        k = f"fan-out {f['name']}={f['fan']}"
-        if k not in seen:
-            alert_items.append(k)
-            seen.add(k)
+    cc_items = [f"CC {f['name']}={f['cc']}" for f in by_cc]
+    fan_items = [f"fan-out {f['name']}={f['fan']}" for f in by_fan]
+    alert_items = list(dict.fromkeys(cc_items + fan_items))[:5]
     hotspot_items = [f"{f['name']} fan={f['fan']}" for f in by_fan[:5]]
-    alerts = "; ".join(alert_items[:5]) if alert_items else "none"
+    alerts = "; ".join(alert_items) if alert_items else "none"
     hotspots = "; ".join(hotspot_items) if hotspot_items else "none"
     return avg_cc, critical, alerts, hotspots
 
