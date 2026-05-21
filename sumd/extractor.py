@@ -669,18 +669,10 @@ def _parse_ignore_file(ignore_path: Path) -> list[str]:
 
 def _match_dir_pattern(path: Path, path_str: str, dir_pattern: str) -> bool:
     """Check if path matches a directory pattern (ends with /)."""
-    if fnmatch.fnmatch(path_str, dir_pattern):
+    globs = (dir_pattern, dir_pattern + "/*", "*/" + dir_pattern, "*/" + dir_pattern + "/*")
+    if any(fnmatch.fnmatch(path_str, g) for g in globs):
         return True
-    if fnmatch.fnmatch(path_str, dir_pattern + "/*"):
-        return True
-    if fnmatch.fnmatch(path_str, "*/" + dir_pattern):
-        return True
-    if fnmatch.fnmatch(path_str, "*/" + dir_pattern + "/*"):
-        return True
-    for part in path.parts:
-        if fnmatch.fnmatch(part, dir_pattern):
-            return True
-    return False
+    return any(fnmatch.fnmatch(part, dir_pattern) for part in path.parts)
 
 
 def _match_absolute_pattern(path_str: str, pattern: str) -> bool:

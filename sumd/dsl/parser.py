@@ -45,66 +45,75 @@ class DSLParser:
             children=expressions,
         )
     
+    def _looks_like_command(self) -> bool:
+        """True if current IDENTIFIER starts a command (not func/assign/expr)."""
+        if not self._check(DSLTokenType.IDENTIFIER):
+            return False
+        next_type = self._peek_next_type()
+        return next_type not in (
+            DSLTokenType.LPAREN,
+            DSLTokenType.PIPE,
+            DSLTokenType.COMPARATOR,
+            DSLTokenType.LOGICAL,
+        ) and not self._check_next(DSLTokenType.OPERATOR, "=")
+
+    def _peek_next_type(self) -> Optional[DSLTokenType]:
+        """Return type of next token, or None if at end."""
+        if self.current + 1 >= len(self.tokens):
+            return None
+        return self.tokens[self.current + 1].type
+
+    def _try_parse_command(self) -> Optional[DSLExpression]:
+        """Try to parse a command with optional pipe; rewind and return None on failure."""
+        saved_pos = self.current
+        self._advance()  # consume identifier
+
+        args: list[DSLExpression] = []
+        has_pipe = False
+        while (not self._is_at_end() and
+               not self._check(DSLTokenType.NEWLINE) and
+               not self._check(DSLTokenType.EOF) and
+               not self._check(DSLTokenType.SEMICOLON)):
+            if self._check(DSLTokenType.PIPE):
+                has_pipe = True
+                break
+            arg = self._parse_primary()
+            if arg:
+                args.append(arg)
+
+        valid = args or self._check(DSLTokenType.NEWLINE) or self._check(DSLTokenType.EOF) or self._check(DSLTokenType.SEMICOLON) or has_pipe
+        if not valid:
+            self.current = saved_pos
+            return None
+
+        cmd = DSLExpression(
+            type=DSLExpressionType.COMMAND,
+            value=self.tokens[saved_pos].value,
+            children=args,
+        )
+        if has_pipe and self._match(DSLTokenType.PIPE):
+            right = self._parse_statement()
+            if right:
+                return DSLExpression(
+                    type=DSLExpressionType.PIPELINE,
+                    value="|",
+                    children=[cmd, right],
+                )
+        return cmd
+
     def _parse_statement(self) -> Optional[DSLExpression]:
         """Parse a statement."""
-        # Skip empty lines
         if self._match(DSLTokenType.NEWLINE):
             return None
-        
-        # Check if this is a command at top level: IDENTIFIER followed by arguments
-        if (self._check(DSLTokenType.IDENTIFIER) and 
-            not self._check_next(DSLTokenType.LPAREN) and  # not a function call
-            not self._check_next(DSLTokenType.OPERATOR, "=") and  # not assignment
-            not self._check_next(DSLTokenType.PIPE) and  # not start of pipeline
-            not self._check_next(DSLTokenType.OPERATOR) and  # not arithmetic/logical
-            not self._check_next(DSLTokenType.COMPARATOR) and  # not comparison
-            not self._check_next(DSLTokenType.LOGICAL)):  # not logical operator
-            
-            # Look ahead to see if there are arguments before statement boundary
-            saved_pos = self.current
-            self._advance()  # consume identifier
-            
-            args = []
-            has_pipe = False
-            # Collect arguments until statement boundary
-            while (not self._is_at_end() and 
-                   not self._check(DSLTokenType.NEWLINE) and
-                   not self._check(DSLTokenType.EOF) and
-                   not self._check(DSLTokenType.SEMICOLON)):
-                if self._check(DSLTokenType.PIPE):
-                    has_pipe = True
-                    break
-                arg = self._parse_primary()
-                if arg:
-                    args.append(arg)
-            
-            # If we consumed something that looks like a command (has args or is standalone)
-            if args or self._check(DSLTokenType.NEWLINE) or self._check(DSLTokenType.EOF) or self._check(DSLTokenType.SEMICOLON) or has_pipe:
-                cmd = DSLExpression(
-                    type=DSLExpressionType.COMMAND,
-                    value=self.tokens[saved_pos].value,
-                    children=args,
-                )
-                # If followed by pipe, create pipeline
-                if has_pipe and self._match(DSLTokenType.PIPE):
-                    right = self._parse_statement()
-                    if right:
-                        return DSLExpression(
-                            type=DSLExpressionType.PIPELINE,
-                            value="|",
-                            children=[cmd, right],
-                        )
-                return cmd
-            
-            # Otherwise rewind and parse normally
-            self.current = saved_pos
-        
-        # Parse pipeline or expression
+
+        if self._looks_like_command():
+            expr = self._try_parse_command()
+            if expr is not None:
+                self._match(DSLTokenType.NEWLINE)
+                return expr
+
         expr = self._parse_pipeline()
-        
-        # Skip trailing newline
         self._match(DSLTokenType.NEWLINE)
-        
         return expr
     
     def _parse_pipeline(self) -> DSLExpression:
@@ -243,91 +252,68 @@ class DSLParser:
         
         return self._parse_primary()
     
-    def _parse_primary(self) -> DSLExpression:
-        """Parse primary expression."""
-        # Parenthesized expression
+    def _parse_paren_or_collection(self) -> Optional[DSLExpression]:
+        """Parse parenthesized, list, or dict expression."""
         if self._match(DSLTokenType.LPAREN):
             expr = self._parse_pipeline()
             self._consume(DSLTokenType.RPAREN, "Expected ')' after expression.")
             return expr
-        
-        # List literal
         if self._match(DSLTokenType.LBRACKET):
             return self._parse_list()
-        
-        # Dictionary literal
         if self._match(DSLTokenType.LBRACE):
             return self._parse_dict()
-        
-        # Function call
-        if self._check(DSLTokenType.IDENTIFIER) and self._check_next(DSLTokenType.LPAREN):
+        return None
+
+    def _parse_identifier_forms(self) -> Optional[DSLExpression]:
+        """Parse function call, property access, command, or plain identifier."""
+        if not self._check(DSLTokenType.IDENTIFIER):
+            return None
+
+        # Function call: id(
+        if self._check_next(DSLTokenType.LPAREN):
             return self._parse_function_call()
-        
-        # Property access (e.g., obj.property - requires identifier after dot)
-        if (self._check(DSLTokenType.IDENTIFIER) and 
-            self._check_next(DSLTokenType.DOT) and 
-            self.current + 2 < len(self.tokens) and
-            self.tokens[self.current + 2].type == DSLTokenType.IDENTIFIER):
+
+        # Property access: id.id
+        if (self._check_next(DSLTokenType.DOT) and
+                self.current + 2 < len(self.tokens) and
+                self.tokens[self.current + 2].type == DSLTokenType.IDENTIFIER):
             return self._parse_property_access()
-        
-        # Dot as literal (e.g., "scan ." where "." means current directory)
-        if self._match(DSLTokenType.DOT):
-            return DSLExpression(
-                type=DSLExpressionType.LITERAL,
-                value=".",
-                metadata={"type": "string"},
-            )
-        
-        # Command (check if it's a standalone identifier)
-        if self._check(DSLTokenType.IDENTIFIER):
-            # Look ahead to see if this is a command (end of expression or followed by operator)
-            current_pos = self.current
-            identifier = self._advance()
-            
-            # If this is the end of the expression or followed by operators, it's a command
-            if (self._is_at_end() or 
-                self._check(DSLTokenType.NEWLINE) or 
+
+        identifier = self._advance()
+
+        # Standalone command when at expression boundary
+        if (self._is_at_end() or
+                self._check(DSLTokenType.NEWLINE) or
                 self._check(DSLTokenType.EOF) or
                 self._check(DSLTokenType.SEMICOLON) or
                 self._check(DSLTokenType.PIPE)):
-                
-                return DSLExpression(
-                    type=DSLExpressionType.COMMAND,
-                    value=identifier.value,
-                    children=[],
-                )
-            
-            # Otherwise, treat as variable/identifier
             return DSLExpression(
-                type=DSLExpressionType.IDENTIFIER,
+                type=DSLExpressionType.COMMAND,
                 value=identifier.value,
+                children=[],
             )
-        
-        # Literal
+
+        return DSLExpression(
+            type=DSLExpressionType.IDENTIFIER,
+            value=identifier.value,
+        )
+
+    def _parse_literal_value(self) -> Optional[DSLExpression]:
+        """Parse string, number, or boolean literal."""
         if self._match(DSLTokenType.STRING):
             value = self._previous().value
-            # Remove quotes
             return DSLExpression(
                 type=DSLExpressionType.LITERAL,
                 value=value[1:-1],
                 metadata={"type": "string"},
             )
-        
         if self._match(DSLTokenType.NUMBER):
             value = self._previous().value
-            if "." in value:
-                return DSLExpression(
-                    type=DSLExpressionType.LITERAL,
-                    value=float(value),
-                    metadata={"type": "float"},
-                )
-            else:
-                return DSLExpression(
-                    type=DSLExpressionType.LITERAL,
-                    value=int(value),
-                    metadata={"type": "int"},
-                )
-        
+            return DSLExpression(
+                type=DSLExpressionType.LITERAL,
+                value=float(value) if "." in value else int(value),
+                metadata={"type": "float" if "." in value else "int"},
+            )
         if self._match(DSLTokenType.BOOLEAN):
             value = self._previous().value
             return DSLExpression(
@@ -335,14 +321,27 @@ class DSLParser:
                 value=value == "true",
                 metadata={"type": "bool"},
             )
-        
-        if self._check(DSLTokenType.IDENTIFIER):
-            identifier = self._advance()
+        return None
+
+    def _parse_primary(self) -> DSLExpression:
+        """Parse primary expression."""
+        if expr := self._parse_paren_or_collection():
+            return expr
+
+        # Dot as literal
+        if self._match(DSLTokenType.DOT):
             return DSLExpression(
-                type=DSLExpressionType.IDENTIFIER,
-                value=identifier.value,
+                type=DSLExpressionType.LITERAL,
+                value=".",
+                metadata={"type": "string"},
             )
-        
+
+        if expr := self._parse_identifier_forms():
+            return expr
+
+        if expr := self._parse_literal_value():
+            return expr
+
         raise ValueError(f"Unexpected token: {self._peek().value}")
     
     def _parse_command(self) -> DSLExpression:
