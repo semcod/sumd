@@ -161,16 +161,8 @@ def parse(content: str) -> SUMDDocument:
 
 
 def parse_file(path: Path) -> SUMDDocument:
-    """Parse a SUMD file.
-
-    Args:
-        path: Path to the SUMD markdown file
-
-    Returns:
-        SUMDDocument: Parsed document structure
-    """
-    parser = SUMDParser()
-    return parser.parse_file(path)
+    """Parse a SUMD file — delegates to parse for DRY."""
+    return parse(path.read_text(encoding="utf-8"))
 
 
 def validate(document: SUMDDocument) -> List[str]:

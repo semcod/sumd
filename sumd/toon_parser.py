@@ -67,20 +67,32 @@ def _parse_toon_block_assert(lines: list[str]) -> list[dict[str, str]]:
     return rows
 
 
-def _parse_toon_block_performance(lines: list[str]) -> list[dict[str, str]]:
-    """Extract PERFORMANCE rows from toon file lines."""
+def _parse_generic_block(
+    lines: list[str],
+    block_prefix: str,
+    pattern: str,
+    key_names: tuple[str, str],
+) -> list[dict[str, str]]:
+    """Extract key-value rows from a named toon block."""
     rows: list[dict[str, str]] = []
     in_block = False
     for line in lines:
-        if re.match(r"^PERFORMANCE\[\d+\]", line):
+        if re.match(rf"^{re.escape(block_prefix)}\[\d+\]", line):
             in_block = True
             continue
         if in_block:
             if re.match(r"^[A-Z_]+\[\d+\]", line) or line.startswith("#"):
                 in_block = False
-            elif m := re.match(r"^\s{2}([a-z_]+),\s*(.+)$", line):
-                rows.append({"metric": m.group(1), "threshold": m.group(2).strip()})
+            elif m := re.match(pattern, line):
+                rows.append({key_names[0]: m.group(1), key_names[1]: m.group(2).strip()})
     return rows
+
+
+def _parse_toon_block_performance(lines: list[str]) -> list[dict[str, str]]:
+    """Extract PERFORMANCE rows from toon file lines."""
+    return _parse_generic_block(
+        lines, "PERFORMANCE", r"^\s{2}([a-z_]+),\s*(.+)$", ("metric", "threshold")
+    )
 
 
 def _parse_toon_block_navigate(lines: list[str]) -> list[str]:
@@ -101,18 +113,9 @@ def _parse_toon_block_navigate(lines: list[str]) -> list[str]:
 
 def _parse_toon_block_gui(lines: list[str]) -> list[dict[str, str]]:
     """Extract GUI action rows from toon file lines."""
-    actions: list[dict[str, str]] = []
-    in_block = False
-    for line in lines:
-        if re.match(r"^GUI\[\d+\]", line):
-            in_block = True
-            continue
-        if in_block:
-            if re.match(r"^[A-Z_]+\[\d+\]", line) or line.startswith("#"):
-                in_block = False
-            elif m := re.match(r"^\s{2}(\w+),\s*(.+)$", line):
-                actions.append({"action": m.group(1), "selector": m.group(2).strip()})
-    return actions
+    return _parse_generic_block(
+        lines, "GUI", r"^\s{2}(\w+),\s*(.+)$", ("action", "selector")
+    )
 
 
 def _parse_toon_file(f: Path) -> dict[str, Any]:

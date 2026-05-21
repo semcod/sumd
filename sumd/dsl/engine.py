@@ -16,10 +16,11 @@ from .schema import (
     DEFAULT_PROJECT_SCHEMA,
 )
 from .schema_commands import SchemaCommandRegistry, SchemaBasedCommands
+from .context_mixin import VariableMixin
 
 
 @dataclass
-class DSLContext:
+class DSLContext(VariableMixin):
     """Execution context for DSL expressions."""
     variables: Dict[str, Any]
     functions: Dict[str, Callable]
@@ -31,14 +32,6 @@ class DSLContext:
         self.functions = {}
         self.working_directory = working_directory or Path.cwd()
         self.metadata = {}
-    
-    def set_variable(self, name: str, value: Any) -> None:
-        """Set a variable in the context."""
-        self.variables[name] = value
-    
-    def get_variable(self, name: str) -> Any:
-        """Get a variable from the context."""
-        return self.variables.get(name)
     
     def register_function(self, name: str, func: Callable) -> None:
         """Register a function in the context."""

@@ -667,55 +667,71 @@ def _parse_ignore_file(ignore_path: Path) -> list[str]:
     return patterns
 
 
+def _match_dir_pattern(path: Path, path_str: str, dir_pattern: str) -> bool:
+    """Check if path matches a directory pattern (ends with /)."""
+    if fnmatch.fnmatch(path_str, dir_pattern):
+        return True
+    if fnmatch.fnmatch(path_str, dir_pattern + "/*"):
+        return True
+    if fnmatch.fnmatch(path_str, "*/" + dir_pattern):
+        return True
+    if fnmatch.fnmatch(path_str, "*/" + dir_pattern + "/*"):
+        return True
+    for part in path.parts:
+        if fnmatch.fnmatch(part, dir_pattern):
+            return True
+    return False
+
+
+def _match_absolute_pattern(path_str: str, pattern: str) -> bool:
+    """Check if path matches an absolute pattern (starts with /)."""
+    pattern = pattern[1:]
+    return fnmatch.fnmatch(path_str, pattern) or fnmatch.fnmatch(path_str, pattern + "/*")
+
+
+def _match_recursive_pattern(path_str: str, pattern: str) -> bool:
+    """Check if path matches a recursive pattern (starts with **/)."""
+    pattern = pattern[3:]
+    return (
+        fnmatch.fnmatch(path_str, pattern)
+        or fnmatch.fnmatch(path_str, "*/" + pattern)
+        or fnmatch.fnmatch(path_str, "**/" + pattern)
+    )
+
+
+def _match_regular_pattern(path: Path, path_str: str, pattern: str) -> bool:
+    """Check if path matches a regular pattern."""
+    if fnmatch.fnmatch(path_str, pattern) or fnmatch.fnmatch(path_str, "*/" + pattern):
+        return True
+    for part in path.parts:
+        if fnmatch.fnmatch(part, pattern):
+            return True
+    return False
+
+
 def _path_matches_pattern(path: Path, pattern: str) -> bool:
     """Check if a path matches a gitignore-style pattern."""
     path_str = str(path)
-    
+
     # Handle negation patterns (starting with !)
     if pattern.startswith("!"):
         # This is a negation - we handle it at the caller level
         return False
-    
+
     # Handle directory patterns (ending with /)
     if pattern.endswith("/"):
-        # Pattern only matches directories and their contents
-        dir_pattern = pattern[:-1]  # Remove trailing slash
-        # Check if the path is the directory itself or inside it
-        if fnmatch.fnmatch(path_str, dir_pattern):
-            return True
-        if fnmatch.fnmatch(path_str, dir_pattern + "/*"):
-            return True
-        if fnmatch.fnmatch(path_str, "*/" + dir_pattern):
-            return True
-        if fnmatch.fnmatch(path_str, "*/" + dir_pattern + "/*"):
-            return True
-        # Check if any parent directory matches
-        for part in path.parts:
-            if fnmatch.fnmatch(part, dir_pattern):
-                return True
-        return False
-    
+        return _match_dir_pattern(path, path_str, pattern[:-1])
+
     # Handle absolute patterns (starting with /)
     if pattern.startswith("/"):
-        # Pattern matches from the root
-        pattern = pattern[1:]
-        return fnmatch.fnmatch(path_str, pattern) or fnmatch.fnmatch(path_str, pattern + "/*")
-    
+        return _match_absolute_pattern(path_str, pattern)
+
     # Handle recursive patterns (starting with **/)
     if pattern.startswith("**/"):
-        pattern = pattern[3:]
-        return fnmatch.fnmatch(path_str, pattern) or fnmatch.fnmatch(path_str, "*/" + pattern) or fnmatch.fnmatch(path_str, "**/" + pattern)
-    
-    # Regular pattern - match any part of the path
-    if fnmatch.fnmatch(path_str, pattern) or fnmatch.fnmatch(path_str, "*/" + pattern):
-        return True
-    
-    # Check if any parent directory matches the pattern
-    for part in path.parts:
-        if fnmatch.fnmatch(part, pattern):
-            return True
-    
-    return False
+        return _match_recursive_pattern(path_str, pattern)
+
+    # Regular pattern
+    return _match_regular_pattern(path, path_str, pattern)
 
 
 def _is_path_ignored(path: Path, proj_dir: Path, ignore_patterns: list[str]) -> bool:
@@ -913,12 +929,9 @@ def generate_map_toon(proj_dir: Path) -> str:
     return "\n".join(L) + "\n"
 
 
-def generate_project_logic(proj_dir: Path) -> str:
-    """Generate project/logic.pl containing Prolog facts representing the project structure."""
-    proj_dir = proj_dir.resolve()
+def _facts_project_metadata(proj_dir: Path) -> list[str]:
+    """Generate project metadata facts."""
     proj_name = proj_dir.name
-    
-    # 1. Project metadata
     version = "0.0.0"
     project_type = "python"
     try:
@@ -931,23 +944,28 @@ def generate_project_logic(proj_dir: Path) -> str:
                 project_type = "javascript"
     except Exception:
         pass
-        
-    facts = []
-    facts.append("% ── Project Metadata ─────────────────────────────────────")
-    facts.append(f"project_metadata('{proj_name}', '{version}', '{project_type}').\n")
-    
-    # 2. Files
-    facts.append("% ── Project Files ────────────────────────────────────────")
-    lang_counts, modules = _collect_map_files(proj_dir)
+    return [
+        "% ── Project Metadata ─────────────────────────────────────",
+        f"project_metadata('{proj_name}', '{version}', '{project_type}').\n",
+    ]
+
+
+def _facts_project_files(proj_dir: Path) -> list[str]:
+    """Generate project file facts."""
+    facts = ["% ── Project Files ────────────────────────────────────────"]
+    _lang_counts, modules = _collect_map_files(proj_dir)
     for rel_path, lines, lang in modules:
         rel_clean = str(rel_path).replace("'", "\\'")
         facts.append(f"project_file('{rel_clean}', {lines}, '{lang}').")
     facts.append("")
-    
-    # 3. Python Analysis (functions, classes, methods)
-    py_modules, all_funcs, all_classes, total_cls = _render_map_detail(proj_dir, modules)
-    
-    facts.append("% ── Python Functions ─────────────────────────────────────")
+    return facts
+
+
+def _facts_python_analysis(proj_dir: Path) -> list[str]:
+    """Generate Python function and class facts."""
+    _lang_counts, modules = _collect_map_files(proj_dir)
+    _py_modules, all_funcs, all_classes, _total_cls = _render_map_detail(proj_dir, modules)
+    facts = ["% ── Python Functions ─────────────────────────────────────"]
     for f in all_funcs:
         mod_clean = f["mod"].replace("'", "\\'")
         func_clean = f["name"].replace("'", "\\'")
@@ -956,7 +974,7 @@ def generate_project_logic(proj_dir: Path) -> str:
         fan = f["fan"]
         facts.append(f"python_function('{mod_clean}', '{func_clean}', {arity}, {cc}, {fan}).")
     facts.append("")
-    
+
     facts.append("% ── Python Classes ───────────────────────────────────────")
     for cls in all_classes:
         mod_clean = cls["mod"].replace("'", "\\'")
@@ -969,9 +987,12 @@ def generate_project_logic(proj_dir: Path) -> str:
             fan = m["fan"]
             facts.append(f"python_method('{cls_clean}', '{m_clean}', {arity}, {cc}, {fan}).")
     facts.append("")
-    
-    # 4. Dependencies
-    facts.append("% ── Dependencies ─────────────────────────────────────────")
+    return facts
+
+
+def _facts_dependencies(proj_dir: Path) -> list[str]:
+    """Generate dependency facts."""
+    facts = ["% ── Dependencies ─────────────────────────────────────────"]
     try:
         reqs = extract_requirements(proj_dir)
         for req in reqs:
@@ -982,9 +1003,12 @@ def generate_project_logic(proj_dir: Path) -> str:
     except Exception:
         pass
     facts.append("")
-    
-    # 5. Makefile
-    facts.append("% ── Makefile Targets ─────────────────────────────────────")
+    return facts
+
+
+def _facts_makefile(proj_dir: Path) -> list[str]:
+    """Generate Makefile target facts."""
+    facts = ["% ── Makefile Targets ─────────────────────────────────────"]
     try:
         makefile = extract_makefile(proj_dir)
         for target in makefile:
@@ -994,9 +1018,12 @@ def generate_project_logic(proj_dir: Path) -> str:
     except Exception:
         pass
     facts.append("")
-    
-    # 6. Taskfile
-    facts.append("% ── Taskfile Tasks ───────────────────────────────────────")
+    return facts
+
+
+def _facts_taskfile(proj_dir: Path) -> list[str]:
+    """Generate Taskfile task facts."""
+    facts = ["% ── Taskfile Tasks ───────────────────────────────────────"]
     try:
         tasks = extract_taskfile(proj_dir)
         for task in tasks:
@@ -1006,9 +1033,12 @@ def generate_project_logic(proj_dir: Path) -> str:
     except Exception:
         pass
     facts.append("")
-    
-    # 7. Environment Variables
-    facts.append("% ── Environment Variables ────────────────────────────────")
+    return facts
+
+
+def _facts_env_variables(proj_dir: Path) -> list[str]:
+    """Generate environment variable facts."""
+    facts = ["% ── Environment Variables ────────────────────────────────"]
     try:
         env_vars = extract_env(proj_dir)
         for ev in env_vars:
@@ -1019,9 +1049,12 @@ def generate_project_logic(proj_dir: Path) -> str:
     except Exception:
         pass
     facts.append("")
-    
-    # 8. TestQL Scenarios
-    facts.append("% ── TestQL Scenarios ─────────────────────────────────────")
+    return facts
+
+
+def _facts_testql_scenarios(proj_dir: Path) -> list[str]:
+    """Generate TestQL scenario facts."""
+    facts = ["% ── TestQL Scenarios ─────────────────────────────────────"]
     try:
         from sumd.toon_parser import extract_testql_scenarios
         scenarios = extract_testql_scenarios(proj_dir)
@@ -1032,12 +1065,25 @@ def generate_project_logic(proj_dir: Path) -> str:
     except Exception:
         pass
     facts.append("")
+    return facts
 
-    # 9. Semantic Facts from SUMD.md and app.doql.less
+
+def generate_project_logic(proj_dir: Path) -> str:
+    """Generate project/logic.pl containing Prolog facts representing the project structure."""
+    proj_dir = proj_dir.resolve()
+    facts: list[str] = []
+    facts.extend(_facts_project_metadata(proj_dir))
+    facts.extend(_facts_project_files(proj_dir))
+    facts.extend(_facts_python_analysis(proj_dir))
+    facts.extend(_facts_dependencies(proj_dir))
+    facts.extend(_facts_makefile(proj_dir))
+    facts.extend(_facts_taskfile(proj_dir))
+    facts.extend(_facts_env_variables(proj_dir))
+    facts.extend(_facts_testql_scenarios(proj_dir))
+
     facts.append("% ── Semantic Facts from SUMD.md ──────────────────────────")
     try:
-        semantic_facts = _extract_sumd_semantic_facts(proj_dir)
-        facts.extend(semantic_facts)
+        facts.extend(_extract_sumd_semantic_facts(proj_dir))
     except Exception:
         pass
     facts.append("")
@@ -1045,75 +1091,108 @@ def generate_project_logic(proj_dir: Path) -> str:
     return "\n".join(facts) + "\n"
 
 
+def _extract_markpact_files(content: str) -> list[str]:
+    """Extract declared files from markpact codeblocks in SUMD.md."""
+    facts = []
+    pattern = r"^```(?P<lang>\w+)[ \t]+markpact:(?P<kind>\w+)(?:[ \t]+(?P<attrs>[^\n]*))?$"
+    for m in re.finditer(pattern, content, re.MULTILINE):
+        kind = m.group("kind")
+        attrs = m.group("attrs") or ""
+        pm = re.search(r"path=([^\s]+)", attrs)
+        if pm:
+            path_val = pm.group(1).strip("'\"")
+            facts.append(f"sumd_declared_file('{path_val}', '{kind}').")
+    return facts
+
+
+def _extract_doql_interfaces(doql_content: str) -> list[str]:
+    """Extract interface facts from app.doql.less content."""
+    facts = []
+    for m in re.finditer(
+        r'interface\[type="(?P<type>[^"]+)"\](?:\s*\{\s*framework:\s*(?P<fw>[^;]+);)?',
+        doql_content,
+    ):
+        itype = m.group("type").replace("'", "\\'")
+        if m.group("fw"):
+            ifw = m.group("fw").strip().replace("'", "\\'")
+            facts.append(f"sumd_interface('{itype}', '{ifw}').")
+        else:
+            facts.append(f"sumd_interface('{itype}', '').")
+    return facts
+
+
+def _extract_doql_workflows(doql_content: str) -> list[str]:
+    """Extract workflow facts from app.doql.less content."""
+    facts = []
+    workflow_blocks = re.finditer(
+        r'workflow\[name="(?P<name>[^"]+)"\]\s*\{(?P<body>[\s\S]*?)\}',
+        doql_content,
+    )
+    for wb in workflow_blocks:
+        w_name = wb.group("name").replace("'", "\\'")
+        body = wb.group("body")
+        trig_m = re.search(r"trigger:\s*([^;]+);", body)
+        w_trig = trig_m.group(1).strip().replace("'", "\\'") if trig_m else ""
+        facts.append(f"sumd_workflow('{w_name}', '{w_trig}').")
+
+        if w_name.startswith("quality:"):
+            gate_name = w_name.split(":", 1)[1]
+            facts.append(f"sumd_quality_workflow('{w_name}', '{gate_name}').")
+
+        steps = re.finditer(r"step-(?P<idx>\d+):\s*run\s+cmd=(?P<cmd>[^;\n]+);", body)
+        for st in steps:
+            s_idx = st.group("idx")
+            s_cmd = st.group("cmd").strip().replace("'", "\\'")
+            facts.append(f"sumd_workflow_step('{w_name}', {s_idx}, '{s_cmd}').")
+    return facts
+
+
+def _extract_doql_facts(proj_dir: Path) -> list[str]:
+    """Extract facts from app.doql.less if it exists."""
+    facts = []
+    doql_path = proj_dir / "app.doql.less"
+    if not doql_path.exists():
+        return facts
+    doql_content = doql_path.read_text(encoding="utf-8")
+    facts.extend(_extract_doql_interfaces(doql_content))
+    facts.extend(_extract_doql_workflows(doql_content))
+    return facts
+
+
+def _extract_deploy_facts(proj_dir: Path) -> list[str]:
+    """Extract deployment target facts."""
+    facts = []
+    compose_path = proj_dir / "docker-compose.yml"
+    if compose_path.exists():
+        facts.append("sumd_deploy_target('docker_compose').")
+        facts.append("sumd_deploy_compose_file('docker-compose.yml').")
+    return facts
+
+
+def _extract_pyqual_gates(proj_dir: Path) -> list[str]:
+    """Extract pyqual gate facts."""
+    facts = []
+    pyqual_path = proj_dir / "pyqual.yaml"
+    if not pyqual_path.exists():
+        return facts
+    pyqual_content = pyqual_path.read_text(encoding="utf-8")
+    for m in re.finditer(r"gate:\s*([^\s\n]+)", pyqual_content):
+        g_name = m.group(1).strip().replace("'", "\\'")
+        facts.append(f"sumd_gate('{g_name}').")
+    return facts
+
+
 def _extract_sumd_semantic_facts(proj_dir: Path) -> list[str]:
     facts = []
     sumd_path = proj_dir / "SUMD.md"
     if not sumd_path.exists():
         return facts
-    
-    content = sumd_path.read_text(encoding="utf-8")
-    
-    # 1. Parse declared files from markpact codeblocks
-    pattern = r"^```(?P<lang>\w+)[ \t]+markpact:(?P<kind>\w+)(?:[ \t]+(?P<attrs>[^\n]*))?$"
-    for m in re.finditer(pattern, content, re.MULTILINE):
-        kind = m.group("kind")
-        attrs = m.group("attrs") or ""
-        # Extract path=...
-        pm = re.search(r"path=([^\s]+)", attrs)
-        if pm:
-            path_val = pm.group(1).strip("'\"")
-            facts.append(f"sumd_declared_file('{path_val}', '{kind}').")
-            
-    # 2. Parse app.doql.less if it exists
-    doql_path = proj_dir / "app.doql.less"
-    if doql_path.exists():
-        doql_content = doql_path.read_text(encoding="utf-8")
-        # Extract interfaces
-        for m in re.finditer(r"interface\[type=\"(?P<type>[^\"]+)\"\](?:\s*\{\s*framework:\s*(?P<fw>[^;]+);)?", doql_content):
-            itype = m.group("type").replace("'", "\\'")
-            if m.group("fw"):
-                ifw = m.group("fw").strip().replace("'", "\\'")
-                facts.append(f"sumd_interface('{itype}', '{ifw}').")
-            else:
-                facts.append(f"sumd_interface('{itype}', '').")
-                
-        # Extract workflows
-        workflow_blocks = re.finditer(r"workflow\[name=\"(?P<name>[^\"]+)\"\]\s*\{(?P<body>[\s\S]*?)\}", doql_content)
-        for wb in workflow_blocks:
-            w_name = wb.group("name").replace("'", "\\'")
-            body = wb.group("body")
-            # Extract trigger
-            trig_m = re.search(r"trigger:\s*([^;]+);", body)
-            w_trig = trig_m.group(1).strip().replace("'", "\\'") if trig_m else ""
-            facts.append(f"sumd_workflow('{w_name}', '{w_trig}').")
-            
-            # If it's a quality workflow, extract the gate name
-            if w_name.startswith("quality:"):
-                gate_name = w_name.split(":", 1)[1]
-                facts.append(f"sumd_quality_workflow('{w_name}', '{gate_name}').")
-                
-            # Extract steps
-            steps = re.finditer(r"step-(?P<idx>\d+):\s*run\s+cmd=(?P<cmd>[^;\n]+);", body)
-            for st in steps:
-                s_idx = st.group("idx")
-                s_cmd = st.group("cmd").strip().replace("'", "\\'")
-                facts.append(f"sumd_workflow_step('{w_name}', {s_idx}, '{s_cmd}').")
 
-    # 3. Parse deployment targets from SUMD.md or compose files
-    compose_path = proj_dir / "docker-compose.yml"
-    if compose_path.exists():
-        facts.append("sumd_deploy_target('docker_compose').")
-        facts.append("sumd_deploy_compose_file('docker-compose.yml').")
-        
-    # 4. Parse pyqual.yaml gates
-    pyqual_path = proj_dir / "pyqual.yaml"
-    if pyqual_path.exists():
-        pyqual_content = pyqual_path.read_text(encoding="utf-8")
-        # Extract gate names
-        for m in re.finditer(r"gate:\s*([^\s\n]+)", pyqual_content):
-            g_name = m.group(1).strip().replace("'", "\\'")
-            facts.append(f"sumd_gate('{g_name}').")
-            
+    content = sumd_path.read_text(encoding="utf-8")
+    facts.extend(_extract_markpact_files(content))
+    facts.extend(_extract_doql_facts(proj_dir))
+    facts.extend(_extract_deploy_facts(proj_dir))
+    facts.extend(_extract_pyqual_gates(proj_dir))
     return facts
 
 

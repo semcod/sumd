@@ -6,6 +6,8 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 from pydantic import BaseModel, Field, validator, ConfigDict
 
+from .context_mixin import VariableMixin
+
 
 class DSLDataType(str, Enum):
     """Supported data types in DSL."""
@@ -149,7 +151,7 @@ class NLPModel(BaseModel):
     confidence_threshold: float = Field(0.7, description="Confidence threshold")
 
 
-class DSLContext(BaseModel):
+class DSLContext(BaseModel, VariableMixin):
     """DSL execution context model."""
     variables: Dict[str, Any] = Field(default_factory=dict, description="Context variables")
     functions: Dict[str, Any] = Field(default_factory=dict, description="Available functions")
@@ -157,17 +159,9 @@ class DSLContext(BaseModel):
     project_schema: Optional[DSLProjectSchema] = Field(None, description="Project schema")
     nlp_model: Optional[NLPModel] = Field(None, description="NLP model")
     metadata: Dict[str, Any] = Field(default_factory=dict, description="Context metadata")
-    
+
     model_config = {"arbitrary_types_allowed": True}
-    
-    def set_variable(self, name: str, value: Any) -> None:
-        """Set a variable in the context."""
-        self.variables[name] = value
-    
-    def get_variable(self, name: str) -> Any:
-        """Get a variable from the context."""
-        return self.variables.get(name)
-    
+
     def register_function(self, name: str, func: Any) -> None:
         """Register a function in the context."""
         self.functions[name] = func

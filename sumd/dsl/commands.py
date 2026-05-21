@@ -645,12 +645,5 @@ async def _cmd_exists(context: DSLContext, args: List[str]) -> bool:
 
 
 async def _cmd_read_file(context: DSLContext, args: List[str]) -> str:
-    """Read file contents."""
-    if not args:
-        raise ValueError("Usage: read_file <file_path>")
-    
-    file_path = context.working_directory / args[0]
-    if not file_path.exists():
-        raise ValueError(f"File not found: {args[0]}")
-    
-    return file_path.read_text(encoding="utf-8")
+    """Read file contents — delegates to cat for DRY."""
+    return await _cmd_cat(context, args)
