@@ -345,3 +345,33 @@ class TestGenerateDoqlLess:
         )
         assert result is None
         assert (tmp_path / "app.doql.less").read_text() == "// existing\n"
+
+
+def test_python_m_sumd_works():
+    import sys
+    import subprocess
+    from unittest.mock import patch
+    import importlib
+    import sumd.__main__
+    
+    result = subprocess.run(
+        [sys.executable, "-m", "sumd", "--help"],
+        capture_output=True,
+        text=True,
+        check=True
+    )
+    assert "usage:" in result.stdout.lower() or "options:" in result.stdout.lower()
+
+    with patch("sumd.cli.main") as mock_main:
+        import inspect
+        code = compile(inspect.getsource(sumd.__main__), sumd.__main__.__file__, "exec")
+        globals_dict = {
+            "__name__": "__main__",
+            "__file__": sumd.__main__.__file__,
+            "__builtins__": __builtins__,
+        }
+        exec(code, globals_dict)
+        mock_main.assert_called_once()
+
+
+

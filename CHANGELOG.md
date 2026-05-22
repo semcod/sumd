@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.53] - 2026-05-22
+
+### Docs
+- Update README.md
+
+### Test
+- Update tests/test_cli.py
+
+### Other
+- Update sumd_logic_validator/sumd_logic_validator/__init__.py
+- Update wup.yaml
+
 ## [0.3.52] - 2026-05-22
 
 ### Docs
