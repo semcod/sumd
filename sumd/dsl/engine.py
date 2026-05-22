@@ -42,6 +42,32 @@ class DSLContext(VariableMixin):
         return self.functions.get(name)
 
 
+# ---------------------------------------------------------------------------
+# Operator dispatch maps — defined at module level to avoid re-creation
+# ---------------------------------------------------------------------------
+
+_COMPARISON_OPS: dict[str, Any] = {
+    "==": lambda l, r: l == r,
+    "!=": lambda l, r: l != r,
+    "<":  lambda l, r: l < r,
+    "<=": lambda l, r: l <= r,
+    ">": lambda l, r: l > r,
+    ">=": lambda l, r: l >= r,
+    "contains":   lambda l, r: str(r) in str(l),
+    "startswith": lambda l, r: str(l).startswith(str(r)),
+    "endswith":   lambda l, r: str(l).endswith(str(r)),
+}
+
+_ARITHMETIC_OPS: dict[str, Any] = {
+    "+":  lambda l, r: l + r,
+    "-":  lambda l, r: l - r,
+    "*":  lambda l, r: l * r,
+    "/":  lambda l, r: l / r,
+    "%":  lambda l, r: l % r,
+    "**": lambda l, r: l ** r,
+}
+
+
 class DSLEngine:
     """Engine for executing DSL expressions."""
     
@@ -95,49 +121,33 @@ class DSLEngine:
         """Get command suggestions."""
         return self.schema_registry.get_suggestions(partial_input)
     
+    def _build_dispatch_table(self) -> dict:
+        """Build expression-type → handler dispatch table."""
+        return {
+            DSLExpressionType.ASSIGNMENT:     self._execute_assignment,
+            DSLExpressionType.COMMAND:        self._execute_command,
+            DSLExpressionType.FUNCTION_CALL:  self._execute_function_call,
+            DSLExpressionType.PROPERTY_ACCESS: self._execute_property_access,
+            DSLExpressionType.COMPARISON:     self._execute_comparison,
+            DSLExpressionType.LOGICAL:        self._execute_logical,
+            DSLExpressionType.ARITHMETIC:     self._execute_arithmetic,
+            DSLExpressionType.PIPELINE:       self._execute_pipeline,
+            DSLExpressionType.LIST:           self._execute_list,
+            DSLExpressionType.DICT:           self._execute_dict,
+            DSLExpressionType.BLOCK:          self._execute_block,
+        }
+
     async def _execute_expression(self, expression: DSLExpression, context: DSLContext) -> Any:
         """Execute a single DSL expression."""
         if expression.type == DSLExpressionType.LITERAL:
             return expression.value
-        
-        elif expression.type == DSLExpressionType.IDENTIFIER:
+        if expression.type == DSLExpressionType.IDENTIFIER:
             return context.get_variable(expression.value) or expression.value
-        
-        elif expression.type == DSLExpressionType.ASSIGNMENT:
-            return await self._execute_assignment(expression, context)
-        
-        elif expression.type == DSLExpressionType.COMMAND:
-            return await self._execute_command(expression, context)
-        
-        elif expression.type == DSLExpressionType.FUNCTION_CALL:
-            return await self._execute_function_call(expression, context)
-        
-        elif expression.type == DSLExpressionType.PROPERTY_ACCESS:
-            return await self._execute_property_access(expression, context)
-        
-        elif expression.type == DSLExpressionType.COMPARISON:
-            return await self._execute_comparison(expression, context)
-        
-        elif expression.type == DSLExpressionType.LOGICAL:
-            return await self._execute_logical(expression, context)
-        
-        elif expression.type == DSLExpressionType.ARITHMETIC:
-            return await self._execute_arithmetic(expression, context)
-        
-        elif expression.type == DSLExpressionType.PIPELINE:
-            return await self._execute_pipeline(expression, context)
-        
-        elif expression.type == DSLExpressionType.LIST:
-            return await self._execute_list(expression, context)
-        
-        elif expression.type == DSLExpressionType.DICT:
-            return await self._execute_dict(expression, context)
-        
-        elif expression.type == DSLExpressionType.BLOCK:
-            return await self._execute_block(expression, context)
-        
-        else:
+
+        handler = self._build_dispatch_table().get(expression.type)
+        if handler is None:
             raise ValueError(f"Unknown expression type: {expression.type}")
+        return await handler(expression, context)
     
     async def _execute_assignment(self, expression: DSLExpression, context: DSLContext) -> Any:
         """Execute assignment expression."""
@@ -155,86 +165,61 @@ class DSLEngine:
         
         return value
     
+    async def _resolve_schema_call(
+        self, name: str, args: list, context: DSLContext
+    ) -> tuple[bool, Any]:
+        """Try to dispatch *name* as a schema command. Returns (handled, result)."""
+        command_schema = self.schema_registry.get_command(name)
+        if command_schema is None:
+            return False, None
+        named_args = {
+            command_schema.parameters[i].name: v
+            for i, v in enumerate(args)
+            if i < len(command_schema.parameters)
+        }
+        self.schema_commands.context = context
+        return True, await self.schema_commands.execute_command(name, named_args)
+
+    async def _evaluate_args(
+        self, expression: DSLExpression, context: DSLContext
+    ) -> list:
+        """Evaluate all child expressions and return their values."""
+        return [
+            await self._execute_expression(child, context)
+            for child in expression.children
+        ]
+
     async def _execute_command(self, expression: DSLExpression, context: DSLContext) -> Any:
         """Execute command expression."""
         command_name = expression.value
-        args = []
-        
-        # Evaluate arguments
-        for arg_expr in expression.children:
-            arg_value = await self._execute_expression(arg_expr, context)
-            args.append(arg_value)
-        
-        # Check if it's a schema-based command
-        if self.schema_registry.get_command(command_name):
-            # Convert positional args to named args based on schema
-            command_schema = self.schema_registry.get_command(command_name)
-            named_args = {}
-            
-            for i, arg_value in enumerate(args):
-                if i < len(command_schema.parameters):
-                    param_name = command_schema.parameters[i].name
-                    named_args[param_name] = arg_value
-            
-            # Update schema commands context
-            self.schema_commands.context = context
-            return await self.schema_commands.execute_command(command_name, named_args)
-        
-        # Check if it's a built-in function
+        args = await self._evaluate_args(expression, context)
+
+        handled, result = await self._resolve_schema_call(command_name, args, context)
+        if handled:
+            return result
+
         if command_name in self.built_in_functions:
-            func = self.built_in_functions[command_name]
-            return await self._call_function(func, args, context)
-        
-        # Check if it's a context function
+            return await self._call_function(self.built_in_functions[command_name], args, context)
         if command_name in context.functions:
-            func = context.functions[command_name]
-            return await self._call_function(func, args, context)
-        
-        # Otherwise, treat as SUMD command
+            return await self._call_function(context.functions[command_name], args, context)
         if self.command_bus:
             return await self._execute_sumd_command(command_name, args, context)
-        
-        # If no args and unknown command, treat as variable name (fallback)
         if not args:
             return command_name
-        
         raise ValueError(f"Unknown command: {command_name}")
     
     async def _execute_function_call(self, expression: DSLExpression, context: DSLContext) -> Any:
         """Execute function call expression."""
         function_name = expression.value
-        args = []
-        
-        # Evaluate arguments
-        for arg_expr in expression.children:
-            arg_value = await self._execute_expression(arg_expr, context)
-            args.append(arg_value)
-        
-        # Check if it's a schema-based command
-        if self.schema_registry.get_command(function_name):
-            # Convert positional args to named args based on schema
-            command_schema = self.schema_registry.get_command(function_name)
-            named_args = {}
-            
-            for i, arg_value in enumerate(args):
-                if i < len(command_schema.parameters):
-                    param_name = command_schema.parameters[i].name
-                    named_args[param_name] = arg_value
-            
-            # Update schema commands context
-            self.schema_commands.context = context
-            return await self.schema_commands.execute_command(function_name, named_args)
-        
-        # Check built-in functions
+        args = await self._evaluate_args(expression, context)
+
+        handled, result = await self._resolve_schema_call(function_name, args, context)
+        if handled:
+            return result
         if function_name in self.built_in_functions:
-            func = self.built_in_functions[function_name]
-            return await self._call_function(func, args, context)
-        
-        # Check context functions
+            return await self._call_function(self.built_in_functions[function_name], args, context)
         if function_name in context.functions:
-            func = context.functions[function_name]
-            return await self._call_function(func, args, context)
-        
+            return await self._call_function(context.functions[function_name], args, context)
         raise ValueError(f"Unknown function: {function_name}")
     
     async def _execute_property_access(self, expression: DSLExpression, context: DSLExpression) -> Any:
@@ -259,35 +244,16 @@ class DSLEngine:
         """Execute comparison expression."""
         if len(expression.children) != 2:
             raise ValueError("Comparison requires exactly 2 children")
-        
         left = await self._execute_expression(expression.children[0], context)
         right = await self._execute_expression(expression.children[1], context)
-        
         operator = expression.value
-        
-        if operator == "==":
-            return left == right
-        elif operator == "!=":
-            return left != right
-        elif operator == "<":
-            return left < right
-        elif operator == "<=":
-            return left <= right
-        elif operator == ">":
-            return left > right
-        elif operator == ">=":
-            return left >= right
-        elif operator == "contains":
-            return str(right) in str(left)
-        elif operator == "matches":
+        if operator == "matches":
             import re
             return bool(re.search(str(right), str(left)))
-        elif operator == "startswith":
-            return str(left).startswith(str(right))
-        elif operator == "endswith":
-            return str(left).endswith(str(right))
-        else:
+        op_fn = _COMPARISON_OPS.get(operator)
+        if op_fn is None:
             raise ValueError(f"Unknown comparison operator: {operator}")
+        return op_fn(left, right)
     
     async def _execute_logical(self, expression: DSLExpression, context: DSLContext) -> bool:
         """Execute logical expression."""
@@ -317,33 +283,17 @@ class DSLEngine:
     async def _execute_arithmetic(self, expression: DSLExpression, context: DSLContext) -> Union[int, float]:
         """Execute arithmetic expression."""
         operator = expression.value
-        
         if operator == "-" and len(expression.children) == 1:
-            # Unary minus
             operand = await self._execute_expression(expression.children[0], context)
             return -operand
-        
-        elif len(expression.children) == 2:
-            left = await self._execute_expression(expression.children[0], context)
-            right = await self._execute_expression(expression.children[1], context)
-            
-            if operator == "+":
-                return left + right
-            elif operator == "-":
-                return left - right
-            elif operator == "*":
-                return left * right
-            elif operator == "/":
-                return left / right
-            elif operator == "%":
-                return left % right
-            elif operator == "**":
-                return left ** right
-            else:
-                raise ValueError(f"Unknown arithmetic operator: {operator}")
-        
-        else:
+        if len(expression.children) != 2:
             raise ValueError(f"Arithmetic operator {operator} requires 1 or 2 operands")
+        left = await self._execute_expression(expression.children[0], context)
+        right = await self._execute_expression(expression.children[1], context)
+        op_fn = _ARITHMETIC_OPS.get(operator)
+        if op_fn is None:
+            raise ValueError(f"Unknown arithmetic operator: {operator}")
+        return op_fn(left, right)
     
     async def _execute_pipeline(self, expression: DSLExpression, context: DSLContext) -> Any:
         """Execute pipeline expression."""

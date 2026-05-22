@@ -1,65 +1,65 @@
 project: /home/tom/github/oqlos/sumd
 generated_from: code2llm call graph analysis
 stats:
-  total_nodes: 215
-  total_edges: 213
-  modules_count: 31
+  total_nodes: 234
+  total_edges: 224
+  modules_count: 33
 nodes:
-  sumd.cli.extract:
-    name: extract
-    module: sumd.cli
-    line: 622
-    cyclomatic_complexity: 5
-    calls_out: 13
-    calls_in: 0
-  sumd.cli._maybe_generate_testql:
-    name: _maybe_generate_testql
-    module: sumd.cli
-    line: 902
-    cyclomatic_complexity: 5
-    calls_out: 8
+  sumd.pipeline._collect_infra_sources:
+    name: _collect_infra_sources
+    module: sumd.pipeline
+    line: 202
+    cyclomatic_complexity: 6
+    calls_out: 10
     calls_in: 1
-  sumd.cli.validate:
-    name: validate
-    module: sumd.cli
-    line: 461
-    cyclomatic_complexity: 4
-    calls_out: 13
+  sumd.dsl.shell.DSLShell._handle_shell_command:
+    name: _handle_shell_command
+    module: sumd.dsl.shell
+    line: 139
+    cyclomatic_complexity: 14
+    calls_out: 24
     calls_in: 0
-  sumd.sections.deployment._render_deployment_install:
-    name: _render_deployment_install
-    module: sumd.sections.deployment
-    line: 15
-    cyclomatic_complexity: 2
+  sumd.sections.interfaces._render_interfaces:
+    name: _render_interfaces
+    module: sumd.sections.interfaces
+    line: 119
+    cyclomatic_complexity: 5
+    calls_out: 9
+    calls_in: 0
+  sumd.parser.parse:
+    name: parse
+    module: sumd.parser
+    line: 150
+    cyclomatic_complexity: 1
+    calls_out: 2
+    calls_in: 1
+  sumd.dsl.commands.create_builtin_registry:
+    name: create_builtin_registry
+    module: sumd.dsl.commands
+    line: 104
+    cyclomatic_complexity: 1
+    calls_out: 45
+    calls_in: 2
+  sumd.pipeline._refresh_analysis_files:
+    name: _refresh_analysis_files
+    module: sumd.pipeline
+    line: 102
+    cyclomatic_complexity: 7
     calls_out: 11
     calls_in: 1
-  sumd.sections.architecture._render_doql_entities:
-    name: _render_doql_entities
-    module: sumd.sections.architecture
-    line: 59
-    cyclomatic_complexity: 6
-    calls_out: 9
+  sumd.extractor._extract_markpact_files:
+    name: _extract_markpact_files
+    module: sumd.extractor
+    line: 1077
+    cyclomatic_complexity: 4
+    calls_out: 7
     calls_in: 1
-  sumd.prolog_engine.deep_resolve:
-    name: deep_resolve
-    module: sumd.prolog_engine
-    line: 198
-    cyclomatic_complexity: 3
-    calls_out: 4
-    calls_in: 3
-  sumd.cli._node_framework:
-    name: _node_framework
+  sumd.cli._run_analyze_tool:
+    name: _run_analyze_tool
     module: sumd.cli
-    line: 318
-    cyclomatic_complexity: 5
-    calls_out: 0
-    calls_in: 1
-  sumd.cli._run_analysis_tools:
-    name: _run_analysis_tools
-    module: sumd.cli
-    line: 799
-    cyclomatic_complexity: 5
-    calls_out: 5
+    line: 598
+    cyclomatic_complexity: 4
+    calls_out: 7
     calls_in: 1
   sumd.sections.code_analysis.CodeAnalysisSection.render:
     name: render
@@ -68,62 +68,419 @@ nodes:
     cyclomatic_complexity: 1
     calls_out: 1
     calls_in: 0
-  sumd.extractor.extract_pyqual:
-    name: extract_pyqual
-    module: sumd.extractor
-    line: 241
-    cyclomatic_complexity: 5
-    calls_out: 12
-    calls_in: 1
-  sumd.cli._is_project_dir:
-    name: _is_project_dir
-    module: sumd.cli
-    line: 708
-    cyclomatic_complexity: 8
-    calls_out: 4
-    calls_in: 3
-  sumd.toon_parser._parse_toon_block_assert:
-    name: _parse_toon_block_assert
+  sumd.utils.prolog_core.unify:
+    name: unify
+    module: sumd.utils.prolog_core
+    line: 170
+    cyclomatic_complexity: 10
+    calls_out: 13
+    calls_in: 2
+  sumd.toon_parser._parse_toon_file:
+    name: _parse_toon_file
     module: sumd.toon_parser
-    line: 48
-    cyclomatic_complexity: 7
-    calls_out: 9
-    calls_in: 1
-  sumd.cli._maybe_generate_doql:
-    name: _maybe_generate_doql
-    module: sumd.cli
-    line: 875
-    cyclomatic_complexity: 7
-    calls_out: 9
-    calls_in: 1
-  sumd.cli._finalize_scan:
-    name: _finalize_scan
-    module: sumd.cli
-    line: 931
-    cyclomatic_complexity: 9
+    line: 121
+    cyclomatic_complexity: 4
     calls_out: 16
     calls_in: 1
-  sumd.extractor._read_toml:
-    name: _read_toml
+  sumd.sections.architecture._render_architecture_doql_section:
+    name: _render_architecture_doql_section
+    module: sumd.sections.architecture
+    line: 17
+    cyclomatic_complexity: 6
+    calls_out: 14
+    calls_in: 1
+  sumd.toon_parser.extract_testql_scenarios:
+    name: extract_testql_scenarios
+    module: sumd.toon_parser
+    line: 146
+    cyclomatic_complexity: 7
+    calls_out: 12
+    calls_in: 2
+  sumd.extractor._render_map_detail:
+    name: _render_map_detail
     module: sumd.extractor
-    line: 20
+    line: 804
+    cyclomatic_complexity: 5
+    calls_out: 6
+    calls_in: 2
+  sumd.mcp_server._resolve_path:
+    name: _resolve_path
+    module: sumd.mcp_server
+    line: 117
     cyclomatic_complexity: 2
     calls_out: 4
-    calls_in: 1
-  sumd.dsl.commands._cmd_sumd_map:
-    name: _cmd_sumd_map
-    module: sumd.dsl.commands
-    line: 428
-    cyclomatic_complexity: 6
-    calls_out: 7
-    calls_in: 0
-  sumd.dsl.shell.DSLShell.run:
-    name: run
-    module: sumd.dsl.shell
-    line: 91
+    calls_in: 8
+  sumd.sections.code_analysis._render_code_analysis:
+    name: _render_code_analysis
+    module: sumd.sections.code_analysis
+    line: 13
     cyclomatic_complexity: 9
     calls_out: 15
+    calls_in: 1
+  sumd.extractor._parse_doql_entities:
+    name: _parse_doql_entities
+    module: sumd.extractor
+    line: 138
+    cyclomatic_complexity: 4
+    calls_out: 8
+    calls_in: 1
+  sumd.validator._check_empty_links:
+    name: _check_empty_links
+    module: sumd.validator
+    line: 276
+    cyclomatic_complexity: 2
+    calls_out: 1
+    calls_in: 1
+  sumd.dsl.parser.parse_dsl:
+    name: parse_dsl
+    module: sumd.dsl.parser
+    line: 166
+    cyclomatic_complexity: 1
+    calls_out: 4
+    calls_in: 5
+  sumd.cli._scaffold_smoke_scenario:
+    name: _scaffold_smoke_scenario
+    module: sumd.cli
+    line: 699
+    cyclomatic_complexity: 6
+    calls_out: 5
+    calls_in: 1
+  sumd.parser.parse_file:
+    name: parse_file
+    module: sumd.parser
+    line: 163
+    cyclomatic_complexity: 1
+    calls_out: 2
     calls_in: 0
+  sumd.toon_parser._parse_toon_block_api:
+    name: _parse_toon_block_api
+    module: sumd.toon_parser
+    line: 28
+    cyclomatic_complexity: 6
+    calls_out: 4
+    calls_in: 1
+  sumd.utils.prolog_core.PythonPrologEngine.query:
+    name: query
+    module: sumd.utils.prolog_core
+    line: 248
+    cyclomatic_complexity: 5
+    calls_out: 8
+    calls_in: 0
+  sumd.validator.validate_markdown:
+    name: validate_markdown
+    module: sumd.validator
+    line: 284
+    cyclomatic_complexity: 1
+    calls_out: 6
+    calls_in: 1
+  sumd.pipeline.RenderPipeline._collect:
+    name: _collect
+    module: sumd.pipeline
+    line: 285
+    cyclomatic_complexity: 3
+    calls_out: 31
+    calls_in: 0
+  sumd.cqrs.queries.SumdQueryHandler._handle_get_sumd_document:
+    name: _handle_get_sumd_document
+    module: sumd.cqrs.queries
+    line: 195
+    cyclomatic_complexity: 3
+    calls_out: 4
+    calls_in: 0
+  sumd.mcp_server._doc_to_dict:
+    name: _doc_to_dict
+    module: sumd.mcp_server
+    line: 101
+    cyclomatic_complexity: 2
+    calls_out: 0
+    calls_in: 2
+  sumd.mcp_server._tool_list_sections:
+    name: _tool_list_sections
+    module: sumd.mcp_server
+    line: 429
+    cyclomatic_complexity: 2
+    calls_out: 4
+    calls_in: 0
+  sumd.extractor._collect_map_files:
+    name: _collect_map_files
+    module: sumd.extractor
+    line: 765
+    cyclomatic_complexity: 8
+    calls_out: 13
+    calls_in: 3
+  sumd.validator._check_h1:
+    name: _check_h1
+    module: sumd.validator
+    line: 224
+    cyclomatic_complexity: 3
+    calls_out: 2
+    calls_in: 1
+  examples.mcp.mcp_client.main:
+    name: main
+    module: examples.mcp.mcp_client
+    line: 121
+    cyclomatic_complexity: 3
+    calls_out: 12
+    calls_in: 0
+  sumd.cli._setup_tools_venv:
+    name: _setup_tools_venv
+    module: sumd.cli
+    line: 523
+    cyclomatic_complexity: 7
+    calls_out: 13
+    calls_in: 1
+  sumd.cqrs.sumd_aggregate.SumdAggregate.create_from_file:
+    name: create_from_file
+    module: sumd.cqrs.sumd_aggregate
+    line: 296
+    cyclomatic_complexity: 6
+    calls_out: 12
+    calls_in: 0
+  examples.llm.openai_example.build_context:
+    name: build_context
+    module: examples.llm.openai_example
+    line: 24
+    cyclomatic_complexity: 5
+    calls_out: 9
+    calls_in: 1
+  sumd.sections.dependencies._render_deps_runtime:
+    name: _render_deps_runtime
+    module: sumd.sections.dependencies
+    line: 14
+    cyclomatic_complexity: 6
+    calls_out: 19
+    calls_in: 1
+  sumd.pipeline._inject_toc:
+    name: _inject_toc
+    module: sumd.pipeline
+    line: 251
+    cyclomatic_complexity: 3
+    calls_out: 9
+    calls_in: 1
+  test.print:
+    name: print
+    module: test
+    line: 3
+    cyclomatic_complexity: 0
+    calls_out: 0
+    calls_in: 84
+  sumd.cli.analyze:
+    name: analyze
+    module: sumd.cli
+    line: 627
+    cyclomatic_complexity: 7
+    calls_out: 20
+    calls_in: 0
+  sumd.extractor.extract_taskfile:
+    name: extract_taskfile
+    module: sumd.extractor
+    line: 72
+    cyclomatic_complexity: 6
+    calls_out: 10
+    calls_in: 2
+  sumd.dsl.parser_base.DSLParserBase._match:
+    name: _match
+    module: sumd.dsl.parser_base
+    line: 58
+    cyclomatic_complexity: 2
+    calls_out: 2
+    calls_in: 4
+  sumd.cli.extract:
+    name: extract
+    module: sumd.cli
+    line: 218
+    cyclomatic_complexity: 5
+    calls_out: 13
+    calls_in: 0
+  sumd.dsl.engine.DSLEngine._builtin_print:
+    name: _builtin_print
+    module: sumd.dsl.engine
+    line: 437
+    cyclomatic_complexity: 1
+    calls_out: 1
+    calls_in: 0
+  sumd.cli._run_code2llm_formats:
+    name: _run_code2llm_formats
+    module: sumd.cli
+    line: 549
+    cyclomatic_complexity: 5
+    calls_out: 7
+    calls_in: 1
+  sumd.sections.extras._render_makefile_targets:
+    name: _render_makefile_targets
+    module: sumd.sections.extras
+    line: 14
+    cyclomatic_complexity: 3
+    calls_out: 4
+    calls_in: 1
+  sumd.mcp_server._tool_export_sumd:
+    name: _tool_export_sumd
+    module: sumd.mcp_server
+    line: 404
+    cyclomatic_complexity: 5
+    calls_out: 12
+    calls_in: 0
+  sumd.extractor._facts_taskfile:
+    name: _facts_taskfile
+    module: sumd.extractor
+    line: 1007
+    cyclomatic_complexity: 3
+    calls_out: 8
+    calls_in: 1
+  sumd.extractor._first_task_cmd:
+    name: _first_task_cmd
+    module: sumd.extractor
+    line: 61
+    cyclomatic_complexity: 4
+    calls_out: 4
+    calls_in: 1
+  sumd.pipeline._collect_pkg_sources:
+    name: _collect_pkg_sources
+    module: sumd.pipeline
+    line: 176
+    cyclomatic_complexity: 5
+    calls_out: 11
+    calls_in: 1
+  sumd.cli.lint:
+    name: lint
+    module: sumd.cli
+    line: 426
+    cyclomatic_complexity: 6
+    calls_out: 21
+    calls_in: 0
+  sumd.extractor._fan_out:
+    name: _fan_out
+    module: sumd.extractor
+    line: 541
+    cyclomatic_complexity: 5
+    calls_out: 8
+    calls_in: 2
+  sumd.extractor.extract_package_json:
+    name: extract_package_json
+    module: sumd.extractor
+    line: 461
+    cyclomatic_complexity: 3
+    calls_out: 15
+    calls_in: 4
+  sumd.pipeline._doql_sources:
+    name: _doql_sources
+    module: sumd.pipeline
+    line: 169
+    cyclomatic_complexity: 4
+    calls_out: 4
+    calls_in: 1
+  sumd.sections.architecture._render_architecture_doql_parsed:
+    name: _render_architecture_doql_parsed
+    module: sumd.sections.architecture
+    line: 105
+    cyclomatic_complexity: 1
+    calls_out: 4
+    calls_in: 1
+  sumd.sections.deployment._render_deployment:
+    name: _render_deployment
+    module: sumd.sections.deployment
+    line: 81
+    cyclomatic_complexity: 1
+    calls_out: 5
+    calls_in: 0
+  sumd.extractor._facts_testql_scenarios:
+    name: _facts_testql_scenarios
+    module: sumd.extractor
+    line: 1038
+    cyclomatic_complexity: 3
+    calls_out: 7
+    calls_in: 1
+  sumd.utils.prolog_core.PythonPrologEngine._resolve:
+    name: _resolve
+    module: sumd.utils.prolog_core
+    line: 282
+    cyclomatic_complexity: 12
+    calls_out: 15
+    calls_in: 0
+  sumd.sections.architecture._render_architecture_rules:
+    name: _render_architecture_rules
+    module: sumd.sections.architecture
+    line: 113
+    cyclomatic_complexity: 3
+    calls_out: 10
+    calls_in: 1
+  sumd.dsl.commands._cmd_read_file:
+    name: _cmd_read_file
+    module: sumd.dsl.commands
+    line: 647
+    cyclomatic_complexity: 1
+    calls_out: 1
+    calls_in: 0
+  examples.llm.openai_example.ask:
+    name: ask
+    module: examples.llm.openai_example
+    line: 46
+    cyclomatic_complexity: 1
+    calls_out: 3
+    calls_in: 1
+  sumd.sections.deployment._render_dockerfile_info:
+    name: _render_dockerfile_info
+    module: sumd.sections.deployment
+    line: 47
+    cyclomatic_complexity: 6
+    calls_out: 9
+    calls_in: 1
+  sumd.extractor._cc_estimate:
+    name: _cc_estimate
+    module: sumd.extractor
+    line: 553
+    cyclomatic_complexity: 4
+    calls_out: 4
+    calls_in: 2
+  sumd.sections.deployment._render_deployment_docker:
+    name: _render_deployment_docker
+    module: sumd.sections.deployment
+    line: 62
+    cyclomatic_complexity: 8
+    calls_out: 7
+    calls_in: 1
+  sumd.cli_doql._generate_doql_less:
+    name: _generate_doql_less
+    module: sumd.cli_doql
+    line: 389
+    cyclomatic_complexity: 7
+    calls_out: 10
+    calls_in: 1
+  sumd.mcp_server._tool_parse_sumd:
+    name: _tool_parse_sumd
+    module: sumd.mcp_server
+    line: 384
+    cyclomatic_complexity: 1
+    calls_out: 5
+    calls_in: 0
+  sumd.extractor._facts_project_files:
+    name: _facts_project_files
+    module: sumd.extractor
+    line: 936
+    cyclomatic_complexity: 2
+    calls_out: 5
+    calls_in: 1
+  sumd.mcp_server._tool_generate_sumd:
+    name: _tool_generate_sumd
+    module: sumd.mcp_server
+    line: 485
+    cyclomatic_complexity: 5
+    calls_out: 11
+    calls_in: 0
+  sumd.sections.interfaces._render_testql_raw:
+    name: _render_testql_raw
+    module: sumd.sections.interfaces
+    line: 44
+    cyclomatic_complexity: 4
+    calls_out: 12
+    calls_in: 1
+  sumd.toon_parser._parse_toon_block_performance:
+    name: _parse_toon_block_performance
+    module: sumd.toon_parser
+    line: 91
+    cyclomatic_complexity: 1
+    calls_out: 1
+    calls_in: 1
   sumd.cqrs.queries.SumdQueryHandler._handle_get_project_info:
     name: _handle_get_project_info
     module: sumd.cqrs.queries
@@ -131,6 +488,69 @@ nodes:
     cyclomatic_complexity: 3
     calls_out: 11
     calls_in: 0
+  sumd.cli._scaffold_crud_scenarios:
+    name: _scaffold_crud_scenarios
+    module: sumd.cli
+    line: 724
+    cyclomatic_complexity: 5
+    calls_out: 7
+    calls_in: 1
+  sumd.cli_scan._is_project_dir:
+    name: _is_project_dir
+    module: sumd.cli_scan
+    line: 72
+    cyclomatic_complexity: 8
+    calls_out: 4
+    calls_in: 3
+  sumd.sections.dependencies._render_deps_dev:
+    name: _render_deps_dev
+    module: sumd.sections.dependencies
+    line: 41
+    cyclomatic_complexity: 6
+    calls_out: 15
+    calls_in: 1
+  sumd.mcp_server._tool_get_section:
+    name: _tool_get_section
+    module: sumd.mcp_server
+    line: 442
+    cyclomatic_complexity: 5
+    calls_out: 8
+    calls_in: 0
+  sumd.cli_scan._walk_projects:
+    name: _walk_projects
+    module: sumd.cli_scan
+    line: 89
+    cyclomatic_complexity: 10
+    calls_out: 7
+    calls_in: 2
+  sumd.extractor.generate_project_logic:
+    name: generate_project_logic
+    module: sumd.extractor
+    line: 1054
+    cyclomatic_complexity: 2
+    calls_out: 22
+    calls_in: 2
+  sumd.extractor.extract_readme_title:
+    name: extract_readme_title
+    module: sumd.extractor
+    line: 275
+    cyclomatic_complexity: 4
+    calls_out: 5
+    calls_in: 3
+  sumd.extractor._facts_makefile:
+    name: _facts_makefile
+    module: sumd.extractor
+    line: 992
+    cyclomatic_complexity: 3
+    calls_out: 6
+    calls_in: 1
+  sumd.extractor._extract_doql_facts:
+    name: _extract_doql_facts
+    module: sumd.extractor
+    line: 1133
+    cyclomatic_complexity: 2
+    calls_out: 6
+    calls_in: 1
   sumd.sections.interfaces._render_testql_extras:
     name: _render_testql_extras
     module: sumd.sections.interfaces
@@ -141,464 +561,23 @@ nodes:
   sumd.cli._api_scenario_template:
     name: _api_scenario_template
     module: sumd.cli
-    line: 1453
+    line: 666
     cyclomatic_complexity: 1
     calls_out: 3
     calls_in: 3
-  sumd.pipeline._inject_toc:
-    name: _inject_toc
-    module: sumd.pipeline
-    line: 251
-    cyclomatic_complexity: 3
-    calls_out: 9
-    calls_in: 1
-  sumd.extractor._collect_map_files:
-    name: _collect_map_files
-    module: sumd.extractor
-    line: 757
-    cyclomatic_complexity: 8
-    calls_out: 13
-    calls_in: 2
-  sumd.extractor.required_tools_for_profile:
-    name: required_tools_for_profile
-    module: sumd.extractor
-    line: 1152
-    cyclomatic_complexity: 4
-    calls_out: 0
-    calls_in: 1
-  sumd.sections.deployment._render_deployment_docker:
-    name: _render_deployment_docker
-    module: sumd.sections.deployment
-    line: 62
-    cyclomatic_complexity: 8
-    calls_out: 7
-    calls_in: 1
-  sumd_logic_validator.sumd_logic_validator.engine.PythonPrologEngine._resolve:
-    name: _resolve
-    module: sumd_logic_validator.sumd_logic_validator.engine
-    line: 278
-    cyclomatic_complexity: 12
-    calls_out: 15
-    calls_in: 0
-  sumd.sections.architecture._render_architecture_doql_section:
-    name: _render_architecture_doql_section
-    module: sumd.sections.architecture
-    line: 17
-    cyclomatic_complexity: 6
-    calls_out: 14
-    calls_in: 1
-  sumd.prolog_engine.rename_variables:
-    name: rename_variables
-    module: sumd.prolog_engine
-    line: 222
-    cyclomatic_complexity: 2
-    calls_out: 8
-    calls_in: 2
-  sumd.cli.export:
-    name: export
-    module: sumd.cli
-    line: 493
-    cyclomatic_complexity: 8
-    calls_out: 16
-    calls_in: 0
-  sumd.sections.environment._render_env_section:
-    name: _render_env_section
-    module: sumd.sections.environment
-    line: 13
-    cyclomatic_complexity: 3
-    calls_out: 7
-    calls_in: 1
-  sumd.validator._check_h1:
-    name: _check_h1
-    module: sumd.validator
-    line: 224
-    cyclomatic_complexity: 3
-    calls_out: 2
-    calls_in: 1
-  sumd.sections.deployment._render_dockerfile_info:
-    name: _render_dockerfile_info
-    module: sumd.sections.deployment
-    line: 47
-    cyclomatic_complexity: 6
-    calls_out: 9
-    calls_in: 1
-  sumd.dsl.schema_commands.SchemaBasedCommands._cmd_sumd_info:
-    name: _cmd_sumd_info
-    module: sumd.dsl.schema_commands
-    line: 277
-    cyclomatic_complexity: 3
-    calls_out: 3
-    calls_in: 0
-  sumd.mcp_server._tool_export_sumd:
-    name: _tool_export_sumd
-    module: sumd.mcp_server
-    line: 404
-    cyclomatic_complexity: 5
-    calls_out: 12
-    calls_in: 0
-  sumd.cli.map_cmd:
-    name: map_cmd
-    module: sumd.cli
-    line: 1671
-    cyclomatic_complexity: 7
-    calls_out: 20
-    calls_in: 0
-  sumd.extractor.extract_python_modules:
-    name: extract_python_modules
-    module: sumd.extractor
-    line: 268
-    cyclomatic_complexity: 4
-    calls_out: 4
-    calls_in: 1
-  sumd.mcp_server._tool_validate_sumd:
-    name: _tool_validate_sumd
-    module: sumd.mcp_server
-    line: 395
-    cyclomatic_complexity: 1
-    calls_out: 7
-    calls_in: 0
-  sumd.dsl.commands.create_builtin_registry:
-    name: create_builtin_registry
-    module: sumd.dsl.commands
-    line: 104
-    cyclomatic_complexity: 1
-    calls_out: 45
-    calls_in: 2
-  sumd.pipeline._refresh_map_toon:
-    name: _refresh_map_toon
-    module: sumd.pipeline
-    line: 56
-    cyclomatic_complexity: 5
-    calls_out: 6
-    calls_in: 1
-  sumd.cli.lint:
-    name: lint
-    module: sumd.cli
-    line: 1211
-    cyclomatic_complexity: 12
-    calls_out: 23
-    calls_in: 0
-  sumd_logic_validator.sumd_logic_validator.cli.get_engine:
-    name: get_engine
-    module: sumd_logic_validator.sumd_logic_validator.cli
+  sumd.toon_parser._parse_toon_block_config:
+    name: _parse_toon_block_config
+    module: sumd.toon_parser
     line: 10
-    cyclomatic_complexity: 4
-    calls_out: 9
-    calls_in: 2
-  sumd.mcp_server._doc_to_dict:
-    name: _doc_to_dict
-    module: sumd.mcp_server
-    line: 101
-    cyclomatic_complexity: 2
-    calls_out: 0
-    calls_in: 2
-  sumd_logic_validator.sumd_logic_validator.engine.PythonPrologDB.add_fact:
-    name: add_fact
-    module: sumd_logic_validator.sumd_logic_validator.engine
-    line: 144
-    cyclomatic_complexity: 2
-    calls_out: 4
-    calls_in: 0
-  sumd.sections.dependencies._render_deps_runtime:
-    name: _render_deps_runtime
-    module: sumd.sections.dependencies
-    line: 14
-    cyclomatic_complexity: 6
-    calls_out: 19
-    calls_in: 1
-  examples.llm.openai_example.ask:
-    name: ask
-    module: examples.llm.openai_example
-    line: 46
-    cyclomatic_complexity: 1
-    calls_out: 3
-    calls_in: 1
-  sumd.validator.validate_codeblocks:
-    name: validate_codeblocks
-    module: sumd.validator
-    line: 168
     cyclomatic_complexity: 9
-    calls_out: 17
-    calls_in: 1
-  sumd.sections.call_graph._render_call_graph:
-    name: _render_call_graph
-    module: sumd.sections.call_graph
-    line: 95
-    cyclomatic_complexity: 7
-    calls_out: 28
-    calls_in: 0
-  sumd.extractor._is_map_ignored_path:
-    name: _is_map_ignored_path
-    module: sumd.extractor
-    line: 749
-    cyclomatic_complexity: 4
-    calls_out: 1
-    calls_in: 1
-  sumd_logic_validator.sumd_logic_validator.engine.unify:
-    name: unify
-    module: sumd_logic_validator.sumd_logic_validator.engine
-    line: 166
-    cyclomatic_complexity: 10
-    calls_out: 13
-    calls_in: 1
-  sumd.extractor._analyse_py_top_classes:
-    name: _analyse_py_top_classes
-    module: sumd.extractor
-    line: 613
-    cyclomatic_complexity: 5
     calls_out: 8
     calls_in: 1
-  sumd.extractor._is_path_ignored:
-    name: _is_path_ignored
+  sumd.extractor._extract_pyqual_gates:
+    name: _extract_pyqual_gates
     module: sumd.extractor
-    line: 721
-    cyclomatic_complexity: 7
-    calls_out: 4
-    calls_in: 1
-  sumd.sections.call_graph._parse_calls_header:
-    name: _parse_calls_header
-    module: sumd.sections.call_graph
-    line: 22
-    cyclomatic_complexity: 6
-    calls_out: 12
-    calls_in: 1
-  sumd.extractor.extract_readme_title:
-    name: extract_readme_title
-    module: sumd.extractor
-    line: 275
-    cyclomatic_complexity: 4
-    calls_out: 5
-    calls_in: 3
-  sumd.prolog_engine.resolve_val:
-    name: resolve_val
-    module: sumd.prolog_engine
-    line: 192
+    line: 1155
     cyclomatic_complexity: 3
-    calls_out: 1
-    calls_in: 8
-  sumd.prolog_engine.is_variable:
-    name: is_variable
-    module: sumd.prolog_engine
-    line: 63
-    cyclomatic_complexity: 6
-    calls_out: 5
-    calls_in: 1
-  sumd.dsl.parser.parse_dsl:
-    name: parse_dsl
-    module: sumd.dsl.parser
-    line: 661
-    cyclomatic_complexity: 1
-    calls_out: 4
-    calls_in: 5
-  sumd.extractor.extract_openapi:
-    name: extract_openapi
-    module: sumd.extractor
-    line: 118
-    cyclomatic_complexity: 5
-    calls_out: 13
-    calls_in: 1
-  sumd.mcp_server._tool_generate_sumd:
-    name: _tool_generate_sumd
-    module: sumd.mcp_server
-    line: 485
-    cyclomatic_complexity: 5
-    calls_out: 11
-    calls_in: 0
-  sumd.dsl.shell.DSLShell.execute_command:
-    name: execute_command
-    module: sumd.dsl.shell
-    line: 250
-    cyclomatic_complexity: 2
-    calls_out: 3
-    calls_in: 0
-  sumd.pipeline._collect_sources:
-    name: _collect_sources
-    module: sumd.pipeline
-    line: 224
-    cyclomatic_complexity: 2
-    calls_out: 4
-    calls_in: 1
-  sumd.extractor._parse_ignore_file:
-    name: _parse_ignore_file
-    module: sumd.extractor
-    line: 648
-    cyclomatic_complexity: 6
     calls_out: 7
-    calls_in: 2
-  sumd_logic_validator.sumd_logic_validator.engine.to_term:
-    name: to_term
-    module: sumd_logic_validator.sumd_logic_validator.engine
-    line: 73
-    cyclomatic_complexity: 13
-    calls_out: 29
-    calls_in: 4
-  sumd.cli._scaffold_generic:
-    name: _scaffold_generic
-    module: sumd.cli
-    line: 1565
-    cyclomatic_complexity: 1
-    calls_out: 3
-    calls_in: 1
-  sumd.sections.deployment._render_deployment:
-    name: _render_deployment
-    module: sumd.sections.deployment
-    line: 81
-    cyclomatic_complexity: 1
-    calls_out: 5
-    calls_in: 0
-  sumd.sections.architecture._render_doql_app:
-    name: _render_doql_app
-    module: sumd.sections.architecture
-    line: 46
-    cyclomatic_complexity: 3
-    calls_out: 8
-    calls_in: 1
-  sumd.extractor.extract_pyproject:
-    name: extract_pyproject
-    module: sumd.extractor
-    line: 36
-    cyclomatic_complexity: 3
-    calls_out: 17
-    calls_in: 5
-  sumd.sections.call_graph._parse_calls_toon:
-    name: _parse_calls_toon
-    module: sumd.sections.call_graph
-    line: 85
-    cyclomatic_complexity: 1
-    calls_out: 3
-    calls_in: 1
-  sumd.sections.extras._render_pkg_json_scripts:
-    name: _render_pkg_json_scripts
-    module: sumd.sections.extras
-    line: 24
-    cyclomatic_complexity: 7
-    calls_out: 16
-    calls_in: 1
-  sumd.cli._scaffold_write:
-    name: _scaffold_write
-    module: sumd.cli
-    line: 1476
-    cyclomatic_complexity: 3
-    calls_out: 4
-    calls_in: 3
-  sumd.cli._scan_one_project:
-    name: _scan_one_project
-    module: sumd.cli
-    line: 976
-    cyclomatic_complexity: 10
-    calls_out: 14
-    calls_in: 1
-  sumd_logic_validator.sumd_logic_validator.cli.shell:
-    name: shell
-    module: sumd_logic_validator.sumd_logic_validator.cli
-    line: 79
-    cyclomatic_complexity: 10
-    calls_out: 16
-    calls_in: 0
-  sumd.cli._generate_doql_less:
-    name: _generate_doql_less
-    module: sumd.cli
-    line: 400
-    cyclomatic_complexity: 7
-    calls_out: 10
-    calls_in: 1
-  sumd.mcp_server._tool_list_sections:
-    name: _tool_list_sections
-    module: sumd.mcp_server
-    line: 429
-    cyclomatic_complexity: 2
-    calls_out: 4
-    calls_in: 0
-  sumd.cli._export_sumd_json:
-    name: _export_sumd_json
-    module: sumd.cli
-    line: 827
-    cyclomatic_complexity: 2
-    calls_out: 2
-    calls_in: 1
-  sumd.extractor._render_map_detail:
-    name: _render_map_detail
-    module: sumd.extractor
-    line: 796
-    cyclomatic_complexity: 5
-    calls_out: 6
-    calls_in: 2
-  sumd.prolog_engine.occurs_check:
-    name: occurs_check
-    module: sumd.prolog_engine
-    line: 213
-    cyclomatic_complexity: 4
-    calls_out: 4
-    calls_in: 2
-  sumd.prolog_engine.PythonPrologDB.parse_and_load:
-    name: parse_and_load
-    module: sumd.prolog_engine
-    line: 147
-    cyclomatic_complexity: 6
-    calls_out: 16
-    calls_in: 0
-  sumd.pipeline._find_tools_bin_dir:
-    name: _find_tools_bin_dir
-    module: sumd.pipeline
-    line: 83
-    cyclomatic_complexity: 3
-    calls_out: 1
-    calls_in: 1
-  sumd.dsl.shell.DSLShell.execute_script:
-    name: execute_script
-    module: sumd.dsl.shell
-    line: 213
-    cyclomatic_complexity: 9
-    calls_out: 17
-    calls_in: 0
-  sumd_logic_validator.sumd_logic_validator.engine.PythonPrologEngine.query:
-    name: query
-    module: sumd_logic_validator.sumd_logic_validator.engine
-    line: 244
-    cyclomatic_complexity: 5
-    calls_out: 8
-    calls_in: 0
-  sumd.dsl.engine.DSLEngine._builtin_print:
-    name: _builtin_print
-    module: sumd.dsl.engine
-    line: 494
-    cyclomatic_complexity: 1
-    calls_out: 1
-    calls_in: 0
-  sumd.parser.SUMDParser.parse_file:
-    name: parse_file
-    module: sumd.parser
-    line: 46
-    cyclomatic_complexity: 1
-    calls_out: 2
-    calls_in: 20
-  sumd.cli.main:
-    name: main
-    module: sumd.cli
-    line: 1942
-    cyclomatic_complexity: 10
-    calls_out: 4
-    calls_in: 0
-  sumd.extractor._map_cc_stats:
-    name: _map_cc_stats
-    module: sumd.extractor
-    line: 819
-    cyclomatic_complexity: 12
-    calls_out: 13
-    calls_in: 1
-  sumd.pipeline._collect_infra_sources:
-    name: _collect_infra_sources
-    module: sumd.pipeline
-    line: 202
-    cyclomatic_complexity: 6
-    calls_out: 10
-    calls_in: 1
-  examples.llm.anthropic_example.ask:
-    name: ask
-    module: examples.llm.anthropic_example
-    line: 24
-    cyclomatic_complexity: 1
-    calls_out: 3
     calls_in: 1
   sumd.pipeline.RenderPipeline.run:
     name: run
@@ -607,125 +586,6 @@ nodes:
     cyclomatic_complexity: 2
     calls_out: 3
     calls_in: 0
-  sumd.mcp_server._tool_parse_sumd:
-    name: _tool_parse_sumd
-    module: sumd.mcp_server
-    line: 384
-    cyclomatic_complexity: 1
-    calls_out: 5
-    calls_in: 0
-  sumd.sections.architecture._render_doql_integrations:
-    name: _render_doql_integrations
-    module: sumd.sections.architecture
-    line: 92
-    cyclomatic_complexity: 5
-    calls_out: 9
-    calls_in: 1
-  sumd.cqrs.queries.SumdQueryHandler._handle_get_validation_results:
-    name: _handle_get_validation_results
-    module: sumd.cqrs.queries
-    line: 381
-    cyclomatic_complexity: 4
-    calls_out: 9
-    calls_in: 0
-  sumd.extractor._parse_doql_content:
-    name: _parse_doql_content
-    module: sumd.extractor
-    line: 202
-    cyclomatic_complexity: 6
-    calls_out: 19
-    calls_in: 1
-  sumd.extractor._fan_out:
-    name: _fan_out
-    module: sumd.extractor
-    line: 541
-    cyclomatic_complexity: 5
-    calls_out: 8
-    calls_in: 2
-  sumd.extractor.extract_makefile:
-    name: extract_makefile
-    module: sumd.extractor
-    line: 299
-    cyclomatic_complexity: 7
-    calls_out: 12
-    calls_in: 2
-  sumd.extractor._try_radon_cc:
-    name: _try_radon_cc
-    module: sumd.extractor
-    line: 574
-    cyclomatic_complexity: 3
-    calls_out: 1
-    calls_in: 1
-  sumd.dsl.engine.DSLEngine.execute_text:
-    name: execute_text
-    module: sumd.dsl.engine
-    line: 75
-    cyclomatic_complexity: 3
-    calls_out: 5
-    calls_in: 0
-  sumd.cli._scaffold_smoke_scenario:
-    name: _scaffold_smoke_scenario
-    module: sumd.cli
-    line: 1486
-    cyclomatic_complexity: 6
-    calls_out: 5
-    calls_in: 1
-  sumd.sections.code_analysis._render_code_analysis:
-    name: _render_code_analysis
-    module: sumd.sections.code_analysis
-    line: 13
-    cyclomatic_complexity: 9
-    calls_out: 15
-    calls_in: 1
-  sumd.sections.architecture._render_architecture:
-    name: _render_architecture
-    module: sumd.sections.architecture
-    line: 127
-    cyclomatic_complexity: 6
-    calls_out: 13
-    calls_in: 0
-  sumd.cli._render_doql_boilerplate:
-    name: _render_doql_boilerplate
-    module: sumd.cli
-    line: 251
-    cyclomatic_complexity: 4
-    calls_out: 3
-    calls_in: 1
-  sumd_logic_validator.sumd_logic_validator.engine.extend_subst:
-    name: extend_subst
-    module: sumd_logic_validator.sumd_logic_validator.engine
-    line: 203
-    cyclomatic_complexity: 2
-    calls_out: 2
-    calls_in: 2
-  sumd.sections.quality._render_quality:
-    name: _render_quality
-    module: sumd.sections.quality
-    line: 53
-    cyclomatic_complexity: 3
-    calls_out: 4
-    calls_in: 0
-  sumd.sections.quality._render_quality_parsed:
-    name: _render_quality_parsed
-    module: sumd.sections.quality
-    line: 27
-    cyclomatic_complexity: 9
-    calls_out: 21
-    calls_in: 1
-  sumd.validator._check_metadata_fields:
-    name: _check_metadata_fields
-    module: sumd.validator
-    line: 248
-    cyclomatic_complexity: 9
-    calls_out: 7
-    calls_in: 1
-  sumd.cli._scaffold_from_openapi:
-    name: _scaffold_from_openapi
-    module: sumd.cli
-    line: 1537
-    cyclomatic_complexity: 7
-    calls_out: 14
-    calls_in: 1
   examples.llm.openai_example.main:
     name: main
     module: examples.llm.openai_example
@@ -733,26 +593,40 @@ nodes:
     cyclomatic_complexity: 2
     calls_out: 15
     calls_in: 0
-  sumd.sections.call_graph._process_in_hubs_line:
-    name: _process_in_hubs_line
-    module: sumd.sections.call_graph
-    line: 54
+  sumd.cli._lint_print_result:
+    name: _lint_print_result
+    module: sumd.cli
+    line: 506
     cyclomatic_complexity: 6
-    calls_out: 6
+    calls_out: 9
     calls_in: 1
-  sumd.dsl.commands._cmd_help:
-    name: _cmd_help
-    module: sumd.dsl.commands
-    line: 569
-    cyclomatic_complexity: 2
-    calls_out: 3
+  sumd.extractor._try_radon_cc:
+    name: _try_radon_cc
+    module: sumd.extractor
+    line: 574
+    cyclomatic_complexity: 3
+    calls_out: 1
+    calls_in: 1
+  sumd.cli.export:
+    name: export
+    module: sumd.cli
+    line: 89
+    cyclomatic_complexity: 8
+    calls_out: 16
     calls_in: 0
-  examples.mcp.mcp_client.run:
-    name: run
-    module: examples.mcp.mcp_client
-    line: 22
-    cyclomatic_complexity: 11
-    calls_out: 53
+  sumd.extractor._parse_doql_interfaces:
+    name: _parse_doql_interfaces
+    module: sumd.extractor
+    line: 156
+    cyclomatic_complexity: 3
+    calls_out: 10
+    calls_in: 1
+  sumd.cli_doql._render_doql_boilerplate:
+    name: _render_doql_boilerplate
+    module: sumd.cli_doql
+    line: 240
+    cyclomatic_complexity: 4
+    calls_out: 3
     calls_in: 1
   sumd.sections.architecture._render_doql_interfaces:
     name: _render_doql_interfaces
@@ -761,34 +635,97 @@ nodes:
     cyclomatic_complexity: 6
     calls_out: 10
     calls_in: 1
-  sumd.extractor._parse_dockerfile_line:
-    name: _parse_dockerfile_line
+  sumd.utils.prolog_core.resolve_val:
+    name: resolve_val
+    module: sumd.utils.prolog_core
+    line: 194
+    cyclomatic_complexity: 3
+    calls_out: 1
+    calls_in: 6
+  sumd.extractor._facts_python_analysis:
+    name: _facts_python_analysis
     module: sumd.extractor
-    line: 383
-    cyclomatic_complexity: 8
+    line: 947
+    cyclomatic_complexity: 4
+    calls_out: 15
+    calls_in: 1
+  sumd.cli_scan._ensure_venv:
+    name: _ensure_venv
+    module: sumd.cli_scan
+    line: 124
+    cyclomatic_complexity: 4
+    calls_out: 7
+    calls_in: 1
+  sumd.extractor.extract_makefile:
+    name: extract_makefile
+    module: sumd.extractor
+    line: 299
+    cyclomatic_complexity: 7
+    calls_out: 12
+    calls_in: 2
+  sumd.cli._scaffold_from_openapi:
+    name: _scaffold_from_openapi
+    module: sumd.cli
+    line: 750
+    cyclomatic_complexity: 7
     calls_out: 14
     calls_in: 1
-  sumd.cli._build_doql_spec:
+  sumd.cli_doql._build_doql_spec:
     name: _build_doql_spec
-    module: sumd.cli
-    line: 383
+    module: sumd.cli_doql
+    line: 372
     cyclomatic_complexity: 3
     calls_out: 4
     calls_in: 1
-  sumd.cqrs.sumd_aggregate.SumdAggregate.create_from_file:
-    name: create_from_file
-    module: sumd.cqrs.sumd_aggregate
-    line: 296
-    cyclomatic_complexity: 6
-    calls_out: 12
-    calls_in: 0
-  sumd.sections.architecture._render_architecture_rules:
-    name: _render_architecture_rules
-    module: sumd.sections.architecture
-    line: 113
-    cyclomatic_complexity: 3
+  sumd.extractor._extract_sumd_semantic_facts:
+    name: _extract_sumd_semantic_facts
+    module: sumd.extractor
+    line: 1168
+    cyclomatic_complexity: 2
     calls_out: 10
     calls_in: 1
+  sumd.extractor._is_path_ignored:
+    name: _is_path_ignored
+    module: sumd.extractor
+    line: 729
+    cyclomatic_complexity: 7
+    calls_out: 4
+    calls_in: 1
+  sumd.sections.architecture._render_doql_app:
+    name: _render_doql_app
+    module: sumd.sections.architecture
+    line: 46
+    cyclomatic_complexity: 3
+    calls_out: 8
+    calls_in: 1
+  sumd.cli_scan._render_write_validate:
+    name: _render_write_validate
+    module: sumd.cli_scan
+    line: 212
+    cyclomatic_complexity: 5
+    calls_out: 5
+    calls_in: 1
+  sumd.sections.architecture._render_architecture:
+    name: _render_architecture
+    module: sumd.sections.architecture
+    line: 127
+    cyclomatic_complexity: 6
+    calls_out: 13
+    calls_in: 0
+  sumd.cli._run_tool_subprocess:
+    name: _run_tool_subprocess
+    module: sumd.cli
+    line: 578
+    cyclomatic_complexity: 3
+    calls_out: 5
+    calls_in: 2
+  sumd.sections.quality._render_quality:
+    name: _render_quality
+    module: sumd.sections.quality
+    line: 53
+    cyclomatic_complexity: 3
+    calls_out: 4
+    calls_in: 0
   sumd.dsl.schema_commands.SchemaBasedCommands._cmd_sumd_validate:
     name: _cmd_sumd_validate
     module: sumd.dsl.schema_commands
@@ -796,216 +733,6 @@ nodes:
     cyclomatic_complexity: 2
     calls_out: 6
     calls_in: 0
-  sumd.prolog_engine.PythonPrologEngine.query:
-    name: query
-    module: sumd.prolog_engine
-    line: 246
-    cyclomatic_complexity: 5
-    calls_out: 8
-    calls_in: 0
-  sumd.extractor.extract_package_json:
-    name: extract_package_json
-    module: sumd.extractor
-    line: 461
-    cyclomatic_complexity: 3
-    calls_out: 15
-    calls_in: 4
-  sumd.sections.extras._render_extras:
-    name: _render_extras
-    module: sumd.sections.extras
-    line: 46
-    cyclomatic_complexity: 3
-    calls_out: 3
-    calls_in: 0
-  examples.llm.anthropic_example.main:
-    name: main
-    module: examples.llm.anthropic_example
-    line: 37
-    cyclomatic_complexity: 2
-    calls_out: 14
-    calls_in: 0
-  sumd.extractor._parse_doql_workflows:
-    name: _parse_doql_workflows
-    module: sumd.extractor
-    line: 173
-    cyclomatic_complexity: 7
-    calls_out: 18
-    calls_in: 1
-  sumd.prolog_engine.PythonPrologDB.add_fact:
-    name: add_fact
-    module: sumd.prolog_engine
-    line: 141
-    cyclomatic_complexity: 2
-    calls_out: 4
-    calls_in: 0
-  sumd.mcp_server._tool_info_sumd:
-    name: _tool_info_sumd
-    module: sumd.mcp_server
-    line: 469
-    cyclomatic_complexity: 2
-    calls_out: 5
-    calls_in: 0
-  sumd.prolog_engine.PythonPrologEngine._resolve:
-    name: _resolve
-    module: sumd.prolog_engine
-    line: 280
-    cyclomatic_complexity: 12
-    calls_out: 15
-    calls_in: 0
-  sumd.extractor._first_task_cmd:
-    name: _first_task_cmd
-    module: sumd.extractor
-    line: 61
-    cyclomatic_complexity: 4
-    calls_out: 4
-    calls_in: 1
-  sumd.validator.validate_markdown:
-    name: validate_markdown
-    module: sumd.validator
-    line: 284
-    cyclomatic_complexity: 1
-    calls_out: 6
-    calls_in: 1
-  sumd_logic_validator.sumd_logic_validator.engine.is_variable:
-    name: is_variable
-    module: sumd_logic_validator.sumd_logic_validator.engine
-    line: 63
-    cyclomatic_complexity: 6
-    calls_out: 4
-    calls_in: 1
-  sumd.sections.architecture._render_architecture_doql_parsed:
-    name: _render_architecture_doql_parsed
-    module: sumd.sections.architecture
-    line: 105
-    cyclomatic_complexity: 1
-    calls_out: 4
-    calls_in: 1
-  sumd_logic_validator.sumd_logic_validator.engine.PythonPrologDB.parse_and_load:
-    name: parse_and_load
-    module: sumd_logic_validator.sumd_logic_validator.engine
-    line: 150
-    cyclomatic_complexity: 7
-    calls_out: 17
-    calls_in: 0
-  sumd.sections.interfaces._render_testql_one_structured:
-    name: _render_testql_one_structured
-    module: sumd.sections.interfaces
-    line: 83
-    cyclomatic_complexity: 7
-    calls_out: 13
-    calls_in: 1
-  sumd.sections.workflows._render_workflows_doql:
-    name: _render_workflows_doql
-    module: sumd.sections.workflows
-    line: 16
-    cyclomatic_complexity: 4
-    calls_out: 7
-    calls_in: 1
-  sumd.sections.dependencies._render_dependencies:
-    name: _render_dependencies
-    module: sumd.sections.dependencies
-    line: 63
-    cyclomatic_complexity: 2
-    calls_out: 6
-    calls_in: 0
-  sumd.cli._tool_bin:
-    name: _tool_bin
-    module: sumd.cli
-    line: 773
-    cyclomatic_complexity: 2
-    calls_out: 1
-    calls_in: 1
-  sumd_logic_validator.sumd_logic_validator.engine.occurs_check:
-    name: occurs_check
-    module: sumd_logic_validator.sumd_logic_validator.engine
-    line: 211
-    cyclomatic_complexity: 4
-    calls_out: 4
-    calls_in: 2
-  sumd.pipeline._run_tool_if_present:
-    name: _run_tool_if_present
-    module: sumd.pipeline
-    line: 93
-    cyclomatic_complexity: 3
-    calls_out: 5
-    calls_in: 3
-  sumd.extractor._parse_doql_interfaces:
-    name: _parse_doql_interfaces
-    module: sumd.extractor
-    line: 156
-    cyclomatic_complexity: 3
-    calls_out: 10
-    calls_in: 1
-  sumd.extractor._parse_doql_entities:
-    name: _parse_doql_entities
-    module: sumd.extractor
-    line: 138
-    cyclomatic_complexity: 4
-    calls_out: 8
-    calls_in: 1
-  sumd.cli._node_spec_from_package_json:
-    name: _node_spec_from_package_json
-    module: sumd.cli
-    line: 340
-    cyclomatic_complexity: 7
-    calls_out: 12
-    calls_in: 1
-  examples.mcp.mcp_client.main:
-    name: main
-    module: examples.mcp.mcp_client
-    line: 121
-    cyclomatic_complexity: 3
-    calls_out: 12
-    calls_in: 0
-  sumd.extractor._analyse_py_top_funcs:
-    name: _analyse_py_top_funcs
-    module: sumd.extractor
-    line: 584
-    cyclomatic_complexity: 5
-    calls_out: 7
-    calls_in: 1
-  sumd.cli.info:
-    name: info
-    module: sumd.cli
-    line: 543
-    cyclomatic_complexity: 3
-    calls_out: 11
-    calls_in: 0
-  sumd.pipeline.RenderPipeline._collect:
-    name: _collect
-    module: sumd.pipeline
-    line: 285
-    cyclomatic_complexity: 3
-    calls_out: 31
-    calls_in: 0
-  sumd.prolog_engine.unify:
-    name: unify
-    module: sumd.prolog_engine
-    line: 168
-    cyclomatic_complexity: 10
-    calls_out: 13
-    calls_in: 3
-  sumd.sections.extras._render_makefile_targets:
-    name: _render_makefile_targets
-    module: sumd.sections.extras
-    line: 14
-    cyclomatic_complexity: 3
-    calls_out: 4
-    calls_in: 1
-  sumd.toon_parser._parse_toon_file:
-    name: _parse_toon_file
-    module: sumd.toon_parser
-    line: 118
-    cyclomatic_complexity: 4
-    calls_out: 16
-    calls_in: 1
-  sumd.prolog_engine.extend_subst:
-    name: extend_subst
-    module: sumd.prolog_engine
-    line: 205
-    cyclomatic_complexity: 2
-    calls_out: 2
-    calls_in: 2
   sumd.sections.interfaces._render_interfaces_testql:
     name: _render_interfaces_testql
     module: sumd.sections.interfaces
@@ -1013,125 +740,27 @@ nodes:
     cyclomatic_complexity: 3
     calls_out: 4
     calls_in: 1
-  sumd.dsl.shell.DSLShell._execute_line:
-    name: _execute_line
-    module: sumd.dsl.shell
-    line: 183
-    cyclomatic_complexity: 9
-    calls_out: 12
-    calls_in: 0
-  sumd.prolog_engine._split_body_terms:
-    name: _split_body_terms
-    module: sumd.prolog_engine
-    line: 104
-    cyclomatic_complexity: 13
-    calls_out: 7
-    calls_in: 3
-  sumd.pipeline._refresh_analysis_files:
-    name: _refresh_analysis_files
-    module: sumd.pipeline
-    line: 102
-    cyclomatic_complexity: 7
-    calls_out: 11
-    calls_in: 1
-  sumd.sections.deployment._render_deployment_reqs:
-    name: _render_deployment_reqs
-    module: sumd.sections.deployment
-    line: 31
-    cyclomatic_complexity: 5
-    calls_out: 9
-    calls_in: 1
-  sumd.cli._echo_scan_result:
-    name: _echo_scan_result
-    module: sumd.cli
-    line: 867
+  examples.llm.anthropic_example.main:
+    name: main
+    module: examples.llm.anthropic_example
+    line: 37
     cyclomatic_complexity: 2
-    calls_out: 4
-    calls_in: 1
-  sumd.dsl.shell.DSLShell._handle_shell_command:
-    name: _handle_shell_command
-    module: sumd.dsl.shell
-    line: 139
-    cyclomatic_complexity: 14
-    calls_out: 24
+    calls_out: 14
     calls_in: 0
-  sumd.sections.call_graph._parse_hub_stat_line:
-    name: _parse_hub_stat_line
-    module: sumd.sections.call_graph
-    line: 41
-    cyclomatic_complexity: 2
-    calls_out: 9
-    calls_in: 1
-  sumd.cli.cli:
-    name: cli
-    module: sumd.cli
-    line: 454
-    cyclomatic_complexity: 1
-    calls_out: 2
-    calls_in: 2
-  sumd.dsl.commands._cmd_sumd_validate:
-    name: _cmd_sumd_validate
-    module: sumd.dsl.commands
-    line: 454
-    cyclomatic_complexity: 2
-    calls_out: 7
-    calls_in: 0
-  sumd.cli._detect_project_type:
-    name: _detect_project_type
-    module: sumd.cli
-    line: 233
-    cyclomatic_complexity: 8
-    calls_out: 4
-    calls_in: 1
-  sumd.sections.environment._render_goal_section:
-    name: _render_goal_section
-    module: sumd.sections.environment
+  sumd.sections.workflows._render_workflows_taskfile:
+    name: _render_workflows_taskfile
+    module: sumd.sections.workflows
     line: 29
-    cyclomatic_complexity: 9
+    cyclomatic_complexity: 6
     calls_out: 17
     calls_in: 1
-  examples.llm.openai_example.build_context:
-    name: build_context
-    module: examples.llm.openai_example
-    line: 24
-    cyclomatic_complexity: 5
-    calls_out: 9
-    calls_in: 1
-  sumd.validator.validate_project_architecture:
-    name: validate_project_architecture
-    module: sumd.validator
-    line: 311
-    cyclomatic_complexity: 8
-    calls_out: 15
-    calls_in: 1
-  sumd.sections.interfaces._render_interfaces_openapi:
-    name: _render_interfaces_openapi
-    module: sumd.sections.interfaces
-    line: 16
+  sumd.sections.call_graph._parse_calls_header:
+    name: _parse_calls_header
+    module: sumd.sections.call_graph
+    line: 22
     cyclomatic_complexity: 6
-    calls_out: 19
-    calls_in: 1
-  sumd.extractor.extract_taskfile:
-    name: extract_taskfile
-    module: sumd.extractor
-    line: 72
-    cyclomatic_complexity: 6
-    calls_out: 10
-    calls_in: 2
-  sumd.sections.interfaces._render_testql_raw:
-    name: _render_testql_raw
-    module: sumd.sections.interfaces
-    line: 44
-    cyclomatic_complexity: 4
     calls_out: 12
     calls_in: 1
-  sumd.cqrs.queries.SumdQueryHandler._handle_get_sumd_document:
-    name: _handle_get_sumd_document
-    module: sumd.cqrs.queries
-    line: 195
-    cyclomatic_complexity: 3
-    calls_out: 4
-    calls_in: 0
   sumd.validator.validate_sumd_file:
     name: validate_sumd_file
     module: sumd.validator
@@ -1139,76 +768,202 @@ nodes:
     cyclomatic_complexity: 4
     calls_out: 8
     calls_in: 5
-  sumd.extractor._analyse_class_methods:
-    name: _analyse_class_methods
-    module: sumd.extractor
-    line: 601
-    cyclomatic_complexity: 6
+  sumd.cqrs.queries.SumdQueryHandler._handle_get_validation_results:
+    name: _handle_get_validation_results
+    module: sumd.cqrs.queries
+    line: 381
+    cyclomatic_complexity: 4
+    calls_out: 9
+    calls_in: 0
+  sumd.cli_scan._maybe_generate_doql:
+    name: _maybe_generate_doql
+    module: sumd.cli_scan
+    line: 239
+    cyclomatic_complexity: 7
+    calls_out: 9
+    calls_in: 1
+  sumd.cqrs.queries.SumdQueryHandler._handle_list_sumd_sections:
+    name: _handle_list_sumd_sections
+    module: sumd.cqrs.queries
+    line: 225
+    cyclomatic_complexity: 3
+    calls_out: 4
+    calls_in: 0
+  sumd.validator._check_required_sections:
+    name: _check_required_sections
+    module: sumd.validator
+    line: 231
+    cyclomatic_complexity: 7
     calls_out: 6
     calls_in: 1
-  sumd.dsl.commands._cmd_sumd_info:
-    name: _cmd_sumd_info
+  sumd.extractor._parse_doql_workflows:
+    name: _parse_doql_workflows
+    module: sumd.extractor
+    line: 173
+    cyclomatic_complexity: 7
+    calls_out: 18
+    calls_in: 1
+  sumd.utils.prolog_core.deep_resolve:
+    name: deep_resolve
+    module: sumd.utils.prolog_core
+    line: 200
+    cyclomatic_complexity: 3
+    calls_out: 4
+    calls_in: 2
+  sumd.validator.validate_project_architecture:
+    name: validate_project_architecture
+    module: sumd.validator
+    line: 311
+    cyclomatic_complexity: 8
+    calls_out: 15
+    calls_in: 1
+  sumd.extractor._map_cc_stats:
+    name: _map_cc_stats
+    module: sumd.extractor
+    line: 827
+    cyclomatic_complexity: 10
+    calls_out: 10
+    calls_in: 1
+  sumd.cli_scan._export_sumd_json:
+    name: _export_sumd_json
+    module: sumd.cli_scan
+    line: 191
+    cyclomatic_complexity: 2
+    calls_out: 2
+    calls_in: 1
+  sumd.dsl.commands._cmd_sumd_validate:
+    name: _cmd_sumd_validate
     module: sumd.dsl.commands
-    line: 472
+    line: 454
+    cyclomatic_complexity: 2
+    calls_out: 7
+    calls_in: 0
+  sumd.sections.interfaces._render_interfaces_openapi:
+    name: _render_interfaces_openapi
+    module: sumd.sections.interfaces
+    line: 16
+    cyclomatic_complexity: 6
+    calls_out: 19
+    calls_in: 1
+  sumd.cli.main:
+    name: main
+    module: sumd.cli
+    line: 1155
+    cyclomatic_complexity: 10
+    calls_out: 4
+    calls_in: 0
+  sumd.extractor._path_matches_pattern:
+    name: _path_matches_pattern
+    module: sumd.extractor
+    line: 704
+    cyclomatic_complexity: 5
+    calls_out: 9
+    calls_in: 2
+  sumd.cli_doql._node_spec_from_package_json:
+    name: _node_spec_from_package_json
+    module: sumd.cli_doql
+    line: 329
+    cyclomatic_complexity: 7
+    calls_out: 12
+    calls_in: 1
+  sumd.cli_doql._node_framework:
+    name: _node_framework
+    module: sumd.cli_doql
+    line: 307
+    cyclomatic_complexity: 5
+    calls_out: 0
+    calls_in: 1
+  sumd.extractor.extract_doql:
+    name: extract_doql
+    module: sumd.extractor
+    line: 230
+    cyclomatic_complexity: 3
+    calls_out: 3
+    calls_in: 1
+  sumd.toon_parser._parse_toon_block_gui:
+    name: _parse_toon_block_gui
+    module: sumd.toon_parser
+    line: 114
+    cyclomatic_complexity: 1
+    calls_out: 1
+    calls_in: 1
+  sumd.extractor._parse_doql_content:
+    name: _parse_doql_content
+    module: sumd.extractor
+    line: 202
+    cyclomatic_complexity: 6
+    calls_out: 19
+    calls_in: 1
+  sumd.extractor.extract_dockerfile:
+    name: extract_dockerfile
+    module: sumd.extractor
+    line: 399
+    cyclomatic_complexity: 6
+    calls_out: 5
+    calls_in: 1
+  sumd.extractor.extract_requirements:
+    name: extract_requirements
+    module: sumd.extractor
+    line: 285
+    cyclomatic_complexity: 7
+    calls_out: 9
+    calls_in: 2
+  sumd.mcp_server._tool_info_sumd:
+    name: _tool_info_sumd
+    module: sumd.mcp_server
+    line: 469
+    cyclomatic_complexity: 2
+    calls_out: 5
+    calls_in: 0
+  sumd.extractor._read_toml:
+    name: _read_toml
+    module: sumd.extractor
+    line: 20
+    cyclomatic_complexity: 2
+    calls_out: 4
+    calls_in: 1
+  sumd.sections.call_graph._render_call_graph:
+    name: _render_call_graph
+    module: sumd.sections.call_graph
+    line: 95
+    cyclomatic_complexity: 7
+    calls_out: 28
+    calls_in: 0
+  sumd.sections.environment._render_goal_section:
+    name: _render_goal_section
+    module: sumd.sections.environment
+    line: 29
+    cyclomatic_complexity: 9
+    calls_out: 17
+    calls_in: 1
+  sumd.toon_parser._parse_toon_block_navigate:
+    name: _parse_toon_block_navigate
+    module: sumd.toon_parser
+    line: 98
+    cyclomatic_complexity: 7
+    calls_out: 5
+    calls_in: 1
+  sumd.sections.deployment._render_deployment_install:
+    name: _render_deployment_install
+    module: sumd.sections.deployment
+    line: 15
+    cyclomatic_complexity: 2
+    calls_out: 11
+    calls_in: 1
+  sumd.dsl.schema_commands.SchemaBasedCommands._cmd_sumd_info:
+    name: _cmd_sumd_info
+    module: sumd.dsl.schema_commands
+    line: 277
     cyclomatic_complexity: 3
     calls_out: 3
     calls_in: 0
-  sumd.sections.workflows._render_workflows:
-    name: _render_workflows
-    module: sumd.sections.workflows
-    line: 56
-    cyclomatic_complexity: 4
-    calls_out: 5
-    calls_in: 0
-  sumd.dsl.shell.DSLShellServer.execute_dsl:
-    name: execute_dsl
-    module: sumd.dsl.shell
-    line: 266
-    cyclomatic_complexity: 4
-    calls_out: 7
-    calls_in: 0
-  sumd_logic_validator.sumd_logic_validator.cli.query:
-    name: query
-    module: sumd_logic_validator.sumd_logic_validator.cli
-    line: 47
-    cyclomatic_complexity: 6
-    calls_out: 14
-    calls_in: 0
-  sumd.dsl.shell.DSLShell.__init__:
-    name: __init__
-    module: sumd.dsl.shell
-    line: 19
-    cyclomatic_complexity: 4
-    calls_out: 6
-    calls_in: 0
-  sumd.extractor._lang_of:
-    name: _lang_of
-    module: sumd.extractor
-    line: 537
-    cyclomatic_complexity: 1
-    calls_out: 2
-    calls_in: 1
-  sumd.sections.interfaces._render_interfaces:
-    name: _render_interfaces
-    module: sumd.sections.interfaces
-    line: 119
-    cyclomatic_complexity: 5
-    calls_out: 9
-    calls_in: 0
-  sumd.cli._lint_collect_paths:
-    name: _lint_collect_paths
+  sumd.cli._lint_classify_issues:
+    name: _lint_classify_issues
     module: sumd.cli
-    line: 1274
+    line: 477
     cyclomatic_complexity: 6
-    calls_out: 7
-    calls_in: 1
-  sumd.dsl.parser.DSLParser._match:
-    name: _match
-    module: sumd.dsl.parser
-    line: 647
-    cyclomatic_complexity: 2
-    calls_out: 2
-    calls_in: 4
+    calls_out: 1
+    calls_in: 2
   sumd.extractor._analyse_py_module:
     name: _analyse_py_module
     module: sumd.extractor
@@ -1216,11 +971,186 @@ nodes:
     cyclomatic_complexity: 2
     calls_out: 6
     calls_in: 2
-  sumd.validator._check_required_sections:
-    name: _check_required_sections
+  sumd.extractor._match_absolute_pattern:
+    name: _match_absolute_pattern
+    module: sumd.extractor
+    line: 678
+    cyclomatic_complexity: 2
+    calls_out: 2
+    calls_in: 1
+  sumd.extractor._facts_dependencies:
+    name: _facts_dependencies
+    module: sumd.extractor
+    line: 976
+    cyclomatic_complexity: 4
+    calls_out: 5
+    calls_in: 1
+  sumd.dsl.commands._cmd_cat:
+    name: _cmd_cat
+    module: sumd.dsl.commands
+    line: 313
+    cyclomatic_complexity: 3
+    calls_out: 4
+    calls_in: 1
+  sumd.parser.SUMDParser.parse_file:
+    name: parse_file
+    module: sumd.parser
+    line: 46
+    cyclomatic_complexity: 1
+    calls_out: 2
+    calls_in: 20
+  sumd.validator._check_metadata_fields:
+    name: _check_metadata_fields
     module: sumd.validator
-    line: 231
+    line: 248
+    cyclomatic_complexity: 9
+    calls_out: 7
+    calls_in: 1
+  sumd.utils.prolog_core.to_term:
+    name: to_term
+    module: sumd.utils.prolog_core
+    line: 73
+    cyclomatic_complexity: 13
+    calls_out: 30
+    calls_in: 9
+  sumd.extractor.extract_pyproject:
+    name: extract_pyproject
+    module: sumd.extractor
+    line: 36
+    cyclomatic_complexity: 3
+    calls_out: 17
+    calls_in: 5
+  sumd.dsl.engine.DSLEngine.execute_text:
+    name: execute_text
+    module: sumd.dsl.engine
+    line: 94
+    cyclomatic_complexity: 3
+    calls_out: 5
+    calls_in: 0
+  examples.llm.anthropic_example.ask:
+    name: ask
+    module: examples.llm.anthropic_example
+    line: 24
+    cyclomatic_complexity: 1
+    calls_out: 3
+    calls_in: 1
+  sumd.toon_parser._parse_toon_block_assert:
+    name: _parse_toon_block_assert
+    module: sumd.toon_parser
+    line: 48
     cyclomatic_complexity: 7
+    calls_out: 9
+    calls_in: 1
+  sumd.toon_parser._parse_generic_block:
+    name: _parse_generic_block
+    module: sumd.toon_parser
+    line: 70
+    cyclomatic_complexity: 7
+    calls_out: 9
+    calls_in: 2
+  sumd.extractor._extract_deploy_facts:
+    name: _extract_deploy_facts
+    module: sumd.extractor
+    line: 1145
+    cyclomatic_complexity: 2
+    calls_out: 3
+    calls_in: 1
+  sumd.mcp_server._tool_validate_sumd:
+    name: _tool_validate_sumd
+    module: sumd.mcp_server
+    line: 395
+    cyclomatic_complexity: 1
+    calls_out: 7
+    calls_in: 0
+  sumd.utils.prolog_core.PythonPrologDB.parse_and_load:
+    name: parse_and_load
+    module: sumd.utils.prolog_core
+    line: 151
+    cyclomatic_complexity: 7
+    calls_out: 17
+    calls_in: 0
+  sumd.utils.prolog_core.rename_variables:
+    name: rename_variables
+    module: sumd.utils.prolog_core
+    line: 224
+    cyclomatic_complexity: 2
+    calls_out: 8
+    calls_in: 1
+  sumd.cli._scaffold_generic:
+    name: _scaffold_generic
+    module: sumd.cli
+    line: 778
+    cyclomatic_complexity: 1
+    calls_out: 3
+    calls_in: 1
+  sumd.extractor.extract_source_snippets:
+    name: extract_source_snippets
+    module: sumd.extractor
+    line: 1229
+    cyclomatic_complexity: 6
+    calls_out: 12
+    calls_in: 1
+  sumd.cli_scan._maybe_generate_testql:
+    name: _maybe_generate_testql
+    module: sumd.cli_scan
+    line: 266
+    cyclomatic_complexity: 5
+    calls_out: 8
+    calls_in: 1
+  sumd.cli.main_sumr:
+    name: main_sumr
+    module: sumd.cli
+    line: 1189
+    cyclomatic_complexity: 3
+    calls_out: 2
+    calls_in: 0
+  sumd.pipeline._refresh_map_toon:
+    name: _refresh_map_toon
+    module: sumd.pipeline
+    line: 56
+    cyclomatic_complexity: 5
+    calls_out: 6
+    calls_in: 1
+  sumd.utils.prolog_core.PythonPrologDB.add_fact:
+    name: add_fact
+    module: sumd.utils.prolog_core
+    line: 145
+    cyclomatic_complexity: 2
+    calls_out: 4
+    calls_in: 0
+  sumd.cli.map_cmd:
+    name: map_cmd
+    module: sumd.cli
+    line: 884
+    cyclomatic_complexity: 7
+    calls_out: 20
+    calls_in: 0
+  sumd.utils.prolog_core.extend_subst:
+    name: extend_subst
+    module: sumd.utils.prolog_core
+    line: 207
+    cyclomatic_complexity: 2
+    calls_out: 2
+    calls_in: 2
+  sumd.utils.prolog_core.occurs_check:
+    name: occurs_check
+    module: sumd.utils.prolog_core
+    line: 215
+    cyclomatic_complexity: 4
+    calls_out: 4
+    calls_in: 2
+  sumd.cli_scan._run_analysis_tools:
+    name: _run_analysis_tools
+    module: sumd.cli_scan
+    line: 163
+    cyclomatic_complexity: 5
+    calls_out: 5
+    calls_in: 1
+  sumd.extractor._analyse_class_methods:
+    name: _analyse_class_methods
+    module: sumd.extractor
+    line: 601
+    cyclomatic_complexity: 6
     calls_out: 6
     calls_in: 1
   sumd.sections.quality._render_quality_raw:
@@ -1230,20 +1160,83 @@ nodes:
     cyclomatic_complexity: 2
     calls_out: 7
     calls_in: 1
-  test.print:
-    name: print
-    module: test
-    line: 3
-    cyclomatic_complexity: 0
-    calls_out: 0
-    calls_in: 84
-  sumd.mcp_server._resolve_path:
-    name: _resolve_path
-    module: sumd.mcp_server
-    line: 117
+  sumd.sections.environment._render_env_section:
+    name: _render_env_section
+    module: sumd.sections.environment
+    line: 13
+    cyclomatic_complexity: 3
+    calls_out: 7
+    calls_in: 1
+  sumd.cli_scan._tool_bin:
+    name: _tool_bin
+    module: sumd.cli_scan
+    line: 137
+    cyclomatic_complexity: 2
+    calls_out: 1
+    calls_in: 1
+  sumd.pipeline._find_tools_bin_dir:
+    name: _find_tools_bin_dir
+    module: sumd.pipeline
+    line: 83
+    cyclomatic_complexity: 3
+    calls_out: 1
+    calls_in: 1
+  sumd.dsl.commands._cmd_sumd_info:
+    name: _cmd_sumd_info
+    module: sumd.dsl.commands
+    line: 472
+    cyclomatic_complexity: 3
+    calls_out: 3
+    calls_in: 0
+  sumd.extractor._analyse_py_top_classes:
+    name: _analyse_py_top_classes
+    module: sumd.extractor
+    line: 613
+    cyclomatic_complexity: 5
+    calls_out: 8
+    calls_in: 1
+  sumd.cli_scan._echo_scan_result:
+    name: _echo_scan_result
+    module: sumd.cli_scan
+    line: 231
     cyclomatic_complexity: 2
     calls_out: 4
-    calls_in: 8
+    calls_in: 1
+  sumd.sections.call_graph._parse_calls_toon:
+    name: _parse_calls_toon
+    module: sumd.sections.call_graph
+    line: 85
+    cyclomatic_complexity: 1
+    calls_out: 3
+    calls_in: 1
+  sumd.dsl.shell.DSLShell.__init__:
+    name: __init__
+    module: sumd.dsl.shell
+    line: 19
+    cyclomatic_complexity: 4
+    calls_out: 6
+    calls_in: 0
+  sumd_logic_validator.sumd_logic_validator.cli.get_engine:
+    name: get_engine
+    module: sumd_logic_validator.sumd_logic_validator.cli
+    line: 10
+    cyclomatic_complexity: 4
+    calls_out: 9
+    calls_in: 2
+  sumd.dsl.shell.DSLShell.execute_command:
+    name: execute_command
+    module: sumd.dsl.shell
+    line: 250
+    cyclomatic_complexity: 2
+    calls_out: 3
+    calls_in: 0
+  sumd.utils.prolog_core.is_variable:
+    name: is_variable
+    module: sumd.utils.prolog_core
+    line: 62
+    cyclomatic_complexity: 6
+    calls_out: 5
+    calls_in: 1
   sumd.sections.call_graph._parse_calls_hubs:
     name: _parse_calls_hubs
     module: sumd.sections.call_graph
@@ -1251,68 +1244,250 @@ nodes:
     cyclomatic_complexity: 8
     calls_out: 4
     calls_in: 1
-  sumd.cqrs.queries.SumdQueryHandler._handle_list_sumd_sections:
-    name: _handle_list_sumd_sections
-    module: sumd.cqrs.queries
-    line: 225
+  sumd.pipeline._collect_tool_sources:
+    name: _collect_tool_sources
+    module: sumd.pipeline
+    line: 151
+    cyclomatic_complexity: 7
+    calls_out: 6
+    calls_in: 1
+  sumd.cli.info:
+    name: info
+    module: sumd.cli
+    line: 139
     cyclomatic_complexity: 3
-    calls_out: 4
+    calls_out: 11
     calls_in: 0
-  sumd.sections.workflows._render_workflows_taskfile:
-    name: _render_workflows_taskfile
-    module: sumd.sections.workflows
-    line: 29
+  sumd.extractor._extract_doql_workflows:
+    name: _extract_doql_workflows
+    module: sumd.extractor
+    line: 1107
+    cyclomatic_complexity: 5
+    calls_out: 18
+    calls_in: 1
+  sumd.extractor._parse_dockerfile_line:
+    name: _parse_dockerfile_line
+    module: sumd.extractor
+    line: 383
+    cyclomatic_complexity: 8
+    calls_out: 14
+    calls_in: 1
+  sumd.cli_scan._finalize_scan:
+    name: _finalize_scan
+    module: sumd.cli_scan
+    line: 295
+    cyclomatic_complexity: 9
+    calls_out: 16
+    calls_in: 1
+  sumd.sections.dependencies._render_dependencies:
+    name: _render_dependencies
+    module: sumd.sections.dependencies
+    line: 63
+    cyclomatic_complexity: 2
+    calls_out: 6
+    calls_in: 0
+  sumd.sections.architecture._render_doql_entities:
+    name: _render_doql_entities
+    module: sumd.sections.architecture
+    line: 59
     cyclomatic_complexity: 6
+    calls_out: 9
+    calls_in: 1
+  sumd.cli.cli:
+    name: cli
+    module: sumd.cli
+    line: 50
+    cyclomatic_complexity: 1
+    calls_out: 2
+    calls_in: 2
+  sumd.extractor.extract_pyqual:
+    name: extract_pyqual
+    module: sumd.extractor
+    line: 241
+    cyclomatic_complexity: 5
+    calls_out: 12
+    calls_in: 1
+  sumd.dsl.shell.DSLShell.execute_script:
+    name: execute_script
+    module: sumd.dsl.shell
+    line: 213
+    cyclomatic_complexity: 9
+    calls_out: 17
+    calls_in: 0
+  sumd.sections.extras._render_extras:
+    name: _render_extras
+    module: sumd.sections.extras
+    line: 46
+    cyclomatic_complexity: 3
+    calls_out: 3
+    calls_in: 0
+  sumd.validator.validate_codeblocks:
+    name: validate_codeblocks
+    module: sumd.validator
+    line: 168
+    cyclomatic_complexity: 9
     calls_out: 17
     calls_in: 1
-  sumd.cli._setup_tools_venv:
-    name: _setup_tools_venv
-    module: sumd.cli
-    line: 1307
+  sumd.extractor._lang_of:
+    name: _lang_of
+    module: sumd.extractor
+    line: 537
+    cyclomatic_complexity: 1
+    calls_out: 2
+    calls_in: 1
+  sumd.extractor.extract_env:
+    name: extract_env
+    module: sumd.extractor
+    line: 346
+    cyclomatic_complexity: 10
+    calls_out: 13
+    calls_in: 2
+  sumd.extractor.generate_map_toon:
+    name: generate_map_toon
+    module: sumd.extractor
+    line: 864
+    cyclomatic_complexity: 5
+    calls_out: 24
+    calls_in: 3
+  sumd_logic_validator.sumd_logic_validator.cli.query:
+    name: query
+    module: sumd_logic_validator.sumd_logic_validator.cli
+    line: 47
+    cyclomatic_complexity: 6
+    calls_out: 14
+    calls_in: 0
+  sumd.cli_scan._scan_one_project:
+    name: _scan_one_project
+    module: sumd.cli_scan
+    line: 340
+    cyclomatic_complexity: 10
+    calls_out: 14
+    calls_in: 1
+  sumd.extractor._parse_ignore_file:
+    name: _parse_ignore_file
+    module: sumd.extractor
+    line: 648
+    cyclomatic_complexity: 6
+    calls_out: 7
+    calls_in: 2
+  sumd.sections.interfaces._render_testql_one_structured:
+    name: _render_testql_one_structured
+    module: sumd.sections.interfaces
+    line: 83
     cyclomatic_complexity: 7
     calls_out: 13
     calls_in: 1
-  sumd.sections.dependencies._render_deps_dev:
-    name: _render_deps_dev
-    module: sumd.sections.dependencies
-    line: 41
-    cyclomatic_complexity: 6
-    calls_out: 15
+  sumd.extractor._facts_project_metadata:
+    name: _facts_project_metadata
+    module: sumd.extractor
+    line: 915
+    cyclomatic_complexity: 4
+    calls_out: 4
     calls_in: 1
-  sumd.cli._run_one_tool:
-    name: _run_one_tool
-    module: sumd.cli
-    line: 787
-    cyclomatic_complexity: 3
-    calls_out: 9
-    calls_in: 1
-  sumd.cli._walk_projects:
-    name: _walk_projects
-    module: sumd.cli
-    line: 725
-    cyclomatic_complexity: 10
-    calls_out: 7
-    calls_in: 2
-  sumd.toon_parser._parse_toon_block_config:
-    name: _parse_toon_block_config
-    module: sumd.toon_parser
-    line: 10
+  sumd.dsl.shell.DSLShell.run:
+    name: run
+    module: sumd.dsl.shell
+    line: 91
     cyclomatic_complexity: 9
-    calls_out: 8
+    calls_out: 15
+    calls_in: 0
+  sumd.extractor._match_recursive_pattern:
+    name: _match_recursive_pattern
+    module: sumd.extractor
+    line: 684
+    cyclomatic_complexity: 3
+    calls_out: 3
     calls_in: 1
-  sumd.validator._check_empty_links:
-    name: _check_empty_links
-    module: sumd.validator
-    line: 276
-    cyclomatic_complexity: 2
-    calls_out: 1
+  sumd.sections.workflows._render_workflows_doql:
+    name: _render_workflows_doql
+    module: sumd.sections.workflows
+    line: 16
+    cyclomatic_complexity: 4
+    calls_out: 7
     calls_in: 1
-  sumd.cli._render_write_validate:
-    name: _render_write_validate
+  sumd.dsl.shell.DSLShellServer.execute_dsl:
+    name: execute_dsl
+    module: sumd.dsl.shell
+    line: 266
+    cyclomatic_complexity: 4
+    calls_out: 7
+    calls_in: 0
+  sumd.extractor._facts_env_variables:
+    name: _facts_env_variables
+    module: sumd.extractor
+    line: 1022
+    cyclomatic_complexity: 3
+    calls_out: 7
+    calls_in: 1
+  sumd.cli.validate:
+    name: validate
     module: sumd.cli
-    line: 848
-    cyclomatic_complexity: 5
+    line: 57
+    cyclomatic_complexity: 4
+    calls_out: 13
+    calls_in: 0
+  sumd.sections.workflows._render_workflows:
+    name: _render_workflows
+    module: sumd.sections.workflows
+    line: 56
+    cyclomatic_complexity: 4
     calls_out: 5
+    calls_in: 0
+  sumd.cli._lint_collect_paths:
+    name: _lint_collect_paths
+    module: sumd.cli
+    line: 491
+    cyclomatic_complexity: 6
+    calls_out: 7
+    calls_in: 1
+  sumd.pipeline._run_tool_if_present:
+    name: _run_tool_if_present
+    module: sumd.pipeline
+    line: 93
+    cyclomatic_complexity: 3
+    calls_out: 5
+    calls_in: 3
+  sumd.dsl.commands._cmd_help:
+    name: _cmd_help
+    module: sumd.dsl.commands
+    line: 569
+    cyclomatic_complexity: 2
+    calls_out: 3
+    calls_in: 0
+  sumd.validator._check_unclosed_fences:
+    name: _check_unclosed_fences
+    module: sumd.validator
+    line: 269
+    cyclomatic_complexity: 4
+    calls_out: 2
+    calls_in: 1
+  sumd.extractor.extract_openapi:
+    name: extract_openapi
+    module: sumd.extractor
+    line: 118
+    cyclomatic_complexity: 5
+    calls_out: 13
+    calls_in: 1
+  sumd.extractor.required_tools_for_profile:
+    name: required_tools_for_profile
+    module: sumd.extractor
+    line: 1214
+    cyclomatic_complexity: 4
+    calls_out: 0
+    calls_in: 1
+  sumd.cli._scaffold_write:
+    name: _scaffold_write
+    module: sumd.cli
+    line: 689
+    cyclomatic_complexity: 3
+    calls_out: 4
+    calls_in: 3
+  sumd.extractor._match_regular_pattern:
+    name: _match_regular_pattern
+    module: sumd.extractor
+    line: 694
+    cyclomatic_complexity: 5
+    calls_out: 3
     calls_in: 1
   sumd.validator._validate_markpact_meta:
     name: _validate_markpact_meta
@@ -1321,75 +1496,19 @@ nodes:
     cyclomatic_complexity: 5
     calls_out: 9
     calls_in: 1
-  sumd.prolog_engine.to_term:
-    name: to_term
-    module: sumd.prolog_engine
-    line: 74
-    cyclomatic_complexity: 13
-    calls_out: 29
-    calls_in: 14
-  sumd.extractor.extract_requirements:
-    name: extract_requirements
+  sumd.extractor._extract_doql_interfaces:
+    name: _extract_doql_interfaces
     module: sumd.extractor
-    line: 285
-    cyclomatic_complexity: 7
+    line: 1091
+    cyclomatic_complexity: 3
     calls_out: 9
-    calls_in: 2
-  sumd.cqrs.queries.SumdQueryHandler._handle_get_sumd_section:
-    name: _handle_get_sumd_section
-    module: sumd.cqrs.queries
-    line: 251
-    cyclomatic_complexity: 4
-    calls_out: 7
-    calls_in: 0
-  sumd.pipeline._collect_pkg_sources:
-    name: _collect_pkg_sources
-    module: sumd.pipeline
-    line: 176
-    cyclomatic_complexity: 5
-    calls_out: 11
     calls_in: 1
-  sumd.toon_parser._parse_toon_block_performance:
-    name: _parse_toon_block_performance
-    module: sumd.toon_parser
-    line: 70
-    cyclomatic_complexity: 7
-    calls_out: 8
-    calls_in: 1
-  sumd_logic_validator.sumd_logic_validator.engine.deep_resolve:
-    name: deep_resolve
-    module: sumd_logic_validator.sumd_logic_validator.engine
-    line: 196
+  sumd.cli_scan._run_one_tool:
+    name: _run_one_tool
+    module: sumd.cli_scan
+    line: 151
     cyclomatic_complexity: 3
-    calls_out: 4
-    calls_in: 1
-  sumd.cli._ensure_venv:
-    name: _ensure_venv
-    module: sumd.cli
-    line: 760
-    cyclomatic_complexity: 4
-    calls_out: 7
-    calls_in: 1
-  sumd.cli._scaffold_crud_scenarios:
-    name: _scaffold_crud_scenarios
-    module: sumd.cli
-    line: 1511
-    cyclomatic_complexity: 5
-    calls_out: 7
-    calls_in: 1
-  sumd_logic_validator.sumd_logic_validator.engine.resolve_val:
-    name: resolve_val
-    module: sumd_logic_validator.sumd_logic_validator.engine
-    line: 190
-    cyclomatic_complexity: 3
-    calls_out: 1
-    calls_in: 4
-  sumd.extractor.extract_dockerfile:
-    name: extract_dockerfile
-    module: sumd.extractor
-    line: 399
-    cyclomatic_complexity: 6
-    calls_out: 5
+    calls_out: 9
     calls_in: 1
   sumd.sections.environment.EnvironmentSection.render:
     name: render
@@ -1398,117 +1517,131 @@ nodes:
     cyclomatic_complexity: 1
     calls_out: 4
     calls_in: 0
-  sumd.mcp_server._tool_get_section:
-    name: _tool_get_section
-    module: sumd.mcp_server
-    line: 442
-    cyclomatic_complexity: 5
-    calls_out: 8
-    calls_in: 0
-  sumd.toon_parser._parse_toon_block_navigate:
-    name: _parse_toon_block_navigate
-    module: sumd.toon_parser
-    line: 86
-    cyclomatic_complexity: 7
-    calls_out: 5
-    calls_in: 1
-  sumd.extractor._path_matches_pattern:
-    name: _path_matches_pattern
-    module: sumd.extractor
-    line: 670
-    cyclomatic_complexity: 18
-    calls_out: 18
-    calls_in: 2
-  sumd.extractor.extract_doql:
-    name: extract_doql
-    module: sumd.extractor
-    line: 230
-    cyclomatic_complexity: 3
-    calls_out: 3
-    calls_in: 1
-  sumd.extractor.generate_project_logic:
-    name: generate_project_logic
-    module: sumd.extractor
-    line: 916
-    cyclomatic_complexity: 20
-    calls_out: 71
-    calls_in: 2
-  sumd.toon_parser._parse_toon_block_api:
-    name: _parse_toon_block_api
-    module: sumd.toon_parser
-    line: 28
+  sumd.dsl.commands._cmd_sumd_map:
+    name: _cmd_sumd_map
+    module: sumd.dsl.commands
+    line: 428
     cyclomatic_complexity: 6
-    calls_out: 4
-    calls_in: 1
-  sumd.cli.analyze:
-    name: analyze
-    module: sumd.cli
-    line: 1388
-    cyclomatic_complexity: 11
-    calls_out: 33
+    calls_out: 7
     calls_in: 0
-  sumd.extractor._cc_estimate:
-    name: _cc_estimate
-    module: sumd.extractor
-    line: 553
-    cyclomatic_complexity: 4
-    calls_out: 4
-    calls_in: 2
-  sumd.toon_parser.extract_testql_scenarios:
-    name: extract_testql_scenarios
-    module: sumd.toon_parser
-    line: 143
+  sumd.sections.call_graph._parse_hub_stat_line:
+    name: _parse_hub_stat_line
+    module: sumd.sections.call_graph
+    line: 41
+    cyclomatic_complexity: 2
+    calls_out: 9
+    calls_in: 1
+  sumd.sections.extras._render_pkg_json_scripts:
+    name: _render_pkg_json_scripts
+    module: sumd.sections.extras
+    line: 24
     cyclomatic_complexity: 7
-    calls_out: 12
-    calls_in: 2
-  sumd.validator._check_unclosed_fences:
-    name: _check_unclosed_fences
-    module: sumd.validator
-    line: 269
-    cyclomatic_complexity: 4
-    calls_out: 2
+    calls_out: 16
     calls_in: 1
-  sumd.extractor.extract_source_snippets:
-    name: extract_source_snippets
-    module: sumd.extractor
-    line: 1167
-    cyclomatic_complexity: 6
-    calls_out: 12
-    calls_in: 1
-  sumd.pipeline._doql_sources:
-    name: _doql_sources
-    module: sumd.pipeline
-    line: 169
-    cyclomatic_complexity: 4
-    calls_out: 4
-    calls_in: 1
-  sumd.cli.main_sumr:
-    name: main_sumr
-    module: sumd.cli
-    line: 1976
-    cyclomatic_complexity: 3
-    calls_out: 2
-    calls_in: 0
-  sumd.cli._detect_projects:
+  sumd.cli_scan._detect_projects:
     name: _detect_projects
-    module: sumd.cli
-    line: 747
+    module: sumd.cli_scan
+    line: 111
     cyclomatic_complexity: 1
     calls_out: 1
     calls_in: 1
-  sumd.extractor.generate_map_toon:
-    name: generate_map_toon
-    module: sumd.extractor
-    line: 865
+  sumd.sections.architecture._render_doql_integrations:
+    name: _render_doql_integrations
+    module: sumd.sections.architecture
+    line: 92
     cyclomatic_complexity: 5
-    calls_out: 24
-    calls_in: 3
-  sumd.pipeline._collect_tool_sources:
-    name: _collect_tool_sources
+    calls_out: 9
+    calls_in: 1
+  sumd.pipeline._collect_sources:
+    name: _collect_sources
     module: sumd.pipeline
-    line: 151
-    cyclomatic_complexity: 7
+    line: 224
+    cyclomatic_complexity: 2
+    calls_out: 4
+    calls_in: 1
+  sumd.dsl.shell.DSLShell._execute_line:
+    name: _execute_line
+    module: sumd.dsl.shell
+    line: 183
+    cyclomatic_complexity: 9
+    calls_out: 12
+    calls_in: 0
+  examples.mcp.mcp_client.run:
+    name: run
+    module: examples.mcp.mcp_client
+    line: 22
+    cyclomatic_complexity: 11
+    calls_out: 53
+    calls_in: 1
+  sumd.sections.deployment._render_deployment_reqs:
+    name: _render_deployment_reqs
+    module: sumd.sections.deployment
+    line: 31
+    cyclomatic_complexity: 5
+    calls_out: 9
+    calls_in: 1
+  sumd.extractor._is_map_ignored_path:
+    name: _is_map_ignored_path
+    module: sumd.extractor
+    line: 757
+    cyclomatic_complexity: 4
+    calls_out: 1
+    calls_in: 1
+  sumd.extractor.extract_python_modules:
+    name: extract_python_modules
+    module: sumd.extractor
+    line: 268
+    cyclomatic_complexity: 4
+    calls_out: 4
+    calls_in: 1
+  sumd_logic_validator.sumd_logic_validator.cli.shell:
+    name: shell
+    module: sumd_logic_validator.sumd_logic_validator.cli
+    line: 79
+    cyclomatic_complexity: 10
+    calls_out: 16
+    calls_in: 0
+  sumd.extractor._analyse_py_top_funcs:
+    name: _analyse_py_top_funcs
+    module: sumd.extractor
+    line: 584
+    cyclomatic_complexity: 5
+    calls_out: 7
+    calls_in: 1
+  sumd.cli_doql._detect_project_type:
+    name: _detect_project_type
+    module: sumd.cli_doql
+    line: 222
+    cyclomatic_complexity: 8
+    calls_out: 4
+    calls_in: 1
+  sumd.sections.call_graph._process_in_hubs_line:
+    name: _process_in_hubs_line
+    module: sumd.sections.call_graph
+    line: 54
+    cyclomatic_complexity: 6
     calls_out: 6
+    calls_in: 1
+  sumd.extractor._match_dir_pattern:
+    name: _match_dir_pattern
+    module: sumd.extractor
+    line: 670
+    cyclomatic_complexity: 4
+    calls_out: 4
+    calls_in: 1
+  sumd.cqrs.queries.SumdQueryHandler._handle_get_sumd_section:
+    name: _handle_get_sumd_section
+    module: sumd.cqrs.queries
+    line: 251
+    cyclomatic_complexity: 4
+    calls_out: 7
+    calls_in: 0
+  sumd.sections.quality._render_quality_parsed:
+    name: _render_quality_parsed
+    module: sumd.sections.quality
+    line: 27
+    cyclomatic_complexity: 9
+    calls_out: 21
     calls_in: 1
 edges:
 - caller: examples.llm.anthropic_example.ask
@@ -1535,8 +1668,14 @@ edges:
 - caller: examples.mcp.mcp_client.main
   callee: test.print
   call_type: resolved
+- caller: sumd.toon_parser._parse_toon_block_performance
+  callee: sumd.toon_parser._parse_generic_block
+  call_type: resolved
+- caller: sumd.toon_parser._parse_toon_block_gui
+  callee: sumd.toon_parser._parse_generic_block
+  call_type: resolved
 - caller: sumd.toon_parser._parse_toon_file
-  callee: sumd.dsl.parser.DSLParser._match
+  callee: sumd.dsl.parser_base.DSLParserBase._match
   call_type: resolved
 - caller: sumd.toon_parser._parse_toon_file
   callee: sumd.toon_parser._parse_toon_block_config
@@ -1586,21 +1725,6 @@ edges:
 - caller: sumd.validator.validate_sumd_file
   callee: sumd.validator.validate_project_architecture
   call_type: resolved
-- caller: sumd.cli._node_spec_from_package_json
-  callee: sumd.cli._node_framework
-  call_type: resolved
-- caller: sumd.cli._build_doql_spec
-  callee: sumd.extractor.extract_package_json
-  call_type: resolved
-- caller: sumd.cli._build_doql_spec
-  callee: sumd.cli._node_spec_from_package_json
-  call_type: resolved
-- caller: sumd.cli._generate_doql_less
-  callee: sumd.cli._build_doql_spec
-  call_type: resolved
-- caller: sumd.cli._generate_doql_less
-  callee: sumd.cli._render_doql_boilerplate
-  call_type: resolved
 - caller: sumd.cli.validate
   callee: sumd.parser.SUMDParser.parse_file
   call_type: resolved
@@ -1613,65 +1737,20 @@ edges:
 - caller: sumd.cli.extract
   callee: sumd.parser.SUMDParser.parse_file
   call_type: resolved
-- caller: sumd.cli._walk_projects
-  callee: sumd.cli._is_project_dir
-  call_type: resolved
-- caller: sumd.cli._detect_projects
-  callee: sumd.cli._walk_projects
-  call_type: resolved
-- caller: sumd.cli._run_one_tool
-  callee: sumd.cli._tool_bin
-  call_type: resolved
-- caller: sumd.cli._run_analysis_tools
-  callee: sumd.cli._ensure_venv
-  call_type: resolved
-- caller: sumd.cli._run_analysis_tools
-  callee: sumd.cli._run_one_tool
-  call_type: resolved
-- caller: sumd.cli._render_write_validate
-  callee: sumd.validator.validate_sumd_file
-  call_type: resolved
-- caller: sumd.cli._render_write_validate
-  callee: sumd.parser.SUMDParser.parse_file
-  call_type: resolved
-- caller: sumd.cli._maybe_generate_doql
-  callee: sumd.cli._detect_project_type
-  call_type: resolved
-- caller: sumd.cli._maybe_generate_doql
-  callee: sumd.extractor.extract_pyproject
-  call_type: resolved
-- caller: sumd.cli._maybe_generate_doql
-  callee: sumd.cli._generate_doql_less
-  call_type: resolved
-- caller: sumd.cli._maybe_generate_doql
-  callee: sumd.extractor.extract_package_json
-  call_type: resolved
-- caller: sumd.cli._finalize_scan
-  callee: sumd.cli._echo_scan_result
-  call_type: resolved
-- caller: sumd.cli._finalize_scan
-  callee: sumd.cli._export_sumd_json
-  call_type: resolved
-- caller: sumd.cli._finalize_scan
-  callee: sumd.cli._run_analysis_tools
-  call_type: resolved
-- caller: sumd.cli._scan_one_project
-  callee: sumd.cli._render_write_validate
-  call_type: resolved
-- caller: sumd.cli._scan_one_project
-  callee: sumd.cli._finalize_scan
-  call_type: resolved
-- caller: sumd.cli._scan_one_project
-  callee: sumd.cli._maybe_generate_doql
-  call_type: resolved
-- caller: sumd.cli._scan_one_project
-  callee: sumd.cli._maybe_generate_testql
-  call_type: resolved
 - caller: sumd.cli.lint
   callee: sumd.cli._lint_collect_paths
   call_type: resolved
 - caller: sumd.cli.lint
   callee: sumd.validator.validate_sumd_file
+  call_type: resolved
+- caller: sumd.cli._lint_print_result
+  callee: sumd.cli._lint_classify_issues
+  call_type: resolved
+- caller: sumd.cli._run_analyze_tool
+  callee: sumd.cli._run_code2llm_formats
+  call_type: resolved
+- caller: sumd.cli._run_analyze_tool
+  callee: sumd.cli._run_tool_subprocess
   call_type: resolved
 - caller: sumd.cli.analyze
   callee: sumd.cli._setup_tools_venv
@@ -1708,48 +1787,6 @@ edges:
   call_type: resolved
 - caller: sumd.cli.main_sumr
   callee: sumd.cli.cli
-  call_type: resolved
-- caller: sumd.prolog_engine.to_term
-  callee: sumd.prolog_engine.is_variable
-  call_type: resolved
-- caller: sumd.prolog_engine.PythonPrologDB.add_fact
-  callee: sumd.prolog_engine.to_term
-  call_type: resolved
-- caller: sumd.prolog_engine.PythonPrologDB.parse_and_load
-  callee: sumd.prolog_engine.to_term
-  call_type: resolved
-- caller: sumd.prolog_engine.PythonPrologDB.parse_and_load
-  callee: sumd.prolog_engine._split_body_terms
-  call_type: resolved
-- caller: sumd.prolog_engine.unify
-  callee: sumd.prolog_engine.resolve_val
-  call_type: resolved
-- caller: sumd.prolog_engine.unify
-  callee: sumd.prolog_engine.extend_subst
-  call_type: resolved
-- caller: sumd.prolog_engine.deep_resolve
-  callee: sumd.prolog_engine.resolve_val
-  call_type: resolved
-- caller: sumd.prolog_engine.extend_subst
-  callee: sumd.prolog_engine.occurs_check
-  call_type: resolved
-- caller: sumd.prolog_engine.occurs_check
-  callee: sumd.prolog_engine.resolve_val
-  call_type: resolved
-- caller: sumd.prolog_engine.PythonPrologEngine.query
-  callee: sumd.prolog_engine.to_term
-  call_type: resolved
-- caller: sumd.prolog_engine.PythonPrologEngine.query
-  callee: sumd.prolog_engine.deep_resolve
-  call_type: resolved
-- caller: sumd.prolog_engine.PythonPrologEngine._resolve
-  callee: sumd.prolog_engine.resolve_val
-  call_type: resolved
-- caller: sumd.prolog_engine.PythonPrologEngine._resolve
-  callee: sumd.prolog_engine.rename_variables
-  call_type: resolved
-- caller: sumd.prolog_engine.PythonPrologEngine._resolve
-  callee: sumd.prolog_engine.unify
   call_type: resolved
 - caller: sumd.extractor.extract_pyproject
   callee: sumd.extractor._read_toml
@@ -1796,6 +1833,18 @@ edges:
 - caller: sumd.extractor._analyse_py_module
   callee: sumd.extractor._analyse_py_top_classes
   call_type: resolved
+- caller: sumd.extractor._path_matches_pattern
+  callee: sumd.extractor._match_regular_pattern
+  call_type: resolved
+- caller: sumd.extractor._path_matches_pattern
+  callee: sumd.extractor._match_dir_pattern
+  call_type: resolved
+- caller: sumd.extractor._path_matches_pattern
+  callee: sumd.extractor._match_absolute_pattern
+  call_type: resolved
+- caller: sumd.extractor._path_matches_pattern
+  callee: sumd.extractor._match_recursive_pattern
+  call_type: resolved
 - caller: sumd.extractor._is_path_ignored
   callee: sumd.extractor._path_matches_pattern
   call_type: resolved
@@ -1823,14 +1872,128 @@ edges:
 - caller: sumd.extractor.generate_map_toon
   callee: sumd.extractor._map_cc_stats
   call_type: resolved
-- caller: sumd.extractor.generate_project_logic
+- caller: sumd.extractor._facts_project_metadata
+  callee: sumd.extractor.extract_pyproject
+  call_type: resolved
+- caller: sumd.extractor._facts_project_metadata
+  callee: sumd.extractor.extract_package_json
+  call_type: resolved
+- caller: sumd.extractor._facts_project_files
   callee: sumd.extractor._collect_map_files
   call_type: resolved
-- caller: sumd.extractor.generate_project_logic
+- caller: sumd.extractor._facts_python_analysis
+  callee: sumd.extractor._collect_map_files
+  call_type: resolved
+- caller: sumd.extractor._facts_python_analysis
   callee: sumd.extractor._render_map_detail
+  call_type: resolved
+- caller: sumd.extractor._facts_dependencies
+  callee: sumd.extractor.extract_requirements
+  call_type: resolved
+- caller: sumd.extractor._facts_makefile
+  callee: sumd.extractor.extract_makefile
+  call_type: resolved
+- caller: sumd.extractor._facts_taskfile
+  callee: sumd.extractor.extract_taskfile
+  call_type: resolved
+- caller: sumd.extractor._facts_env_variables
+  callee: sumd.extractor.extract_env
+  call_type: resolved
+- caller: sumd.extractor._facts_testql_scenarios
+  callee: sumd.toon_parser.extract_testql_scenarios
+  call_type: resolved
+- caller: sumd.extractor._extract_doql_facts
+  callee: sumd.extractor._extract_doql_interfaces
+  call_type: resolved
+- caller: sumd.extractor._extract_doql_facts
+  callee: sumd.extractor._extract_doql_workflows
+  call_type: resolved
+- caller: sumd.extractor._extract_sumd_semantic_facts
+  callee: sumd.extractor._extract_markpact_files
+  call_type: resolved
+- caller: sumd.extractor._extract_sumd_semantic_facts
+  callee: sumd.extractor._extract_doql_facts
+  call_type: resolved
+- caller: sumd.extractor._extract_sumd_semantic_facts
+  callee: sumd.extractor._extract_deploy_facts
+  call_type: resolved
+- caller: sumd.extractor._extract_sumd_semantic_facts
+  callee: sumd.extractor._extract_pyqual_gates
   call_type: resolved
 - caller: sumd.extractor.extract_source_snippets
   callee: sumd.extractor._analyse_py_module
+  call_type: resolved
+- caller: sumd.parser.parse_file
+  callee: sumd.parser.parse
+  call_type: resolved
+- caller: sumd.cli_scan._walk_projects
+  callee: sumd.cli_scan._is_project_dir
+  call_type: resolved
+- caller: sumd.cli_scan._detect_projects
+  callee: sumd.cli_scan._walk_projects
+  call_type: resolved
+- caller: sumd.cli_scan._run_one_tool
+  callee: sumd.cli_scan._tool_bin
+  call_type: resolved
+- caller: sumd.cli_scan._run_analysis_tools
+  callee: sumd.cli_scan._ensure_venv
+  call_type: resolved
+- caller: sumd.cli_scan._run_analysis_tools
+  callee: sumd.cli_scan._run_one_tool
+  call_type: resolved
+- caller: sumd.cli_scan._render_write_validate
+  callee: sumd.validator.validate_sumd_file
+  call_type: resolved
+- caller: sumd.cli_scan._render_write_validate
+  callee: sumd.parser.SUMDParser.parse_file
+  call_type: resolved
+- caller: sumd.cli_scan._maybe_generate_doql
+  callee: sumd.cli_doql._detect_project_type
+  call_type: resolved
+- caller: sumd.cli_scan._maybe_generate_doql
+  callee: sumd.extractor.extract_pyproject
+  call_type: resolved
+- caller: sumd.cli_scan._maybe_generate_doql
+  callee: sumd.cli_doql._generate_doql_less
+  call_type: resolved
+- caller: sumd.cli_scan._maybe_generate_doql
+  callee: sumd.extractor.extract_package_json
+  call_type: resolved
+- caller: sumd.cli_scan._finalize_scan
+  callee: sumd.cli_scan._echo_scan_result
+  call_type: resolved
+- caller: sumd.cli_scan._finalize_scan
+  callee: sumd.cli_scan._export_sumd_json
+  call_type: resolved
+- caller: sumd.cli_scan._finalize_scan
+  callee: sumd.cli_scan._run_analysis_tools
+  call_type: resolved
+- caller: sumd.cli_scan._scan_one_project
+  callee: sumd.cli_scan._render_write_validate
+  call_type: resolved
+- caller: sumd.cli_scan._scan_one_project
+  callee: sumd.cli_scan._finalize_scan
+  call_type: resolved
+- caller: sumd.cli_scan._scan_one_project
+  callee: sumd.cli_scan._maybe_generate_doql
+  call_type: resolved
+- caller: sumd.cli_scan._scan_one_project
+  callee: sumd.cli_scan._maybe_generate_testql
+  call_type: resolved
+- caller: sumd.cli_doql._node_spec_from_package_json
+  callee: sumd.cli_doql._node_framework
+  call_type: resolved
+- caller: sumd.cli_doql._build_doql_spec
+  callee: sumd.extractor.extract_package_json
+  call_type: resolved
+- caller: sumd.cli_doql._build_doql_spec
+  callee: sumd.cli_doql._node_spec_from_package_json
+  call_type: resolved
+- caller: sumd.cli_doql._generate_doql_less
+  callee: sumd.cli_doql._build_doql_spec
+  call_type: resolved
+- caller: sumd.cli_doql._generate_doql_less
+  callee: sumd.cli_doql._render_doql_boilerplate
   call_type: resolved
 - caller: sumd.pipeline._refresh_map_toon
   callee: sumd.extractor.generate_map_toon
@@ -2030,6 +2193,45 @@ edges:
 - caller: sumd.sections.environment.EnvironmentSection.render
   callee: sumd.sections.environment._render_goal_section
   call_type: resolved
+- caller: sumd.utils.prolog_core.to_term
+  callee: sumd.utils.prolog_core.is_variable
+  call_type: resolved
+- caller: sumd.utils.prolog_core.PythonPrologDB.add_fact
+  callee: sumd.utils.prolog_core.to_term
+  call_type: resolved
+- caller: sumd.utils.prolog_core.PythonPrologDB.parse_and_load
+  callee: sumd.utils.prolog_core.to_term
+  call_type: resolved
+- caller: sumd.utils.prolog_core.unify
+  callee: sumd.utils.prolog_core.resolve_val
+  call_type: resolved
+- caller: sumd.utils.prolog_core.unify
+  callee: sumd.utils.prolog_core.extend_subst
+  call_type: resolved
+- caller: sumd.utils.prolog_core.deep_resolve
+  callee: sumd.utils.prolog_core.resolve_val
+  call_type: resolved
+- caller: sumd.utils.prolog_core.extend_subst
+  callee: sumd.utils.prolog_core.occurs_check
+  call_type: resolved
+- caller: sumd.utils.prolog_core.occurs_check
+  callee: sumd.utils.prolog_core.resolve_val
+  call_type: resolved
+- caller: sumd.utils.prolog_core.PythonPrologEngine.query
+  callee: sumd.utils.prolog_core.to_term
+  call_type: resolved
+- caller: sumd.utils.prolog_core.PythonPrologEngine.query
+  callee: sumd.utils.prolog_core.deep_resolve
+  call_type: resolved
+- caller: sumd.utils.prolog_core.PythonPrologEngine._resolve
+  callee: sumd.utils.prolog_core.resolve_val
+  call_type: resolved
+- caller: sumd.utils.prolog_core.PythonPrologEngine._resolve
+  callee: sumd.utils.prolog_core.rename_variables
+  call_type: resolved
+- caller: sumd.utils.prolog_core.PythonPrologEngine._resolve
+  callee: sumd.utils.prolog_core.unify
+  call_type: resolved
 - caller: sumd.cqrs.sumd_aggregate.SumdAggregate.create_from_file
   callee: sumd.parser.SUMDParser.parse_file
   call_type: resolved
@@ -2075,6 +2277,9 @@ edges:
 - caller: sumd.dsl.commands._cmd_help
   callee: sumd.dsl.commands.create_builtin_registry
   call_type: resolved
+- caller: sumd.dsl.commands._cmd_read_file
+  callee: sumd.dsl.commands._cmd_cat
+  call_type: resolved
 - caller: sumd.dsl.shell.DSLShell.__init__
   callee: sumd.dsl.commands.create_builtin_registry
   call_type: resolved
@@ -2105,45 +2310,6 @@ edges:
 - caller: sumd.dsl.schema_commands.SchemaBasedCommands._cmd_sumd_info
   callee: sumd.parser.SUMDParser.parse_file
   call_type: resolved
-- caller: sumd_logic_validator.sumd_logic_validator.engine.to_term
-  callee: sumd_logic_validator.sumd_logic_validator.engine.is_variable
-  call_type: resolved
-- caller: sumd_logic_validator.sumd_logic_validator.engine.PythonPrologDB.add_fact
-  callee: sumd.prolog_engine.to_term
-  call_type: resolved
-- caller: sumd_logic_validator.sumd_logic_validator.engine.PythonPrologDB.parse_and_load
-  callee: sumd.prolog_engine.to_term
-  call_type: resolved
-- caller: sumd_logic_validator.sumd_logic_validator.engine.unify
-  callee: sumd_logic_validator.sumd_logic_validator.engine.resolve_val
-  call_type: resolved
-- caller: sumd_logic_validator.sumd_logic_validator.engine.unify
-  callee: sumd_logic_validator.sumd_logic_validator.engine.extend_subst
-  call_type: resolved
-- caller: sumd_logic_validator.sumd_logic_validator.engine.deep_resolve
-  callee: sumd_logic_validator.sumd_logic_validator.engine.resolve_val
-  call_type: resolved
-- caller: sumd_logic_validator.sumd_logic_validator.engine.extend_subst
-  callee: sumd_logic_validator.sumd_logic_validator.engine.occurs_check
-  call_type: resolved
-- caller: sumd_logic_validator.sumd_logic_validator.engine.occurs_check
-  callee: sumd_logic_validator.sumd_logic_validator.engine.resolve_val
-  call_type: resolved
-- caller: sumd_logic_validator.sumd_logic_validator.engine.PythonPrologEngine.query
-  callee: sumd.prolog_engine.to_term
-  call_type: resolved
-- caller: sumd_logic_validator.sumd_logic_validator.engine.PythonPrologEngine.query
-  callee: sumd.prolog_engine.deep_resolve
-  call_type: resolved
-- caller: sumd_logic_validator.sumd_logic_validator.engine.PythonPrologEngine._resolve
-  callee: sumd.prolog_engine.resolve_val
-  call_type: resolved
-- caller: sumd_logic_validator.sumd_logic_validator.engine.PythonPrologEngine._resolve
-  callee: sumd.prolog_engine.rename_variables
-  call_type: resolved
-- caller: sumd_logic_validator.sumd_logic_validator.engine.PythonPrologEngine._resolve
-  callee: sumd.prolog_engine.unify
-  call_type: resolved
 - caller: sumd_logic_validator.sumd_logic_validator.cli.query
   callee: sumd_logic_validator.sumd_logic_validator.cli.get_engine
   call_type: resolved
@@ -2163,33 +2329,18 @@ modules:
   - examples.mcp.mcp_client.run
   sumd.cli:
   - sumd.cli._api_scenario_template
-  - sumd.cli._build_doql_spec
-  - sumd.cli._detect_project_type
-  - sumd.cli._detect_projects
-  - sumd.cli._echo_scan_result
-  - sumd.cli._ensure_venv
-  - sumd.cli._export_sumd_json
-  - sumd.cli._finalize_scan
-  - sumd.cli._generate_doql_less
-  - sumd.cli._is_project_dir
+  - sumd.cli._lint_classify_issues
   - sumd.cli._lint_collect_paths
-  - sumd.cli._maybe_generate_doql
-  - sumd.cli._maybe_generate_testql
-  - sumd.cli._node_framework
-  - sumd.cli._node_spec_from_package_json
-  - sumd.cli._render_doql_boilerplate
-  - sumd.cli._render_write_validate
-  - sumd.cli._run_analysis_tools
-  - sumd.cli._run_one_tool
+  - sumd.cli._lint_print_result
+  - sumd.cli._run_analyze_tool
+  - sumd.cli._run_code2llm_formats
+  - sumd.cli._run_tool_subprocess
   - sumd.cli._scaffold_crud_scenarios
   - sumd.cli._scaffold_from_openapi
   - sumd.cli._scaffold_generic
   - sumd.cli._scaffold_smoke_scenario
   - sumd.cli._scaffold_write
-  - sumd.cli._scan_one_project
   - sumd.cli._setup_tools_venv
-  - sumd.cli._tool_bin
-  - sumd.cli._walk_projects
   - sumd.cli.analyze
   - sumd.cli.cli
   - sumd.cli.export
@@ -2200,6 +2351,28 @@ modules:
   - sumd.cli.main_sumr
   - sumd.cli.map_cmd
   - sumd.cli.validate
+  sumd.cli_doql:
+  - sumd.cli_doql._build_doql_spec
+  - sumd.cli_doql._detect_project_type
+  - sumd.cli_doql._generate_doql_less
+  - sumd.cli_doql._node_framework
+  - sumd.cli_doql._node_spec_from_package_json
+  - sumd.cli_doql._render_doql_boilerplate
+  sumd.cli_scan:
+  - sumd.cli_scan._detect_projects
+  - sumd.cli_scan._echo_scan_result
+  - sumd.cli_scan._ensure_venv
+  - sumd.cli_scan._export_sumd_json
+  - sumd.cli_scan._finalize_scan
+  - sumd.cli_scan._is_project_dir
+  - sumd.cli_scan._maybe_generate_doql
+  - sumd.cli_scan._maybe_generate_testql
+  - sumd.cli_scan._render_write_validate
+  - sumd.cli_scan._run_analysis_tools
+  - sumd.cli_scan._run_one_tool
+  - sumd.cli_scan._scan_one_project
+  - sumd.cli_scan._tool_bin
+  - sumd.cli_scan._walk_projects
   sumd.cqrs.queries:
   - sumd.cqrs.queries.SumdQueryHandler._handle_get_project_info
   - sumd.cqrs.queries.SumdQueryHandler._handle_get_sumd_document
@@ -2209,7 +2382,9 @@ modules:
   sumd.cqrs.sumd_aggregate:
   - sumd.cqrs.sumd_aggregate.SumdAggregate.create_from_file
   sumd.dsl.commands:
+  - sumd.dsl.commands._cmd_cat
   - sumd.dsl.commands._cmd_help
+  - sumd.dsl.commands._cmd_read_file
   - sumd.dsl.commands._cmd_sumd_info
   - sumd.dsl.commands._cmd_sumd_map
   - sumd.dsl.commands._cmd_sumd_validate
@@ -2218,8 +2393,9 @@ modules:
   - sumd.dsl.engine.DSLEngine._builtin_print
   - sumd.dsl.engine.DSLEngine.execute_text
   sumd.dsl.parser:
-  - sumd.dsl.parser.DSLParser._match
   - sumd.dsl.parser.parse_dsl
+  sumd.dsl.parser_base:
+  - sumd.dsl.parser_base.DSLParserBase._match
   sumd.dsl.schema_commands:
   - sumd.dsl.schema_commands.SchemaBasedCommands._cmd_sumd_info
   - sumd.dsl.schema_commands.SchemaBasedCommands._cmd_sumd_validate
@@ -2238,12 +2414,31 @@ modules:
   - sumd.extractor._analyse_py_top_funcs
   - sumd.extractor._cc_estimate
   - sumd.extractor._collect_map_files
+  - sumd.extractor._extract_deploy_facts
+  - sumd.extractor._extract_doql_facts
+  - sumd.extractor._extract_doql_interfaces
+  - sumd.extractor._extract_doql_workflows
+  - sumd.extractor._extract_markpact_files
+  - sumd.extractor._extract_pyqual_gates
+  - sumd.extractor._extract_sumd_semantic_facts
+  - sumd.extractor._facts_dependencies
+  - sumd.extractor._facts_env_variables
+  - sumd.extractor._facts_makefile
+  - sumd.extractor._facts_project_files
+  - sumd.extractor._facts_project_metadata
+  - sumd.extractor._facts_python_analysis
+  - sumd.extractor._facts_taskfile
+  - sumd.extractor._facts_testql_scenarios
   - sumd.extractor._fan_out
   - sumd.extractor._first_task_cmd
   - sumd.extractor._is_map_ignored_path
   - sumd.extractor._is_path_ignored
   - sumd.extractor._lang_of
   - sumd.extractor._map_cc_stats
+  - sumd.extractor._match_absolute_pattern
+  - sumd.extractor._match_dir_pattern
+  - sumd.extractor._match_recursive_pattern
+  - sumd.extractor._match_regular_pattern
   - sumd.extractor._parse_dockerfile_line
   - sumd.extractor._parse_doql_content
   - sumd.extractor._parse_doql_entities
@@ -2256,6 +2451,7 @@ modules:
   - sumd.extractor._try_radon_cc
   - sumd.extractor.extract_dockerfile
   - sumd.extractor.extract_doql
+  - sumd.extractor.extract_env
   - sumd.extractor.extract_makefile
   - sumd.extractor.extract_openapi
   - sumd.extractor.extract_package_json
@@ -2281,6 +2477,8 @@ modules:
   - sumd.mcp_server._tool_validate_sumd
   sumd.parser:
   - sumd.parser.SUMDParser.parse_file
+  - sumd.parser.parse
+  - sumd.parser.parse_file
   sumd.pipeline:
   - sumd.pipeline.RenderPipeline._collect
   - sumd.pipeline.RenderPipeline.run
@@ -2294,20 +2492,6 @@ modules:
   - sumd.pipeline._refresh_analysis_files
   - sumd.pipeline._refresh_map_toon
   - sumd.pipeline._run_tool_if_present
-  sumd.prolog_engine:
-  - sumd.prolog_engine.PythonPrologDB.add_fact
-  - sumd.prolog_engine.PythonPrologDB.parse_and_load
-  - sumd.prolog_engine.PythonPrologEngine._resolve
-  - sumd.prolog_engine.PythonPrologEngine.query
-  - sumd.prolog_engine._split_body_terms
-  - sumd.prolog_engine.deep_resolve
-  - sumd.prolog_engine.extend_subst
-  - sumd.prolog_engine.is_variable
-  - sumd.prolog_engine.occurs_check
-  - sumd.prolog_engine.rename_variables
-  - sumd.prolog_engine.resolve_val
-  - sumd.prolog_engine.to_term
-  - sumd.prolog_engine.unify
   sumd.sections.architecture:
   - sumd.sections.architecture._render_architecture
   - sumd.sections.architecture._render_architecture_doql_parsed
@@ -2361,13 +2545,28 @@ modules:
   - sumd.sections.workflows._render_workflows_doql
   - sumd.sections.workflows._render_workflows_taskfile
   sumd.toon_parser:
+  - sumd.toon_parser._parse_generic_block
   - sumd.toon_parser._parse_toon_block_api
   - sumd.toon_parser._parse_toon_block_assert
   - sumd.toon_parser._parse_toon_block_config
+  - sumd.toon_parser._parse_toon_block_gui
   - sumd.toon_parser._parse_toon_block_navigate
   - sumd.toon_parser._parse_toon_block_performance
   - sumd.toon_parser._parse_toon_file
   - sumd.toon_parser.extract_testql_scenarios
+  sumd.utils.prolog_core:
+  - sumd.utils.prolog_core.PythonPrologDB.add_fact
+  - sumd.utils.prolog_core.PythonPrologDB.parse_and_load
+  - sumd.utils.prolog_core.PythonPrologEngine._resolve
+  - sumd.utils.prolog_core.PythonPrologEngine.query
+  - sumd.utils.prolog_core.deep_resolve
+  - sumd.utils.prolog_core.extend_subst
+  - sumd.utils.prolog_core.is_variable
+  - sumd.utils.prolog_core.occurs_check
+  - sumd.utils.prolog_core.rename_variables
+  - sumd.utils.prolog_core.resolve_val
+  - sumd.utils.prolog_core.to_term
+  - sumd.utils.prolog_core.unify
   sumd.validator:
   - sumd.validator._check_empty_links
   - sumd.validator._check_h1
@@ -2383,21 +2582,12 @@ modules:
   - sumd_logic_validator.sumd_logic_validator.cli.get_engine
   - sumd_logic_validator.sumd_logic_validator.cli.query
   - sumd_logic_validator.sumd_logic_validator.cli.shell
-  sumd_logic_validator.sumd_logic_validator.engine:
-  - sumd_logic_validator.sumd_logic_validator.engine.PythonPrologDB.add_fact
-  - sumd_logic_validator.sumd_logic_validator.engine.PythonPrologDB.parse_and_load
-  - sumd_logic_validator.sumd_logic_validator.engine.PythonPrologEngine._resolve
-  - sumd_logic_validator.sumd_logic_validator.engine.PythonPrologEngine.query
-  - sumd_logic_validator.sumd_logic_validator.engine.deep_resolve
-  - sumd_logic_validator.sumd_logic_validator.engine.extend_subst
-  - sumd_logic_validator.sumd_logic_validator.engine.is_variable
-  - sumd_logic_validator.sumd_logic_validator.engine.occurs_check
-  - sumd_logic_validator.sumd_logic_validator.engine.resolve_val
-  - sumd_logic_validator.sumd_logic_validator.engine.to_term
-  - sumd_logic_validator.sumd_logic_validator.engine.unify
   test:
   - test.print
 entry_points:
+- README.print
+- README.scan
+- README.validate
 - examples.llm.anthropic_example.main
 - examples.llm.openai_example.main
 - examples.mcp.mcp_client.main
@@ -2496,6 +2686,7 @@ entry_points:
 - sumd.cqrs.sumd_aggregate.SumdAggregate.validate_document
 - sumd.cqrs.sumd_aggregate.SumdSection.from_dict
 - sumd.cqrs.sumd_aggregate.SumdSection.to_dict
+- sumd.dsl.ast_nodes.DSLExpression.__str__
 - sumd.dsl.commands.DSLCommand.__post_init__
 - sumd.dsl.commands.DSLCommandRegistry.__init__
 - sumd.dsl.commands.DSLCommandRegistry.get_command
@@ -2503,7 +2694,6 @@ entry_points:
 - sumd.dsl.commands.DSLCommandRegistry.list_categories
 - sumd.dsl.commands.DSLCommandRegistry.list_commands
 - sumd.dsl.commands.DSLCommandRegistry.register
-- sumd.dsl.commands._cmd_cat
 - sumd.dsl.commands._cmd_cd
 - sumd.dsl.commands._cmd_clear
 - sumd.dsl.commands._cmd_echo
@@ -2525,12 +2715,13 @@ entry_points:
 - sumd.dsl.commands._cmd_sumd_validate
 - sumd.dsl.commands._cmd_unset
 - sumd.dsl.commands._cmd_vars
+- sumd.dsl.context_mixin.VariableMixin.get_variable
+- sumd.dsl.context_mixin.VariableMixin.set_variable
 - sumd.dsl.engine.DSLContext.__init__
 - sumd.dsl.engine.DSLContext.get_function
-- sumd.dsl.engine.DSLContext.get_variable
 - sumd.dsl.engine.DSLContext.register_function
-- sumd.dsl.engine.DSLContext.set_variable
 - sumd.dsl.engine.DSLEngine.__init__
+- sumd.dsl.engine.DSLEngine._build_dispatch_table
 - sumd.dsl.engine.DSLEngine._builtin_bool
 - sumd.dsl.engine.DSLEngine._builtin_cd
 - sumd.dsl.engine.DSLEngine._builtin_cwd
@@ -2544,6 +2735,7 @@ entry_points:
 - sumd.dsl.engine.DSLEngine._builtin_type
 - sumd.dsl.engine.DSLEngine._builtin_write_file
 - sumd.dsl.engine.DSLEngine._call_function
+- sumd.dsl.engine.DSLEngine._evaluate_args
 - sumd.dsl.engine.DSLEngine._execute_arithmetic
 - sumd.dsl.engine.DSLEngine._execute_assignment
 - sumd.dsl.engine.DSLEngine._execute_block
@@ -2559,10 +2751,13 @@ entry_points:
 - sumd.dsl.engine.DSLEngine._execute_sumd_command
 - sumd.dsl.engine.DSLEngine._initialize_builtin_functions
 - sumd.dsl.engine.DSLEngine._is_natural_language
+- sumd.dsl.engine.DSLEngine._resolve_schema_call
 - sumd.dsl.engine.DSLEngine.execute
 - sumd.dsl.engine.DSLEngine.execute_text
 - sumd.dsl.engine.DSLEngine.get_suggestions
 - sumd.dsl.engine.DSLEngine.process_natural_language
+- sumd.dsl.lexer.DSLLexer.__init__
+- sumd.dsl.lexer.DSLLexer.tokenize
 - sumd.dsl.nlp.NLPIntegration.__init__
 - sumd.dsl.nlp.NLPIntegration.add_custom_entity
 - sumd.dsl.nlp.NLPIntegration.add_custom_intent
@@ -2584,36 +2779,41 @@ entry_points:
 - sumd.dsl.nlp.SimpleNLPModel.__init__
 - sumd.dsl.nlp.SimpleNLPModel.extract_entities
 - sumd.dsl.nlp.SimpleNLPModel.predict_intent
-- sumd.dsl.parser.DSLExpression.__str__
-- sumd.dsl.parser.DSLLexer.__init__
-- sumd.dsl.parser.DSLLexer.tokenize
-- sumd.dsl.parser.DSLParser.__init__
-- sumd.dsl.parser.DSLParser._advance
-- sumd.dsl.parser.DSLParser._check
-- sumd.dsl.parser.DSLParser._check_next
-- sumd.dsl.parser.DSLParser._consume
-- sumd.dsl.parser.DSLParser._is_at_end
-- sumd.dsl.parser.DSLParser._parse_arithmetic
+- sumd.dsl.parser.DSLParser._build_pipeline_or_cmd
+- sumd.dsl.parser.DSLParser._collect_command_args
+- sumd.dsl.parser.DSLParser._is_command_boundary
+- sumd.dsl.parser.DSLParser._looks_like_command
 - sumd.dsl.parser.DSLParser._parse_assignment
-- sumd.dsl.parser.DSLParser._parse_command
-- sumd.dsl.parser.DSLParser._parse_comparison
-- sumd.dsl.parser.DSLParser._parse_dict
-- sumd.dsl.parser.DSLParser._parse_factor
-- sumd.dsl.parser.DSLParser._parse_function_call
-- sumd.dsl.parser.DSLParser._parse_list
-- sumd.dsl.parser.DSLParser._parse_logical_and
-- sumd.dsl.parser.DSLParser._parse_logical_or
 - sumd.dsl.parser.DSLParser._parse_pipeline
-- sumd.dsl.parser.DSLParser._parse_primary
-- sumd.dsl.parser.DSLParser._parse_property_access
 - sumd.dsl.parser.DSLParser._parse_statement
-- sumd.dsl.parser.DSLParser._parse_term
-- sumd.dsl.parser.DSLParser._peek
-- sumd.dsl.parser.DSLParser._previous
+- sumd.dsl.parser.DSLParser._peek_next_type
+- sumd.dsl.parser.DSLParser._try_parse_command
 - sumd.dsl.parser.DSLParser.parse
-- sumd.dsl.schema.DSLContext.get_variable
+- sumd.dsl.parser_base.DSLParserBase.__init__
+- sumd.dsl.parser_base.DSLParserBase._advance
+- sumd.dsl.parser_base.DSLParserBase._check
+- sumd.dsl.parser_base.DSLParserBase._check_next
+- sumd.dsl.parser_base.DSLParserBase._consume
+- sumd.dsl.parser_base.DSLParserBase._is_at_end
+- sumd.dsl.parser_base.DSLParserBase._peek
+- sumd.dsl.parser_base.DSLParserBase._previous
+- sumd.dsl.parser_expr.DSLExpressionParser._parse_arithmetic
+- sumd.dsl.parser_expr.DSLExpressionParser._parse_comparison
+- sumd.dsl.parser_expr.DSLExpressionParser._parse_factor
+- sumd.dsl.parser_expr.DSLExpressionParser._parse_logical_and
+- sumd.dsl.parser_expr.DSLExpressionParser._parse_logical_or
+- sumd.dsl.parser_expr.DSLExpressionParser._parse_term
+- sumd.dsl.parser_primary.DSLPrimaryParser._parse_command
+- sumd.dsl.parser_primary.DSLPrimaryParser._parse_dict
+- sumd.dsl.parser_primary.DSLPrimaryParser._parse_function_call
+- sumd.dsl.parser_primary.DSLPrimaryParser._parse_identifier_command
+- sumd.dsl.parser_primary.DSLPrimaryParser._parse_identifier_forms
+- sumd.dsl.parser_primary.DSLPrimaryParser._parse_list
+- sumd.dsl.parser_primary.DSLPrimaryParser._parse_literal_value
+- sumd.dsl.parser_primary.DSLPrimaryParser._parse_paren_or_collection
+- sumd.dsl.parser_primary.DSLPrimaryParser._parse_primary
+- sumd.dsl.parser_primary.DSLPrimaryParser._parse_property_access
 - sumd.dsl.schema.DSLContext.register_function
-- sumd.dsl.schema.DSLContext.set_variable
 - sumd.dsl.schema_commands.SchemaBasedCommands.__init__
 - sumd.dsl.schema_commands.SchemaBasedCommands._cmd_analyze_sentiment
 - sumd.dsl.schema_commands.SchemaBasedCommands._cmd_ask
@@ -2682,7 +2882,6 @@ entry_points:
 - sumd.parser.SUMDParser._parse_sections
 - sumd.parser.SUMDParser.parse
 - sumd.parser.SUMDParser.validate
-- sumd.parser.parse
 - sumd.parser.parse_file
 - sumd.parser.validate
 - sumd.pipeline.RenderPipeline.__init__
@@ -2691,29 +2890,6 @@ entry_points:
 - sumd.pipeline.RenderPipeline._collect
 - sumd.pipeline.RenderPipeline._render_legacy_sections
 - sumd.pipeline.RenderPipeline.run
-- sumd.prolog_engine.HybridPrologEngine.__init__
-- sumd.prolog_engine.HybridPrologEngine._query_pyswip
-- sumd.prolog_engine.HybridPrologEngine._query_python
-- sumd.prolog_engine.HybridPrologEngine._query_subprocess
-- sumd.prolog_engine.HybridPrologEngine._swipl_executable_exists
-- sumd.prolog_engine.HybridPrologEngine.query
-- sumd.prolog_engine.PythonPrologDB.__init__
-- sumd.prolog_engine.PythonPrologDB.add_fact
-- sumd.prolog_engine.PythonPrologDB.add_rule
-- sumd.prolog_engine.PythonPrologDB.parse_and_load
-- sumd.prolog_engine.PythonPrologEngine.__init__
-- sumd.prolog_engine.PythonPrologEngine._find_vars
-- sumd.prolog_engine.PythonPrologEngine._resolve
-- sumd.prolog_engine.PythonPrologEngine.query
-- sumd.prolog_engine.Rule.__init__
-- sumd.prolog_engine.Rule.__repr__
-- sumd.prolog_engine.Term.__eq__
-- sumd.prolog_engine.Term.__init__
-- sumd.prolog_engine.Term.__repr__
-- sumd.prolog_engine.Variable.__eq__
-- sumd.prolog_engine.Variable.__hash__
-- sumd.prolog_engine.Variable.__init__
-- sumd.prolog_engine.Variable.__repr__
 - sumd.renderer.generate_sumd_content
 - sumd.sections.api_stubs.ApiStubsSection.should_render
 - sumd.sections.api_stubs._render_api_stubs
@@ -2745,6 +2921,29 @@ entry_points:
 - sumd.sections.utils.should_render.has_attr
 - sumd.sections.workflows.WorkflowsSection.should_render
 - sumd.sections.workflows._render_workflows
+- sumd.utils.prolog_core.HybridPrologEngine.__init__
+- sumd.utils.prolog_core.HybridPrologEngine._query_pyswip
+- sumd.utils.prolog_core.HybridPrologEngine._query_python
+- sumd.utils.prolog_core.HybridPrologEngine._query_subprocess
+- sumd.utils.prolog_core.HybridPrologEngine._swipl_executable_exists
+- sumd.utils.prolog_core.HybridPrologEngine.query
+- sumd.utils.prolog_core.PythonPrologDB.__init__
+- sumd.utils.prolog_core.PythonPrologDB.add_fact
+- sumd.utils.prolog_core.PythonPrologDB.add_rule
+- sumd.utils.prolog_core.PythonPrologDB.parse_and_load
+- sumd.utils.prolog_core.PythonPrologEngine.__init__
+- sumd.utils.prolog_core.PythonPrologEngine._find_vars
+- sumd.utils.prolog_core.PythonPrologEngine._resolve
+- sumd.utils.prolog_core.PythonPrologEngine.query
+- sumd.utils.prolog_core.Rule.__init__
+- sumd.utils.prolog_core.Rule.__repr__
+- sumd.utils.prolog_core.Term.__eq__
+- sumd.utils.prolog_core.Term.__init__
+- sumd.utils.prolog_core.Term.__repr__
+- sumd.utils.prolog_core.Variable.__eq__
+- sumd.utils.prolog_core.Variable.__hash__
+- sumd.utils.prolog_core.Variable.__init__
+- sumd.utils.prolog_core.Variable.__repr__
 - sumd.validator._validate_bash_body
 - sumd.validator._validate_deps_body
 - sumd.validator._validate_less_css_body
@@ -2755,28 +2954,4 @@ entry_points:
 - sumd_logic_validator.sumd_logic_validator.cli.main
 - sumd_logic_validator.sumd_logic_validator.cli.query
 - sumd_logic_validator.sumd_logic_validator.cli.shell
-- sumd_logic_validator.sumd_logic_validator.engine.HybridPrologEngine.__init__
-- sumd_logic_validator.sumd_logic_validator.engine.HybridPrologEngine._query_pyswip
-- sumd_logic_validator.sumd_logic_validator.engine.HybridPrologEngine._query_python
-- sumd_logic_validator.sumd_logic_validator.engine.HybridPrologEngine._query_subprocess
-- sumd_logic_validator.sumd_logic_validator.engine.HybridPrologEngine._swipl_executable_exists
-- sumd_logic_validator.sumd_logic_validator.engine.HybridPrologEngine.query
-- sumd_logic_validator.sumd_logic_validator.engine.PythonPrologDB.__init__
-- sumd_logic_validator.sumd_logic_validator.engine.PythonPrologDB.add_fact
-- sumd_logic_validator.sumd_logic_validator.engine.PythonPrologDB.add_rule
-- sumd_logic_validator.sumd_logic_validator.engine.PythonPrologDB.parse_and_load
-- sumd_logic_validator.sumd_logic_validator.engine.PythonPrologEngine.__init__
-- sumd_logic_validator.sumd_logic_validator.engine.PythonPrologEngine._find_vars
-- sumd_logic_validator.sumd_logic_validator.engine.PythonPrologEngine._resolve
-- sumd_logic_validator.sumd_logic_validator.engine.PythonPrologEngine.query
-- sumd_logic_validator.sumd_logic_validator.engine.Rule.__init__
-- sumd_logic_validator.sumd_logic_validator.engine.Rule.__repr__
-- sumd_logic_validator.sumd_logic_validator.engine.Term.__eq__
-- sumd_logic_validator.sumd_logic_validator.engine.Term.__init__
-- sumd_logic_validator.sumd_logic_validator.engine.Term.__repr__
-- sumd_logic_validator.sumd_logic_validator.engine.Variable.__eq__
-- sumd_logic_validator.sumd_logic_validator.engine.Variable.__hash__
-- sumd_logic_validator.sumd_logic_validator.engine.Variable.__init__
-- sumd_logic_validator.sumd_logic_validator.engine.Variable.__repr__
-- sumd_logic_validator.sumd_logic_validator.engine.rename_variables
 - working_script.print

@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.52] - 2026-05-22
+
+### Docs
+- Update CHANGELOG.md
+- Update README.md
+- Update SUMD.md
+- Update docs/README.md
+- Update project/README.md
+- Update project/context.md
+
+### Other
+- Update .code2llm_cache/README_1779389498557479360_22261.pkl
+- Update .code2llm_cache/parser_1779390705725531417_5710.pkl
+- Update .code2llm_cache/parser_base_1779390689248364816_2340.pkl
+- Update .code2llm_cache/parser_expr_1779390693892411771_3525.pkl
+- Update .code2llm_cache/parser_primary_1779390699265466099_7201.pkl
+- Update .gitignore
+- Update .koru/runtime-context.json
+- Update .planfile/config.yaml
+- Update .planfile/sprints/current.yaml
+- Update app.doql.less
+- ... and 29 more files
+
+## [0.3.51] - 2026-05-21
+
 ### Added
 - **CQRS ES Architecture**: Implemented Command Query Responsibility Segregation with Event Sourcing
   - Command and Query buses for separate read/write operations
@@ -36,8 +61,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **File filtering**: sumd now properly respects .gitignore and .sumdignore files when analyzing source files
 - Added support for standard gitignore patterns including wildcards, directory patterns, and negation
 - Improved file collection performance by skipping ignored files and directories
-
-## [0.3.51] - 2026-05-21
 
 ### Docs
 - Update README.md

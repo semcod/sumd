@@ -1,7 +1,7 @@
 <!-- code2docs:start --># sumd
 
-![version](https://img.shields.io/badge/version-0.1.0-blue) ![python](https://img.shields.io/badge/python-%3E%3D3.10-blue) ![coverage](https://img.shields.io/badge/coverage-unknown-lightgrey) ![functions](https://img.shields.io/badge/functions-550-green)
-> **550** functions | **109** classes | **118** files | CC̄ = 4.0
+![version](https://img.shields.io/badge/version-0.1.0-blue) ![python](https://img.shields.io/badge/python-%3E%3D3.10-blue) ![coverage](https://img.shields.io/badge/coverage-unknown-lightgrey) ![functions](https://img.shields.io/badge/functions-553-green)
+> **553** functions | **104** classes | **126** files | CC̄ = 3.7
 
 > Auto-generated project documentation from source code analysis.
 
@@ -79,6 +79,7 @@ sumd/
 ├── TODO
 ├── Makefile
 ├── working_script
+├── koru
     ├── pre-commit-config
     ├── guards
 ├── script
@@ -135,7 +136,9 @@ sumd/
     ├── extractor
     ├── parser
     ├── rules
+    ├── cli_scan
     ├── models
+    ├── cli_doql
     ├── renderer
     ├── pipeline
     ├── mcp_server
@@ -160,6 +163,8 @@ sumd/
             ├── render
         ├── utils/
             ├── should_render
+        ├── prolog_core
+    ├── utils/
         ├── aggregates
         ├── commands
         ├── events
@@ -168,11 +173,14 @@ sumd/
         ├── queries
         ├── engine
         ├── schema
+        ├── lexer
         ├── commands
     ├── dsl/
         ├── parser
+        ├── context_mixin
         ├── shell
         ├── schema_commands
+        ├── ast_nodes
         ├── nlp
     ├── install_testql_autoloop
     ├── bootstrap
@@ -182,7 +190,6 @@ sumd/
     ├── requirements
     ├── pyproject
     ├── README
-        ├── engine
         ├── cli
     ├── sumd_logic_validator/
         ├── main
@@ -195,12 +202,6 @@ sumd/
 ### Classes
 
 - **`CodeBlockIssue`** — —
-- **`Variable`** — Represents a logical variable in our pure Python engine.
-- **`Term`** — Represents a Prolog term (e.g. parent(john, mary)).
-- **`Rule`** — Represents a Prolog rule Head :- Body.
-- **`PythonPrologDB`** — In-memory Prolog database for pure Python execution.
-- **`PythonPrologEngine`** — SLD Resolution Logic Interpreter.
-- **`HybridPrologEngine`** — Hybrid Logic Engine delegating queries based on backend availability.
 - **`SUMDParser`** — Parser for SUMD markdown documents.
 - **`SectionType`** — SUMD section types.
 - **`Section`** — Represents a SUMD section.
@@ -224,6 +225,12 @@ sumd/
 - **`ApiStubsSection`** — —
 - **`EnvironmentSection`** — —
 - **`ConfigurationSection`** — —
+- **`Variable`** — Represents a logical variable in our pure Python engine.
+- **`Term`** — Represents a Prolog term (e.g. parent(john, mary)).
+- **`Rule`** — Represents a Prolog rule Head :- Body.
+- **`PythonPrologDB`** — In-memory Prolog database for pure Python execution.
+- **`PythonPrologEngine`** — SLD Resolution Logic Interpreter.
+- **`HybridPrologEngine`** — Hybrid Logic Engine delegating queries based on backend availability.
 - **`AggregateRoot`** — Base aggregate root for event sourcing.
 - **`EntityState`** — Base entity state for aggregates.
 - **`Entity`** — Base entity for domain objects.
@@ -282,27 +289,22 @@ sumd/
 - **`NLPModel`** — NLP model configuration.
 - **`DSLContext`** — DSL execution context model.
 - **`DSLCommandResult`** — DSL command execution result.
-- **`DSLCommand`** — DSL command definition.
-- **`DSLCommandRegistry`** — Registry for DSL commands.
 - **`DSLTokenType`** — Token types for DSL parsing.
 - **`DSLToken`** — Token in DSL.
 - **`DSLLexer`** — Lexer for tokenizing DSL expressions.
-- **`DSLExpressionType`** — Types of DSL expressions.
-- **`DSLExpression`** — Expression in DSL.
+- **`DSLCommand`** — DSL command definition.
+- **`DSLCommandRegistry`** — Registry for DSL commands.
 - **`DSLParser`** — Parser for DSL expressions.
+- **`VariableMixin`** — Mixin providing set_variable / get_variable helpers.
 - **`DSLShell`** — Interactive shell for SUMD DSL.
 - **`DSLShellServer`** — Server for DSL shell operations (for MCP integration).
 - **`SchemaCommandRegistry`** — Registry for schema-based DSL commands.
 - **`SchemaBasedCommands`** — Implementation of schema-based DSL commands.
+- **`DSLExpressionType`** — Types of DSL expressions.
+- **`DSLExpression`** — Expression in DSL.
 - **`NLPProcessor`** — Natural Language Processor for DSL commands.
 - **`NLPIntegration`** — NLP integration for DSL engine.
 - **`SimpleNLPModel`** — Simple NLP model implementation for basic functionality.
-- **`Variable`** — Represents a logical variable in our pure Python engine.
-- **`Term`** — Represents a Prolog term (e.g. parent(john, mary)).
-- **`Rule`** — Represents a Prolog rule Head :- Body.
-- **`PythonPrologDB`** — In-memory Prolog database for pure Python execution.
-- **`PythonPrologEngine`** — SLD Resolution Logic Interpreter.
-- **`HybridPrologEngine`** — Hybrid Logic Engine delegating queries based on backend availability.
 
 ### Functions
 
@@ -312,6 +314,9 @@ sumd/
 - `write_file()` — —
 - `print()` — —
 - `write_file()` — —
+- `print()` — —
+- `scan()` — —
+- `validate()` — —
 - `ask(sumd_path, question, model)` — —
 - `main()` — —
 - `build_context(sumd_path)` — Return a focused context string from SUMD.md.
@@ -340,14 +345,6 @@ sumd/
 - `nlp_command(text, directory, execute, verbose)` — Process natural language text and convert to DSL commands.
 - `main()` — Main entry point — if first arg is a path, run 'scan <path> --fix'.
 - `main_sumr()` — Entry point for `sumr` command — generates SUMR.md (refactor profile).
-- `is_variable(x)` — —
-- `to_term(x)` — —
-- `unify(x, y, subst)` — Logical unification of x and y under substitution subst.
-- `resolve_val(x, subst)` — —
-- `deep_resolve(x, subst)` — —
-- `extend_subst(v, val, subst)` — —
-- `occurs_check(v, val, subst)` — —
-- `rename_variables(rule, suffix)` — Rename variables in rule to avoid collisions in resolution.
 - `extract_pyproject(proj_dir)` — —
 - `extract_taskfile(proj_dir)` — —
 - `extract_openapi(proj_dir)` — —
@@ -369,7 +366,7 @@ sumd/
 - `extract_swop(proj_dir)` — Extract SWOP manifest files from .swop/manifests/<context>/ directory.
 - `extract_project_analysis(proj_dir, refactor)` — Return list of {file, lang, content} for files present in project/ subdir.
 - `parse(content)` — Parse a SUMD markdown document.
-- `parse_file(path)` — Parse a SUMD file.
+- `parse_file(path)` — Parse a SUMD file — delegates to parse for DRY.
 - `validate(document)` — Validate a SUMD document.
 - `generate_sumd_content(proj_dir, return_sources, raw_sources, profile)` — Generate SUMD.md content from a project directory.
 - `list_tools()` — —
@@ -378,11 +375,6 @@ sumd/
 - `call_with_ctx(render_fn)` — Return a ``render`` method that calls *render_fn* with ctx attributes.
 - `always(_self, _ctx)` — Always render the section.
 - `has_attr(attr)` — Return a ``should_render`` that checks ``bool(ctx.<attr>)``.
-- `create_builtin_registry()` — Create registry with built-in commands.
-- `parse_dsl(text)` — Parse DSL text into expression.
-- `main()` — Main entry point for DSL shell.
-- `log()` — —
-- `write_if_missing()` — —
 - `is_variable(x)` — —
 - `to_term(x)` — —
 - `unify(x, y, subst)` — Logical unification of x and y under substitution subst.
@@ -391,6 +383,11 @@ sumd/
 - `extend_subst(v, val, subst)` — —
 - `occurs_check(v, val, subst)` — —
 - `rename_variables(rule, suffix)` — Rename variables in rule to avoid collisions in resolution.
+- `create_builtin_registry()` — Create registry with built-in commands.
+- `parse_dsl(text)` — Parse DSL text into expression.
+- `main()` — Main entry point for DSL shell.
+- `log()` — —
+- `write_if_missing()` — —
 - `get_engine()` — —
 - `main()` — 🧠 Hybrid Python-Prolog logic runner CLI.
 - `info()` — Display information about the available Prolog backends.
@@ -403,7 +400,7 @@ sumd/
 📄 `.pre-commit-config`
 📄 `CHANGELOG`
 📄 `Makefile`
-📄 `README`
+📄 `README` (4 functions)
 📄 `SPEC`
 📄 `TODO`
 📄 `Taskfile`
@@ -441,6 +438,7 @@ sumd/
 📄 `examples.mcp.mcp_client` (2 functions)
 📄 `examples.sumd`
 📄 `goal`
+📄 `koru`
 📄 `mcp`
 📄 `print_errors`
 📄 `project`
@@ -452,7 +450,9 @@ sumd/
 📄 `simple_script` (17 functions)
 📦 `sumd`
 📄 `sumd.__main__`
-📄 `sumd.cli` (47 functions)
+📄 `sumd.cli` (29 functions)
+📄 `sumd.cli_doql` (6 functions)
+📄 `sumd.cli_scan` (14 functions)
 📦 `sumd.cqrs`
 📄 `sumd.cqrs.aggregates` (23 functions, 6 classes)
 📄 `sumd.cqrs.commands` (8 functions, 12 classes)
@@ -460,20 +460,23 @@ sumd/
 📄 `sumd.cqrs.queries` (17 functions, 13 classes)
 📄 `sumd.cqrs.sumd_aggregate` (18 functions, 3 classes)
 📦 `sumd.dsl`
+📄 `sumd.dsl.ast_nodes` (1 functions, 2 classes)
 📄 `sumd.dsl.commands` (30 functions, 2 classes)
-📄 `sumd.dsl.engine` (38 functions, 2 classes)
+📄 `sumd.dsl.context_mixin` (2 functions, 1 classes)
+📄 `sumd.dsl.engine` (39 functions, 2 classes)
+📄 `sumd.dsl.lexer` (2 functions, 3 classes)
 📄 `sumd.dsl.nlp` (21 functions, 3 classes)
-📄 `sumd.dsl.parser` (29 functions, 6 classes)
-📄 `sumd.dsl.schema` (3 functions, 14 classes)
+📄 `sumd.dsl.parser` (36 functions, 1 classes)
+📄 `sumd.dsl.schema` (1 functions, 14 classes)
 📄 `sumd.dsl.schema_commands` (33 functions, 2 classes)
 📄 `sumd.dsl.shell` (14 functions, 2 classes)
-📄 `sumd.extractor` (45 functions)
+📄 `sumd.extractor` (63 functions)
 📄 `sumd.generator`
 📄 `sumd.mcp_server` (18 functions)
 📄 `sumd.models` (3 classes)
 📄 `sumd.parser` (9 functions, 1 classes)
 📄 `sumd.pipeline` (16 functions, 1 classes)
-📄 `sumd.prolog_engine` (32 functions, 6 classes)
+📄 `sumd.prolog_engine`
 📄 `sumd.renderer` (1 functions)
 📄 `sumd.rules`
 📦 `sumd.sections`
@@ -497,14 +500,15 @@ sumd/
 📄 `sumd.sections.utils.render` (1 functions)
 📄 `sumd.sections.utils.should_render` (2 functions)
 📄 `sumd.sections.workflows` (4 functions, 1 classes)
-📄 `sumd.toon_parser` (8 functions)
+📄 `sumd.toon_parser` (9 functions)
+📦 `sumd.utils`
+📄 `sumd.utils.prolog_core` (32 functions, 6 classes)
 📄 `sumd.validator` (16 functions, 1 classes)
 📄 `sumd_logic_validator.README`
 📄 `sumd_logic_validator.pyproject`
 📄 `sumd_logic_validator.requirements`
 📦 `sumd_logic_validator.sumd_logic_validator`
 📄 `sumd_logic_validator.sumd_logic_validator.cli` (5 functions)
-📄 `sumd_logic_validator.sumd_logic_validator.engine` (32 functions, 6 classes)
 📦 `sumd_logic_validator.sumd_logic_validator.logic`
 📄 `sumd_logic_validator.sumd_logic_validator.logic.rules`
 📄 `sumd_logic_validator.sumd_logic_validator.main`
@@ -519,7 +523,7 @@ sumd/
 ## Requirements
 
 - Python >= >=3.10
-- click >=8.3.3- pyyaml >=6.0.3- toml >=0.10.2- goal >=2.1.190- costs >=0.1.50- pfix >=0.1.72- mcp >=1.27.0
+- click >=8.4.0- pyyaml >=6.0.3- toml >=0.10.2- goal >=2.1.190- costs >=0.1.51- pfix >=0.1.73- mcp >=1.27.1
 
 ## Contributing
 

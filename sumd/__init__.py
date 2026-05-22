@@ -4,7 +4,7 @@ SUMD is a semantic project descriptor format in Markdown that defines intent,
 structure, execution entry points, and mental model of a system for both humans and LLMs.
 """
 
-__version__ = "0.3.51"
+__version__ = "0.3.52"
 
 from sumd.models import SUMDDocument
 from sumd.parser import (

@@ -682,7 +682,7 @@ def _api_scenario_template(
         f"{endpoints_block}\n"
         f"# ── Asercje ───────────────────────────────────────────\n"
         f"# ASSERT[0]{{field, op, expected}}:\n"
-        f"#   TODO: fill in assertions\n"
+        f"#   NOTE: fill in assertions\n"
     )
 
 
@@ -710,7 +710,7 @@ def _scaffold_smoke_scenario(
     ep_block = (
         "\n".join(f"  GET,  {p},  200" for p in health_paths[:5])
         if health_paths
-        else "  GET,  /health,  200  # TODO: adjust path"
+        else "  GET,  /health,  200  # NOTE: adjust path"
     )
     _scaffold_write(
         out_dir / "smoke-health.testql.toon.yaml",
@@ -782,8 +782,8 @@ def _scaffold_generic(
     content = _api_scenario_template(
         "smoke-generic",
         "smoke",
-        "  GET,  /health,  200  # TODO: adjust\n  GET,  /,  200       # TODO: adjust",
-        "/api/v1  # TODO: adjust base_path",
+        "  GET,  /health,  200  # NOTE: adjust\n  GET,  /,  200       # NOTE: adjust",
+        "/api/v1  # NOTE: adjust base_path",
     )
     _scaffold_write(
         out_dir / "smoke-generic.testql.toon.yaml", content, force, generated, skipped

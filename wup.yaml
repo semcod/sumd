@@ -1,0 +1,71 @@
+# WUP (What's Up) Configuration
+# Version: 0.2.21
+
+project:
+  name: sumd
+  description: Auto-generated config for sumd
+
+watch:
+  paths:
+    - sumd/**
+  exclude_patterns:
+    - '*.md'
+    - '*.txt'
+    - tests/**
+    - .venv/**
+    - venv/**
+    - .sumd-tools/**
+
+services: []
+
+test_strategy:
+  quick:
+    debounce_s: 2
+    max_queue: 5
+    timeout_s: 10
+  detail:
+    debounce_s: 10
+    max_queue: 1
+    timeout_s: 30
+
+testql:
+  scenario_dir: testql-scenarios
+  smoke_scenario: sumd-cli.testql.toon.yaml
+  output_format: json
+  extra_args:
+    - --timeout 10s
+  endpoint_discovery: false
+  base_url: ''
+  base_url_env: WUP_BASE_URL
+  explicit_endpoints: []
+  endpoints_by_service: {}
+
+visual_diff:
+  enabled: false
+
+web:
+  enabled: false
+
+# BEGIN WUP MONITORING MANIFEST (auto-generated — do not edit; run: wup sync-testql --write)
+monitoring:
+  generated_at: '2026-05-22T07:05:16Z'
+  generated_by: wup sync-testql --write (or wup watch startup)
+  how_to_refresh: wup sync-testql . --write
+  probe_interval_s: 60
+  health_scenario: ''
+  base_url: (set testql.base_url or WUP_BASE_URL)
+  endpoint_discovery: false
+  scenario_dir: testql-scenarios
+  service_map_globs: []
+  docker_compose_files: []
+  wup_services: {}
+  docker_not_mapped_to_wup: []
+  troubleshooting:
+    probe_failed_check:
+    - Czy kontener z sekcji docker jest uruchomiony (docker ps)?
+    - Czy host_ports mapuje na URL w live_probes (np. 8100 vs 8202)?
+    - Czy błąd dotyczy proxy frontendu (/firmware na :8100) vs bezpośredniego :8202?
+    - 'Czy endpoint jest w live_probes — jeśli nie, uruchom: wup sync-testql . --write'
+    config_vs_runtime: Pole live_probes to faktyczne żądania HTTP WUP. Jeśli endpointu
+      tu nie ma, WUP go nie sprawdza — to błąd konfiguracji, nie aplikacji.
+# END WUP MONITORING MANIFEST

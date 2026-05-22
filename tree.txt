@@ -1,0 +1,183 @@
+.
+├── app.doql.less
+├── CHANGELOG.md
+├── coverage.json
+├── deps.json
+├── examples
+│   ├── app.doql.less
+│   ├── basic
+│   │   ├── demo.sh
+│   │   ├── README.md
+│   │   └── sample-project
+│   │       ├── goal.yaml
+│   │       ├── openapi.yaml
+│   │       ├── pyproject.toml
+│   │       ├── README.md
+│   │       ├── sumd.json
+│   │       ├── SUMD.md
+│   │       └── Taskfile.yml
+│   ├── integrations
+│   │   ├── docker-compose.yml
+│   │   ├── Dockerfile
+│   │   ├── github-actions.yml
+│   │   ├── makefile
+│   │   ├── pre-commit-config.yaml
+│   │   ├── README.md
+│   │   ├── taskfile.yml
+│   │   └── vscode-tasks.json
+│   ├── llm
+│   │   ├── anthropic_example.py
+│   │   ├── context_injection.md
+│   │   ├── llm_cli_example.sh
+│   │   ├── ollama_example.sh
+│   │   ├── openai_example.py
+│   │   └── README.md
+│   ├── mcp
+│   │   ├── claude_desktop_config.json
+│   │   ├── continue_config.json
+│   │   ├── cursor_mcp.json
+│   │   ├── mcp_client.py
+│   │   └── README.md
+│   ├── README.md
+│   ├── sumd.json
+│   ├── SUMD.md
+│   ├── SUMR.md
+│   └── testql-scenarios
+├── goal.yaml
+├── koru.yaml
+├── LICENSE
+├── Makefile
+├── mcp.json
+├── print_errors.py
+├── project.sh
+├── pyproject.toml
+├── pyqual.yaml
+├── README.md
+├── regix.yaml
+├── report.html
+├── script.dsl
+├── scripts
+│   ├── bootstrap.sh
+│   └── install_testql_autoloop.sh
+├── simple_script.dsl
+├── SPEC.md
+├── sumd
+│   ├── cli_doql.py
+│   ├── cli.py
+│   ├── cli_scan.py
+│   ├── cqrs
+│   │   ├── aggregates.py
+│   │   ├── commands.py
+│   │   ├── events.py
+│   │   ├── __init__.py
+│   │   ├── queries.py
+│   │   └── sumd_aggregate.py
+│   ├── dsl
+│   │   ├── ast_nodes.py
+│   │   ├── commands.py
+│   │   ├── context_mixin.py
+│   │   ├── engine.py
+│   │   ├── __init__.py
+│   │   ├── lexer.py
+│   │   ├── nlp.py
+│   │   ├── parser_base.py
+│   │   ├── parser_expr.py
+│   │   ├── parser_primary.py
+│   │   ├── parser.py
+│   │   ├── schema_commands.py
+│   │   ├── schema.py
+│   │   └── shell.py
+│   ├── extractor.py
+│   ├── generator.py
+│   ├── __init__.py
+│   ├── __main__.py
+│   ├── mcp_server.py
+│   ├── models.py
+│   ├── parser.py
+│   ├── pipeline.py
+│   ├── prolog_engine.py
+│   ├── renderer.py
+│   ├── rules.pl
+│   ├── sections
+│   │   ├── api_stubs.py
+│   │   ├── architecture.py
+│   │   ├── base.py
+│   │   ├── call_graph.py
+│   │   ├── code_analysis.py
+│   │   ├── configuration.py
+│   │   ├── dependencies.py
+│   │   ├── deployment.py
+│   │   ├── environment.py
+│   │   ├── extras.py
+│   │   ├── __init__.py
+│   │   ├── interfaces.py
+│   │   ├── metadata.py
+│   │   ├── quality.py
+│   │   ├── refactor_analysis.py
+│   │   ├── source_snippets.py
+│   │   ├── swop.py
+│   │   ├── test_contracts.py
+│   │   ├── utils
+│   │   │   ├── __init__.py
+│   │   │   ├── render.py
+│   │   │   └── should_render.py
+│   │   └── workflows.py
+│   ├── toon_parser.py
+│   ├── utils
+│   │   ├── __init__.py
+│   │   └── prolog_core.py
+│   └── validator.py
+├── sumd_logic_validator
+│   ├── logic
+│   │   ├── __init__.py
+│   │   └── rules.pl
+│   ├── pyproject.toml
+│   ├── README.md
+│   ├── requirements.txt
+│   ├── sumd_logic_validator
+│   │   ├── cli.py
+│   │   ├── engine.py
+│   │   ├── __init__.py
+│   │   ├── logic
+│   │   │   ├── __init__.py
+│   │   │   └── rules.pl
+│   │   └── main.py
+│   └── tests
+│       ├── __init__.py
+│       └── test_engine.py
+├── SUMD.md
+├── SUMR.md
+├── swop.yaml
+├── Taskfile.guards.yml
+├── Taskfile.yml
+├── test.dsl
+├── test_gitignore.py
+├── test_ignore.py
+├── testql-scenarios
+│   ├── generated-cli-tests.testql.toon.yaml
+│   ├── generated-from-pytests.testql.toon.yaml
+│   └── sumd-cli.testql.toon.yaml
+├── test-results.json
+├── tests
+│   ├── test_architectural_logic.py
+│   ├── test_cli.py
+│   ├── test_cqrs_es.py
+│   ├── test_dogfood.py
+│   ├── test_dsl.py
+│   ├── test_extractor.py
+│   ├── test_mcp_cqrs_dsl.py
+│   ├── test_mcp_server.py
+│   ├── test_parser.py
+│   ├── test_pipeline.py
+│   ├── test_sections.py
+│   └── test_statement.py
+├── TODO.md
+├── TODO.txt
+├── tree.sh
+├── tree.txt
+├── uv.lock
+├── VERSION
+├── working_script.dsl
+└── wup.yaml
+
+22 directories, 159 files
