@@ -51,14 +51,14 @@
 - **Classes**: 3
 - **File**: `nlp.py`
 
+### sumd.mcp_server
+- **Functions**: 18
+- **File**: `mcp_server.py`
+
 ### sumd.cqrs.sumd_aggregate
 - **Functions**: 18
 - **Classes**: 3
 - **File**: `sumd_aggregate.py`
-
-### sumd.mcp_server
-- **Functions**: 18
-- **File**: `mcp_server.py`
 
 ### sumd.cqrs.queries
 - **Functions**: 17
@@ -239,20 +239,16 @@ FILE: Path to the SUMD markdown file
 > Executes query by spawning a swipl process.
 - **Calls**: list, subprocess.run, res.stdout.splitlines, set, subprocess.run, print_goals.append, str, line.strip
 
-### sumd.dsl.schema_commands.SchemaBasedCommands.execute_command
-> Execute a schema-based command.
-- **Calls**: time.time, self.registry.validate_command_call, self.registry.get_command, DSLCommandResult, DSLCommandResult, time.time, DSLCommandResult, self._execute_sumd_command
-
 ### sumd.dsl.shell.DSLShell.run
 > Run the interactive shell.
 - **Calls**: print, print, print, print, print, self._get_prompt, None.strip, line.startswith
 
+### sumd.dsl.schema_commands.SchemaBasedCommands.execute_command
+> Execute a schema-based command.
+- **Calls**: time.time, self.registry.validate_command_call, self.registry.get_command, DSLCommandResult, DSLCommandResult, time.time, DSLCommandResult, self._execute_sumd_command
+
 ### examples.llm.anthropic_example.main
 - **Calls**: argparse.ArgumentParser, parser.add_argument, parser.add_argument, parser.add_argument, parser.parse_args, Path, print, print
-
-### sumd.pipeline.RenderPipeline._assemble
-> Assemble all section lines into final markdown.
-- **Calls**: a, a, a, self._build_registered_sections, a, a, a, a
 
 ### sumd.parser.SUMDParser._parse_header
 > Parse the project header (H1).
@@ -260,6 +256,10 @@ FILE: Path to the SUMD markdown file
 Args:
     lines: List of document lines
 - **Calls**: enumerate, line.startswith, None.strip, header_content.split, None.strip, line.startswith, len, None.strip
+
+### sumd.pipeline.RenderPipeline._assemble
+> Assemble all section lines into final markdown.
+- **Calls**: a, a, a, self._build_registered_sections, a, a, a, a
 
 ## Process Flows
 
@@ -390,6 +390,11 @@ _handle_shell_command [sumd.dsl.shell.DSLShell]
 - **Methods**: 7
 - **Key Methods**: sumd.dsl.nlp.NLPIntegration.__init__, sumd.dsl.nlp.NLPIntegration.process_natural_language, sumd.dsl.nlp.NLPIntegration.get_suggestions, sumd.dsl.nlp.NLPIntegration.add_custom_intent, sumd.dsl.nlp.NLPIntegration.add_custom_entity, sumd.dsl.nlp.NLPIntegration.get_available_intents, sumd.dsl.nlp.NLPIntegration.get_intent_examples
 
+### sumd.parser.SUMDParser
+> Parser for SUMD markdown documents.
+- **Methods**: 6
+- **Key Methods**: sumd.parser.SUMDParser.__init__, sumd.parser.SUMDParser.parse, sumd.parser.SUMDParser.parse_file, sumd.parser.SUMDParser._parse_header, sumd.parser.SUMDParser._parse_sections, sumd.parser.SUMDParser.validate
+
 ### sumd.pipeline.RenderPipeline
 > Collect project data → build sections → render → inject TOC.
 
@@ -398,21 +403,16 @@ Usage:
 - **Methods**: 6
 - **Key Methods**: sumd.pipeline.RenderPipeline.__init__, sumd.pipeline.RenderPipeline._collect, sumd.pipeline.RenderPipeline._build_registered_sections, sumd.pipeline.RenderPipeline._render_legacy_sections, sumd.pipeline.RenderPipeline._assemble, sumd.pipeline.RenderPipeline.run
 
-### sumd.parser.SUMDParser
-> Parser for SUMD markdown documents.
+### sumd.utils.prolog_core.HybridPrologEngine
+> Hybrid Logic Engine delegating queries based on backend availability.
 - **Methods**: 6
-- **Key Methods**: sumd.parser.SUMDParser.__init__, sumd.parser.SUMDParser.parse, sumd.parser.SUMDParser.parse_file, sumd.parser.SUMDParser._parse_header, sumd.parser.SUMDParser._parse_sections, sumd.parser.SUMDParser.validate
+- **Key Methods**: sumd.utils.prolog_core.HybridPrologEngine.__init__, sumd.utils.prolog_core.HybridPrologEngine.query, sumd.utils.prolog_core.HybridPrologEngine._query_pyswip, sumd.utils.prolog_core.HybridPrologEngine._query_subprocess, sumd.utils.prolog_core.HybridPrologEngine._query_python, sumd.utils.prolog_core.HybridPrologEngine._swipl_executable_exists
 
 ### sumd.cqrs.aggregates.Entity
 > Base entity for domain objects.
 - **Methods**: 6
 - **Key Methods**: sumd.cqrs.aggregates.Entity.__init__, sumd.cqrs.aggregates.Entity.id, sumd.cqrs.aggregates.Entity.domain_events, sumd.cqrs.aggregates.Entity.add_domain_event, sumd.cqrs.aggregates.Entity.clear_domain_events, sumd.cqrs.aggregates.Entity.get_state
 - **Inherits**: ABC
-
-### sumd.utils.prolog_core.HybridPrologEngine
-> Hybrid Logic Engine delegating queries based on backend availability.
-- **Methods**: 6
-- **Key Methods**: sumd.utils.prolog_core.HybridPrologEngine.__init__, sumd.utils.prolog_core.HybridPrologEngine.query, sumd.utils.prolog_core.HybridPrologEngine._query_pyswip, sumd.utils.prolog_core.HybridPrologEngine._query_subprocess, sumd.utils.prolog_core.HybridPrologEngine._query_python, sumd.utils.prolog_core.HybridPrologEngine._swipl_executable_exists
 
 ### sumd.cqrs.events.EventStore
 > In-memory event store with optional file persistence.
@@ -472,6 +472,77 @@ Key functions that process and transform data:
 > Parse a single *.testql.toon.yaml file into a scenario dict.
 - **Output to**: f.read_text, content.splitlines, re.search, str, sumd.dsl.parser_base.DSLParserBase._match
 
+### sumd.parser.SUMDParser.parse
+> Parse a SUMD markdown document.
+
+Args:
+    content: The markdown content to parse
+
+Returns:
+    SUMD
+- **Output to**: SUMDDocument, content.split, self._parse_header, self._parse_sections
+
+### sumd.parser.SUMDParser.parse_file
+> Parse a SUMD file.
+
+Args:
+    path: Path to the SUMD markdown file
+
+Returns:
+    SUMDDocument: Parse
+- **Output to**: path.read_text, self.parse
+
+### sumd.parser.SUMDParser._parse_header
+> Parse the project header (H1).
+
+Args:
+    lines: List of document lines
+- **Output to**: enumerate, line.startswith, None.strip, header_content.split, None.strip
+
+### sumd.parser.SUMDParser._parse_sections
+> Parse all sections in the document.
+
+Args:
+    lines: List of document lines
+- **Output to**: line.startswith, None.strip, sections.append, None.lower, self.SECTION_MAPPING.get
+
+### sumd.parser.SUMDParser.validate
+> Validate a SUMD document against the specification.
+
+Args:
+    document: The document to validate
+
+R
+- **Output to**: errors.append, errors.append, errors.append, errors.append
+
+### sumd.parser.parse
+> Parse a SUMD markdown document.
+
+Args:
+    content: The markdown content to parse
+
+Returns:
+    SUMD
+- **Output to**: SUMDParser, parser.parse
+
+### sumd.parser.parse_file
+> Parse a SUMD file — delegates to parse for DRY.
+- **Output to**: sumd.parser.parse, path.read_text
+
+### sumd.parser.validate
+> Validate a SUMD document.
+
+Args:
+    document: The document to validate
+
+Returns:
+    List of valida
+- **Output to**: SUMDParser, parser.validate
+
+### sumd.cli_scan._render_write_validate
+> Render SUMD content, write file, validate. Returns (doc, md_issues, cb_errors, cb_warnings, sources)
+- **Output to**: None.run, sumd_path.write_text, sumd.validator.validate_sumd_file, sumd.parser.SUMDParser.parse_file, RenderPipeline
+
 ### sumd.validator._validate_yaml_body
 > Check YAML body is parseable.
 - **Output to**: yaml.safe_load
@@ -506,56 +577,6 @@ Key functions that process and transform data:
 Checks:
 - markpact annotation syntax (kind, required 
 - **Output to**: _CODEBLOCK_RE.finditer, None.strip, None.strip, None.strip, _MARKPACT_META_RE.search
-
-### sumd.validator.validate_markdown
-> Validate SUMD markdown structure.
-
-Checks:
-- H1 title present
-- Required H2 sections present (profil
-- **Output to**: content.splitlines, sumd.validator._check_empty_links, sumd.validator._check_unclosed_fences, sumd.validator._check_metadata_fields, sumd.validator._check_h1
-
-### sumd.validator.validate_project_architecture
-> Run Prolog-based architectural consistency checks on the project.
-
-Returns:
-    list[str]: list of l
-- **Output to**: sumd.extractor.generate_project_logic, rules_path.read_text, PythonPrologDB, db.parse_and_load, db.parse_and_load
-
-### sumd.validator.validate_sumd_file
-> Run all validators on a SUMD.md file.
-
-Returns:
-    {
-      "source": str,
-      "markdown": list[st
-- **Output to**: path.read_text, sumd.validator.validate_markdown, sumd.validator.validate_codeblocks, None.parent.resolve, sumd.validator.validate_project_architecture
-
-### sumd.cli_scan._render_write_validate
-> Render SUMD content, write file, validate. Returns (doc, md_issues, cb_errors, cb_warnings, sources)
-- **Output to**: None.run, sumd_path.write_text, sumd.validator.validate_sumd_file, sumd.parser.SUMDParser.parse_file, RenderPipeline
-
-### sumd.cli.validate
-> Validate a SUMD document.
-
-FILE: Path to the SUMD markdown file
-- **Output to**: cli.command, click.argument, sumd.parser.SUMDParser.parse_file, SUMDParser, parser.validate
-
-### sumd.cli._run_code2llm_formats
-> Run code2llm for each format. Returns True if all succeeded.
-- **Output to**: code2llm.exists, subprocess.run, click.echo, click.echo, str
-
-### sumd.cli._run_tool_subprocess
-> Run a single analysis tool subprocess. Returns True on success.
-- **Output to**: subprocess.run, click.echo, exe.exists, click.echo, str
-
-### sumd.extractor._parse_openapi_endpoints
-> Extract endpoint dicts from the paths section of an OpenAPI spec.
-- **Output to**: set, paths.items, methods.items, seen.add, endpoints.append
-
-### sumd.extractor._parse_doql_entities
-> Parse entity blocks from DOQL content.
-- **Output to**: re.finditer, dict, m.group, entities.append, re.findall
 
 ## Behavioral Patterns
 
@@ -620,19 +641,19 @@ Functions exposed as public API (no underscore prefix):
 - `examples.llm.openai_example.main` - 15 calls
 - `sumd.validator.validate_project_architecture` - 15 calls
 - `sumd.extractor.extract_package_json` - 15 calls
-- `sumd.dsl.schema_commands.SchemaBasedCommands.execute_command` - 15 calls
 - `sumd.dsl.shell.DSLShell.run` - 15 calls
+- `sumd.dsl.schema_commands.SchemaBasedCommands.execute_command` - 15 calls
 - `examples.llm.anthropic_example.main` - 14 calls
-- `sumd.sections.metadata.MetadataSection.render` - 14 calls
 - `sumd.mcp_server.list_tools` - 14 calls
+- `sumd.sections.metadata.MetadataSection.render` - 14 calls
 - `sumd_logic_validator.sumd_logic_validator.cli.query` - 14 calls
 - `sumd.cli.validate` - 13 calls
 - `sumd.cli.extract` - 13 calls
 - `sumd.extractor.extract_openapi` - 13 calls
 - `sumd.extractor.extract_env` - 13 calls
 - `sumd.utils.prolog_core.unify` - 13 calls
-- `sumd.toon_parser.extract_testql_scenarios` - 12 calls
 - `examples.mcp.mcp_client.main` - 12 calls
+- `sumd.toon_parser.extract_testql_scenarios` - 12 calls
 
 ## System Interactions
 

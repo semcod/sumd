@@ -295,36 +295,25 @@ class DSLEngine:
             raise ValueError(f"Unknown arithmetic operator: {operator}")
         return op_fn(left, right)
     
+    async def _execute_pipeline_stage(self, child: DSLExpression, previous_result: Any, context: DSLContext) -> Any:
+        """Execute a single pipeline stage given the previous result."""
+        if child.type == DSLExpressionType.IDENTIFIER:
+            func_name = child.value
+            if func_name in self.built_in_functions:
+                return await self._call_function(self.built_in_functions[func_name], [previous_result], context)
+            if func_name in context.functions:
+                return await self._call_function(context.functions[func_name], [previous_result], context)
+            return func_name
+        return await self._execute_expression(child, context)
+
     async def _execute_pipeline(self, expression: DSLExpression, context: DSLContext) -> Any:
         """Execute pipeline expression."""
         result = None
-        
         for i, child in enumerate(expression.children):
             if i == 0:
-                # First stage: execute normally
                 result = await self._execute_expression(child, context)
             else:
-                # Subsequent stages: treat as function call with previous result
-                if child.type == DSLExpressionType.IDENTIFIER:
-                    # Treat identifier as function call
-                    func_name = child.value
-                    
-                    # Check built-in functions
-                    if func_name in self.built_in_functions:
-                        func = self.built_in_functions[func_name]
-                        result = await self._call_function(func, [result], context)
-                    # Check context functions
-                    elif func_name in context.functions:
-                        func = context.functions[func_name]
-                        result = await self._call_function(func, [result], context)
-                    else:
-                        # Not a function, just return the identifier
-                        result = func_name
-                else:
-                    # Execute other expression types normally
-                    result = await self._execute_expression(child, context)
-            
-            # Set the result as a special variable for the next stage
+                result = await self._execute_pipeline_stage(child, result, context)
             context.set_variable("_", result)
         
         return result

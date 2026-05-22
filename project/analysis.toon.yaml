@@ -1,4 +1,4 @@
-# code2llm | 75f 16706L | python:65,shell:6,perl:4 | 2026-05-21
+# code2llm | 75f 16710L | python:65,shell:6,perl:4 | 2026-05-22
 # CC̄=3.7 | critical:0/542 | dups:0 | cycles:0
 
 HEALTH[0]: ok
@@ -8,13 +8,13 @@ REFACTOR[0]: none needed
 PIPELINES[307]:
   [1] Src [main]: main → ask → parse_file
       PURITY: 100% pure
-  [2] Src [main]: main → ask → build_context → parse_file
+  [2] Src [main]: main → run
       PURITY: 100% pure
-  [3] Src [main]: main → run
+  [3] Src [main]: main → ask → build_context → parse_file
       PURITY: 100% pure
-  [4] Src [_validate_yaml_body]: _validate_yaml_body
+  [4] Src [parse]: parse
       PURITY: 100% pure
-  [5] Src [_validate_less_css_body]: _validate_less_css_body
+  [5] Src [_parse_header]: _parse_header
       PURITY: 100% pure
 
 LAYERS:
@@ -41,7 +41,7 @@ LAYERS:
   │ prolog_core                432L  6C   32m  CC=14     ←0
   │ queries                    419L  13C   17m  CC=10     ←0
   │ cli_scan                   392L  0C   14m  CC=10     ←1
-  │ validator                  383L  1C   16m  CC=9      ←5
+  │ validator                  386L  1C   16m  CC=11     ←5
   │ shell                      359L  2C   14m  CC=14     ←0
   │ schema                     345L  14C    1m  CC=1      ←0
   │ sumd_aggregate             344L  3C   18m  CC=6      ←0
@@ -103,7 +103,7 @@ LAYERS:
   │ bootstrap.sh                69L  0C    0m  CC=0.0    ←0
   │
   project/                        CC̄=0.0    ←in:0  →out:0
-  │ !! logic.pl                  1193L  0C    0m  CC=0.0    ←0
+  │ !! logic.pl                  1194L  0C    0m  CC=0.0    ←0
   │
 
 COUPLING:

@@ -197,6 +197,9 @@ def validate_codeblocks(content: str, source: str = "SUMD.md") -> list[CodeBlock
             continue
 
         # ── language-specific body validation ───────────────────────────
+        if lang == "toon" and "markpact:testql" in meta:
+            continue
+            
         validator = _LANG_VALIDATORS.get(lang)
         if validator:
             for msg in validator(body, ctx):

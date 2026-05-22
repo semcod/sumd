@@ -1,5 +1,5 @@
-# sumd | 94f 17173L | python:85,shell:7,less:2 | 2026-05-21
-# stats: 313 func | 163 cls | 94 mod | CC̄=4.3 | critical:14 | cycles:0
+# sumd | 94f 17206L | python:85,shell:7,less:2 | 2026-05-22
+# stats: 314 func | 163 cls | 94 mod | CC̄=4.3 | critical:15 | cycles:0
 # alerts[5]: CC scan=14; CC _split_body_terms=14; CC to_term=13; CC run=11; CC main=11
 # hotspots[5]: cqrs_command fan=19; scan fan=18; scaffold fan=18; generate fan=15; to_term fan=15
 # evolution: baseline
@@ -75,7 +75,7 @@ M[94]:
   sumd/toon_parser.py,177
   sumd/utils/__init__.py,2
   sumd/utils/prolog_core.py,433
-  sumd/validator.py,384
+  sumd/validator.py,387
   sumd_logic_validator/logic/__init__.py,2
   sumd_logic_validator/sumd_logic_validator/__init__.py,4
   sumd_logic_validator/sumd_logic_validator/cli.py,115
@@ -87,7 +87,7 @@ M[94]:
   test_gitignore.py,1
   test_ignore.py,1
   tests/test_architectural_logic.py,167
-  tests/test_cli.py,348
+  tests/test_cli.py,378
   tests/test_cqrs_es.py,389
   tests/test_dogfood.py,148
   tests/test_dsl.py,470
@@ -613,7 +613,7 @@ D:
     test_architectural_validation_missing_automation(tmp_path)
     test_architectural_validation_missing_gate(tmp_path)
   tests/test_cli.py:
-    e: sumd_file,TestValidateCommand,TestInfoCommand,TestExportCommand,TestCliVersion,TestCliHelp,TestProjectDetection,TestNodeSpecFromPackageJson,TestGenerateDoqlLess
+    e: sumd_file,test_python_m_sumd_works,TestValidateCommand,TestInfoCommand,TestExportCommand,TestCliVersion,TestCliHelp,TestProjectDetection,TestNodeSpecFromPackageJson,TestGenerateDoqlLess
     TestValidateCommand: test_valid_file_exits_zero(1),test_valid_file_prints_ok(1),test_missing_file_exits_nonzero(1)
     TestInfoCommand: test_info_runs(1)
     TestExportCommand: test_export_json(1),test_export_to_output_file(2),test_export_markdown(1)
@@ -623,6 +623,7 @@ D:
     TestNodeSpecFromPackageJson: test_framework_detection(2),test_spec_uses_real_scripts_and_extras(0),test_spec_falls_back_without_scripts(0)  # Node DOQL spec must mirror real package.json (scripts + fram
     TestGenerateDoqlLess: _pkg(1),test_fresh_generation_for_node_uses_real_scripts(1),test_force_regenerates_autogen_file_without_duplicating(1),test_force_preserves_user_authored_file(1),test_no_force_skips_existing(1)  # Refresh behaviour for app.doql.less generation.
     sumd_file(tmp_path)
+    test_python_m_sumd_works()
   tests/test_cqrs_es.py:
     e: TestEventStore,TestSumdAggregate,TestCommandBus,TestQueryBus,TestEventSourcedRepository,TestIntegration
     TestEventStore: test_save_and_get_events(0),test_persistence(0),test_get_events_from_version(0)  # Test EventStore functionality.

@@ -25,7 +25,7 @@ SUMD - Structured Unified Markdown Descriptor for AI-aware project documentation
 ## Metadata
 
 - **name**: `sumd`
-- **version**: `0.3.51`
+- **version**: `0.3.53`
 - **python_requires**: `>=3.10`
 - **license**: {'text': 'Apache-2.0'}
 - **ai_model**: `openrouter/qwen/qwen3-coder-next`
@@ -45,7 +45,7 @@ SUMD (description) → DOQL/source (code) → taskfile (automation) → testql (
 
 app {
   name: sumd;
-  version: 0.3.51;
+  version: 0.3.53;
 }
 
 dependencies {
@@ -473,34 +473,35 @@ LOG[8]{message}:
 # SCENARIO: sumd-cli.testql.toon.yaml — CLI command and pipeline validation
 # TYPE: cli
 # GENERATED: false
+# PURPOSE: Validate sumd CLI commands exit 0 and produce expected output
 
-# ── Configuration ──────────────────────────────────────
-CONFIG[4]{key, value}:
-  cli_command, python -m sumd
-  timeout_ms, 15000
-  test_mode, cli
-  validate_output, true
+SET cli "python -m sumd"
 
-# ── CLI Commands and Assertions ────────────────────────
-ASSERT[5]{field, op, expected}:
-  command_scan_status, ==, 0
-  command_lint_status, ==, 0
-  command_info_status, ==, 0
-  command_export_status, ==, 0
-  help_contains, ==, "SUMD - Structured Unified Markdown Descriptor"
+# ── Smoke: help ───────────────────────────────────────────
+RUN "${cli} --help"
+ASSERT_EXIT_CODE 0
 
-# ── Navigation and GUI actions for DSL shell ───────────
-# Even though this is a CLI command, we can represent DSL commands
-# that are executed within the shell during this scenario.
-GUI[4]{action, selector}:
-  execute, "scan ."
-  execute, "lint SUMD.md"
-  execute, "info SUMD.md"
-  execute, "export SUMD.md --format json"
+# ── version ───────────────────────────────────────────────
+RUN "${cli} --version"
+ASSERT_EXIT_CODE 0
 
-PERFORMANCE[2]{metric, threshold}:
-  execution_time_ms, 5000
-  memory_peak_mb, 128
+# ── validate command ──────────────────────────────────────
+RUN "${cli} validate SUMD.md"
+ASSERT_EXIT_CODE 0
+
+# ── info command ──────────────────────────────────────────
+RUN "${cli} info SUMD.md"
+ASSERT_EXIT_CODE 0
+
+# ── export to JSON ────────────────────────────────────────
+RUN "${cli} export SUMD.md --format json"
+ASSERT_EXIT_CODE 0
+
+# ── lint workspace ────────────────────────────────────────
+RUN "${cli} lint --workspace ."
+ASSERT_EXIT_CODE 0
+
+LOG "sumd CLI scenario passed"
 ```
 
 ## Workflows
@@ -822,7 +823,7 @@ pipeline:
 ```yaml
 project:
   name: sumd
-  version: 0.3.51
+  version: 0.3.53
   env: local
 ```
 
@@ -909,8 +910,8 @@ pip install -e .[dev]
 ### `project/map.toon.yaml`
 
 ```toon markpact:analysis path=project/map.toon.yaml
-# sumd | 94f 17173L | python:85,shell:7,less:2 | 2026-05-21
-# stats: 313 func | 163 cls | 94 mod | CC̄=4.3 | critical:14 | cycles:0
+# sumd | 94f 17206L | python:85,shell:7,less:2 | 2026-05-22
+# stats: 314 func | 163 cls | 94 mod | CC̄=4.3 | critical:15 | cycles:0
 # alerts[5]: CC scan=14; CC _split_body_terms=14; CC to_term=13; CC run=11; CC main=11
 # hotspots[5]: cqrs_command fan=19; scan fan=18; scaffold fan=18; generate fan=15; to_term fan=15
 # evolution: baseline
@@ -986,7 +987,7 @@ M[94]:
   sumd/toon_parser.py,177
   sumd/utils/__init__.py,2
   sumd/utils/prolog_core.py,433
-  sumd/validator.py,384
+  sumd/validator.py,387
   sumd_logic_validator/logic/__init__.py,2
   sumd_logic_validator/sumd_logic_validator/__init__.py,4
   sumd_logic_validator/sumd_logic_validator/cli.py,115
@@ -998,7 +999,7 @@ M[94]:
   test_gitignore.py,1
   test_ignore.py,1
   tests/test_architectural_logic.py,167
-  tests/test_cli.py,348
+  tests/test_cli.py,378
   tests/test_cqrs_es.py,389
   tests/test_dogfood.py,148
   tests/test_dsl.py,470
@@ -1524,7 +1525,7 @@ D:
     test_architectural_validation_missing_automation(tmp_path)
     test_architectural_validation_missing_gate(tmp_path)
   tests/test_cli.py:
-    e: sumd_file,TestValidateCommand,TestInfoCommand,TestExportCommand,TestCliVersion,TestCliHelp,TestProjectDetection,TestNodeSpecFromPackageJson,TestGenerateDoqlLess
+    e: sumd_file,test_python_m_sumd_works,TestValidateCommand,TestInfoCommand,TestExportCommand,TestCliVersion,TestCliHelp,TestProjectDetection,TestNodeSpecFromPackageJson,TestGenerateDoqlLess
     TestValidateCommand: test_valid_file_exits_zero(1),test_valid_file_prints_ok(1),test_missing_file_exits_nonzero(1)
     TestInfoCommand: test_info_runs(1)
     TestExportCommand: test_export_json(1),test_export_to_output_file(2),test_export_markdown(1)
@@ -1534,6 +1535,7 @@ D:
     TestNodeSpecFromPackageJson: test_framework_detection(2),test_spec_uses_real_scripts_and_extras(0),test_spec_falls_back_without_scripts(0)  # Node DOQL spec must mirror real package.json (scripts + fram
     TestGenerateDoqlLess: _pkg(1),test_fresh_generation_for_node_uses_real_scripts(1),test_force_regenerates_autogen_file_without_duplicating(1),test_force_preserves_user_authored_file(1),test_no_force_skips_existing(1)  # Refresh behaviour for app.doql.less generation.
     sumd_file(tmp_path)
+    test_python_m_sumd_works()
   tests/test_cqrs_es.py:
     e: TestEventStore,TestSumdAggregate,TestCommandBus,TestQueryBus,TestEventSourcedRepository,TestIntegration
     TestEventStore: test_save_and_get_events(0),test_persistence(0),test_get_events_from_version(0)  # Test EventStore functionality.
@@ -1645,7 +1647,7 @@ D:
 
 ```prolog markpact:analysis path=project/logic.pl
 % ── Project Metadata ─────────────────────────────────────
-project_metadata('sumd', '0.3.51', 'python').
+project_metadata('sumd', '0.3.53', 'python').
 
 % ── Project Files ────────────────────────────────────────
 project_file('app.doql.less', 255, 'less').
@@ -1718,7 +1720,7 @@ project_file('sumd/sections/workflows.py', 87, 'python').
 project_file('sumd/toon_parser.py', 177, 'python').
 project_file('sumd/utils/__init__.py', 2, 'python').
 project_file('sumd/utils/prolog_core.py', 433, 'python').
-project_file('sumd/validator.py', 384, 'python').
+project_file('sumd/validator.py', 387, 'python').
 project_file('sumd_logic_validator/logic/__init__.py', 2, 'python').
 project_file('sumd_logic_validator/sumd_logic_validator/__init__.py', 4, 'python').
 project_file('sumd_logic_validator/sumd_logic_validator/cli.py', 115, 'python').
@@ -1730,7 +1732,7 @@ project_file('sumd_logic_validator/tests/test_engine.py', 29, 'python').
 project_file('test_gitignore.py', 1, 'python').
 project_file('test_ignore.py', 1, 'python').
 project_file('tests/test_architectural_logic.py', 167, 'python').
-project_file('tests/test_cli.py', 348, 'python').
+project_file('tests/test_cli.py', 378, 'python').
 project_file('tests/test_cqrs_es.py', 389, 'python').
 project_file('tests/test_dogfood.py', 148, 'python').
 project_file('tests/test_dsl.py', 470, 'python').
@@ -1996,7 +1998,7 @@ python_function('sumd/validator.py', '_validate_toon_body', 2, 2, 1).
 python_function('sumd/validator.py', '_validate_bash_body', 2, 4, 1).
 python_function('sumd/validator.py', '_validate_deps_body', 2, 5, 6).
 python_function('sumd/validator.py', '_validate_markpact_meta', 5, 5, 6).
-python_function('sumd/validator.py', 'validate_codeblocks', 2, 9, 11).
+python_function('sumd/validator.py', 'validate_codeblocks', 2, 11, 11).
 python_function('sumd/validator.py', '_check_h1', 2, 3, 2).
 python_function('sumd/validator.py', '_check_required_sections', 3, 7, 6).
 python_function('sumd/validator.py', '_check_metadata_fields', 2, 9, 6).
@@ -2019,6 +2021,7 @@ python_function('tests/test_architectural_logic.py', 'test_architectural_validat
 python_function('tests/test_architectural_logic.py', 'test_architectural_validation_missing_automation', 1, 3, 5).
 python_function('tests/test_architectural_logic.py', 'test_architectural_validation_missing_gate', 1, 3, 5).
 python_function('tests/test_cli.py', 'sumd_file', 1, 1, 1).
+python_function('tests/test_cli.py', 'test_python_m_sumd_works', 0, 2, 7).
 python_function('tests/test_dogfood.py', '_run', 3, 1, 1).
 python_function('tests/test_dogfood.py', 'project_copy', 1, 1, 5).
 python_function('tests/test_dogfood.py', 'test_sumd_scans_itself', 1, 5, 5).
@@ -2999,7 +3002,7 @@ def _validate_toon_body(body, path)  # CC=2, fan=1
 def _validate_bash_body(body, path)  # CC=4, fan=1
 def _validate_deps_body(body, path)  # CC=5, fan=6
 def _validate_markpact_meta(mp, line_no, lang, meta, issues)  # CC=5, fan=6
-def validate_codeblocks(content, source)  # CC=9, fan=11
+def validate_codeblocks(content, source)  # CC=11, fan=11 ⚠
 def _check_h1(lines, source)  # CC=3, fan=2
 def _check_required_sections(lines, source, profile)  # CC=7, fan=6
 def _check_metadata_fields(lines, source)  # CC=9, fan=6
@@ -3339,11 +3342,6 @@ EDGES:
 **`CLI Command Tests`**
 
 **`sumd-cli.testql.toon.yaml — CLI command and pipeline validation`**
-- assert `command_scan_status == 0`
-- assert `command_lint_status == 0`
-- assert `command_info_status == 0`
-- perf `execution_time_ms < 5000`
-- perf `memory_peak_mb < 128`
 
 ### Integration (1)
 

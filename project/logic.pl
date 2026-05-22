@@ -1,5 +1,5 @@
 % ── Project Metadata ─────────────────────────────────────
-project_metadata('sumd', '0.3.51', 'python').
+project_metadata('sumd', '0.3.53', 'python').
 
 % ── Project Files ────────────────────────────────────────
 project_file('app.doql.less', 255, 'less').
@@ -72,7 +72,7 @@ project_file('sumd/sections/workflows.py', 87, 'python').
 project_file('sumd/toon_parser.py', 177, 'python').
 project_file('sumd/utils/__init__.py', 2, 'python').
 project_file('sumd/utils/prolog_core.py', 433, 'python').
-project_file('sumd/validator.py', 384, 'python').
+project_file('sumd/validator.py', 387, 'python').
 project_file('sumd_logic_validator/logic/__init__.py', 2, 'python').
 project_file('sumd_logic_validator/sumd_logic_validator/__init__.py', 4, 'python').
 project_file('sumd_logic_validator/sumd_logic_validator/cli.py', 115, 'python').
@@ -84,7 +84,7 @@ project_file('sumd_logic_validator/tests/test_engine.py', 29, 'python').
 project_file('test_gitignore.py', 1, 'python').
 project_file('test_ignore.py', 1, 'python').
 project_file('tests/test_architectural_logic.py', 167, 'python').
-project_file('tests/test_cli.py', 348, 'python').
+project_file('tests/test_cli.py', 378, 'python').
 project_file('tests/test_cqrs_es.py', 389, 'python').
 project_file('tests/test_dogfood.py', 148, 'python').
 project_file('tests/test_dsl.py', 470, 'python').
@@ -350,7 +350,7 @@ python_function('sumd/validator.py', '_validate_toon_body', 2, 2, 1).
 python_function('sumd/validator.py', '_validate_bash_body', 2, 4, 1).
 python_function('sumd/validator.py', '_validate_deps_body', 2, 5, 6).
 python_function('sumd/validator.py', '_validate_markpact_meta', 5, 5, 6).
-python_function('sumd/validator.py', 'validate_codeblocks', 2, 9, 11).
+python_function('sumd/validator.py', 'validate_codeblocks', 2, 11, 11).
 python_function('sumd/validator.py', '_check_h1', 2, 3, 2).
 python_function('sumd/validator.py', '_check_required_sections', 3, 7, 6).
 python_function('sumd/validator.py', '_check_metadata_fields', 2, 9, 6).
@@ -373,6 +373,7 @@ python_function('tests/test_architectural_logic.py', 'test_architectural_validat
 python_function('tests/test_architectural_logic.py', 'test_architectural_validation_missing_automation', 1, 3, 5).
 python_function('tests/test_architectural_logic.py', 'test_architectural_validation_missing_gate', 1, 3, 5).
 python_function('tests/test_cli.py', 'sumd_file', 1, 1, 1).
+python_function('tests/test_cli.py', 'test_python_m_sumd_works', 0, 2, 7).
 python_function('tests/test_dogfood.py', '_run', 3, 1, 1).
 python_function('tests/test_dogfood.py', 'project_copy', 1, 1, 5).
 python_function('tests/test_dogfood.py', 'test_sumd_scans_itself', 1, 5, 5).

@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.54] - 2026-05-22
+
+### Docs
+- Update README.md
+- Update SUMD.md
+- Update project/README.md
+- Update project/context.md
+
+### Test
+- Update testql-scenarios/sumd-cli.testql.toon.yaml
+
+### Other
+- Update .redeployignore
+- Update app.doql.less
+- Update project/analysis.toon.yaml
+- Update project/logic.pl
+- Update project/map.toon.yaml
+- Update sumd/dsl/engine.py
+- Update sumd/validator.py
+- Update sumd_logic_validator/sumd_logic_validator/__init__.py
+- Update wup.yaml
+
 ## [0.3.53] - 2026-05-22
 
 ### Docs

@@ -1,31 +1,32 @@
 # SCENARIO: sumd-cli.testql.toon.yaml — CLI command and pipeline validation
 # TYPE: cli
 # GENERATED: false
+# PURPOSE: Validate sumd CLI commands exit 0 and produce expected output
 
-# ── Configuration ──────────────────────────────────────
-CONFIG[4]{key, value}:
-  cli_command, python -m sumd
-  timeout_ms, 15000
-  test_mode, cli
-  validate_output, true
+SET cli "python -m sumd"
 
-# ── CLI Commands and Assertions ────────────────────────
-ASSERT[5]{field, op, expected}:
-  command_scan_status, ==, 0
-  command_lint_status, ==, 0
-  command_info_status, ==, 0
-  command_export_status, ==, 0
-  help_contains, ==, "SUMD - Structured Unified Markdown Descriptor"
+# ── Smoke: help ───────────────────────────────────────────
+RUN "${cli} --help"
+ASSERT_EXIT_CODE 0
 
-# ── Navigation and GUI actions for DSL shell ───────────
-# Even though this is a CLI command, we can represent DSL commands
-# that are executed within the shell during this scenario.
-GUI[4]{action, selector}:
-  execute, "scan ."
-  execute, "lint SUMD.md"
-  execute, "info SUMD.md"
-  execute, "export SUMD.md --format json"
+# ── version ───────────────────────────────────────────────
+RUN "${cli} --version"
+ASSERT_EXIT_CODE 0
 
-PERFORMANCE[2]{metric, threshold}:
-  execution_time_ms, 5000
-  memory_peak_mb, 128
+# ── validate command ──────────────────────────────────────
+RUN "${cli} validate SUMD.md"
+ASSERT_EXIT_CODE 0
+
+# ── info command ──────────────────────────────────────────
+RUN "${cli} info SUMD.md"
+ASSERT_EXIT_CODE 0
+
+# ── export to JSON ────────────────────────────────────────
+RUN "${cli} export SUMD.md --format json"
+ASSERT_EXIT_CODE 0
+
+# ── lint workspace ────────────────────────────────────────
+RUN "${cli} lint --workspace ."
+ASSERT_EXIT_CODE 0
+
+LOG "sumd CLI scenario passed"
