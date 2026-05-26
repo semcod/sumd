@@ -7,6 +7,14 @@ from pathlib import Path
 from typing import Any
 
 
+def _process_config_kv(line: str, config: dict[str, str]) -> None:
+    """Process a single config key-value line."""
+    if m := re.match(r"^\s{2}([a-z_]+),\s*(.+)$", line):
+        k, v = m.group(1), m.group(2).strip()
+        if not k.startswith("detected") and "${" not in v:
+            config[k] = v
+
+
 def _parse_toon_block_config(lines: list[str]) -> dict[str, str]:
     """Extract CONFIG key-value pairs from toon file lines."""
     config: dict[str, str] = {}
@@ -18,10 +26,8 @@ def _parse_toon_block_config(lines: list[str]) -> dict[str, str]:
         if in_block:
             if re.match(r"^[A-Z_]+\[\d+\]", line) or line.startswith("#"):
                 in_block = False
-            elif m := re.match(r"^\s{2}([a-z_]+),\s*(.+)$", line):
-                k, v = m.group(1), m.group(2).strip()
-                if not k.startswith("detected") and "${" not in v:
-                    config[k] = v
+            else:
+                _process_config_kv(line, config)
     return config
 
 

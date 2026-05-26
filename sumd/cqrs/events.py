@@ -5,7 +5,7 @@ from __future__ import annotations
 import dataclasses
 import json
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 from dataclasses import dataclass, field
@@ -17,7 +17,7 @@ class Event:
     event_id: str = field(default_factory=lambda: str(uuid.uuid4()))
     aggregate_id: str = ""
     event_type: str = ""
-    timestamp: datetime = field(default_factory=datetime.utcnow)
+    timestamp: datetime = field(default_factory=lambda: datetime.now(tz=timezone.utc))
     version: int = 1
     data: Dict[str, Any] = field(default_factory=dict)
     
@@ -93,26 +93,30 @@ class EventStore:
         with open(event_file, "a", encoding="utf-8") as f:
             f.write(json.dumps(event.to_dict()) + "\n")
     
+    def _parse_event_line(self, line: str) -> Optional[Event]:
+        """Parse a single JSONL line into an Event; return None on error."""
+        line = line.strip()
+        if not line:
+            return None
+        try:
+            return Event.from_dict(json.loads(line))
+        except Exception:
+            return None
+
     def _load_events(self) -> None:
         """Load events from file storage."""
         if not self._storage_path or not self._storage_path.exists():
             return
-        
+
         for event_file in self._storage_path.glob("*.jsonl"):
             aggregate_id = event_file.stem
-            self._events[aggregate_id] = []
-            
             try:
-                with open(event_file, "r", encoding="utf-8") as f:
-                    for line in f:
-                        line = line.strip()
-                        if line:
-                            event_data = json.loads(line)
-                            event = Event.from_dict(event_data)
-                            self._events[aggregate_id].append(event)
+                lines = event_file.read_text(encoding="utf-8").splitlines()
             except Exception:
-                # Skip corrupted files
                 continue
+            self._events[aggregate_id] = [
+                ev for line in lines if (ev := self._parse_event_line(line)) is not None
+            ]
 
 
 # SUMD-specific events

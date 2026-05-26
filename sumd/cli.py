@@ -155,6 +155,20 @@ def info(file: Path):
         sys.exit(1)
 
 
+def _parse_structured_data(content: str, format_type: str) -> dict:
+    """Parse structured data string based on format type."""
+    if format_type == "json":
+        import json
+        return json.loads(content)
+    if format_type == "yaml":
+        import yaml
+        return yaml.safe_load(content)
+    if format_type == "toml":
+        import toml
+        return toml.loads(content)
+    return {}
+
+
 @cli.command()
 @click.argument("file", type=click.Path(exists=True, path_type=Path))
 @click.option(
@@ -171,20 +185,7 @@ def generate(file: Path, format: str, output: Optional[Path]):
     """
     try:
         content = file.read_text(encoding="utf-8")
-        data = {}
-
-        if format == "json":
-            import json
-
-            data = json.loads(content)
-        elif format == "yaml":
-            import yaml
-
-            data = yaml.safe_load(content)
-        elif format == "toml":
-            import toml
-
-            data = toml.loads(content)
+        data = _parse_structured_data(content, format)
 
         # Generate SUMD markdown
         lines = []
@@ -243,6 +244,46 @@ def extract(file: Path, section: str):
 # .NET, Swift, Dart/Flutter, Elixir, Haskell, Clojure, C/C++ and generic
 # tool-driven repos (Taskfile, Makefile, Dockerfile, docker-compose, …).
 # Glob patterns for project markers (extensions that vary per project).
+def _collect_project_dirs(workspace: Path, workspace_mode: bool, effective_depth: Optional[int]) -> list[Path]:
+    """Determine the list of project directories to scan."""
+    if workspace_mode:
+        return [workspace] if _is_project_dir(workspace) else []
+    project_dirs = _detect_projects(workspace, max_depth=effective_depth)
+    if _is_project_dir(workspace):
+        project_dirs.insert(0, workspace)
+    return project_dirs
+
+
+def _scan_projects_loop(
+    project_dirs: list[Path],
+    fix: bool,
+    raw: bool,
+    export_json: bool,
+    analyze: bool,
+    tool_list: list[str],
+    parser_inst,
+    profile: str,
+    generate_doql: bool,
+    doql_sync: bool,
+    generate_testql: bool,
+) -> tuple[int, int, int, dict]:
+    """Execute scan over multiple projects and accumulate results."""
+    results = {}
+    ok_count = skip_count = fail_count = 0
+    for proj_dir in project_dirs:
+        result = _scan_one_project(
+            proj_dir, fix, raw, export_json, analyze, tool_list, parser_inst, profile, generate_doql, doql_sync, generate_testql
+        )
+        results[proj_dir.name] = result
+        if result["status"] == "SKIP":
+            skip_count += 1
+        elif result["status"] == "OK":
+            ok_count += 1
+        else:
+            fail_count += 1
+    return ok_count, skip_count, fail_count, results
+
+
 @cli.command("scan")
 @click.argument("workspace", type=click.Path(exists=True, path_type=Path), default=".")
 @click.option(
@@ -349,25 +390,13 @@ def scan(
     """
     workspace = workspace.resolve()
     parser_inst = SUMDParser()
-    results: dict = {}
-    total = ok_count = skip_count = fail_count = 0
     tool_list = [t.strip() for t in tools.split(",") if t.strip()]
 
     # Default non-recursive: only immediate children (max_depth=0).
     # --recursive or --depth overrides this default.
     effective_depth = depth if depth is not None else (None if recursive else 0)
 
-    if workspace_mode:
-        # Treat workspace root as a single project; do not scan subdirectories.
-        if _is_project_dir(workspace):
-            project_dirs = [workspace]
-        else:
-            project_dirs = []
-    else:
-        project_dirs = _detect_projects(workspace, max_depth=effective_depth)
-        # If workspace itself looks like a project root, include it.
-        if _is_project_dir(workspace):
-            project_dirs.insert(0, workspace)
+    project_dirs = _collect_project_dirs(workspace, workspace_mode, effective_depth)
 
     if not project_dirs:
         click.echo(
@@ -382,22 +411,13 @@ def scan(
     click.echo(f"{'Project':<20} {'Status':<10} {'Sections':<10} {'Sources'}")
     click.echo("─" * 70)
 
-    for proj_dir in project_dirs:
-        total += 1
-        result = _scan_one_project(
-            proj_dir, fix, raw, export_json, analyze, tool_list, parser_inst, profile, generate_doql, doql_sync, generate_testql
-        )
-        results[proj_dir.name] = result
-        if result["status"] == "SKIP":
-            skip_count += 1
-        elif result["status"] == "OK":
-            ok_count += 1
-        else:
-            fail_count += 1
+    ok_count, skip_count, fail_count, results = _scan_projects_loop(
+        project_dirs, fix, raw, export_json, analyze, tool_list, parser_inst, profile, generate_doql, doql_sync, generate_testql
+    )
 
     click.echo("─" * 70)
     click.echo(
-        f"\n📊 Summary: {total} projects | ✅ {ok_count} ok | ⏭ {skip_count} skipped | ❌ {fail_count} failed\n"
+        f"\n📊 Summary: {len(project_dirs)} projects | ✅ {ok_count} ok | ⏭ {skip_count} skipped | ❌ {fail_count} failed\n"
     )
 
     if report:
@@ -790,6 +810,45 @@ def _scaffold_generic(
     )
 
 
+def _scaffold_openapi_flow(
+    openapi_path: Path, out_dir: Path, scenario_type: str, force: bool, generated: list[str], skipped: list[str]
+) -> None:
+    """Parse openapi.yaml and generate scaffolded scenarios."""
+    import yaml as _yaml
+    click.echo(f"📖 Reading {openapi_path.name}...")
+    try:
+        spec = _yaml.safe_load(openapi_path.read_text(encoding="utf-8"))
+    except Exception as e:
+        click.echo(f"❌ Failed to parse openapi.yaml: {e}", err=True)
+        sys.exit(1)
+    n_paths = _scaffold_from_openapi(
+        spec, out_dir, scenario_type, force, generated, skipped
+    )
+    groups_count = len(
+        {
+            (path.strip("/").split("/")[0] or "root")
+            for path in spec.get("paths", {})
+        }
+    )
+    click.echo(f"   📋 {n_paths} paths → {groups_count} resource groups")
+
+
+def _print_scaffold_summary(generated: list[str], skipped: list[str], out_dir: Path) -> None:
+    """Print the final summary of scaffolded files."""
+    click.echo(
+        f"\n📊 scaffold: {len(generated)} generated | {len(skipped)} skipped (use --force to overwrite)"
+    )
+    for f in generated:
+        click.echo(f"   ✅ {out_dir / f}")
+    for f in skipped:
+        click.echo(f"   ⏭  {out_dir / f} (already exists)")
+    if generated:
+        click.echo("\n💡 Next steps:")
+        click.echo("   1. Fill in ASSERTs in generated files")
+        click.echo("   2. Run: sumd scan . --fix   (to embed scenarios in SUMD.md)")
+        click.echo(f"   3. Run: testql run {out_dir}/")
+
+
 @cli.command()
 @click.argument("project", type=click.Path(exists=True, path_type=Path))
 @click.option(
@@ -821,8 +880,6 @@ def scaffold(project: Path, output: Optional[Path], force: bool, scenario_type: 
 
     PROJECT: Path to the project directory
     """
-    import yaml as _yaml
-
     project = project.resolve()
     out_dir = (output or (project / "testql-scenarios")).resolve()
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -831,37 +888,10 @@ def scaffold(project: Path, output: Optional[Path], force: bool, scenario_type: 
 
     openapi_path = project / "openapi.yaml"
     if openapi_path.exists():
-        click.echo(f"📖 Reading {openapi_path.name}...")
-        try:
-            spec = _yaml.safe_load(openapi_path.read_text(encoding="utf-8"))
-        except Exception as e:
-            click.echo(f"❌ Failed to parse openapi.yaml: {e}", err=True)
-            sys.exit(1)
-        n_paths = _scaffold_from_openapi(
-            spec, out_dir, scenario_type, force, generated, skipped
-        )
-        groups_count = len(
-            {
-                (path.strip("/").split("/")[0] or "root")
-                for path in spec.get("paths", {})
-            }
-        )
-        click.echo(f"   📋 {n_paths} paths → {groups_count} resource groups")
+        _scaffold_openapi_flow(openapi_path, out_dir, scenario_type, force, generated, skipped)
     else:
         _scaffold_generic(out_dir, force, generated, skipped)
-
-    click.echo(
-        f"\n📊 scaffold: {len(generated)} generated | {len(skipped)} skipped (use --force to overwrite)"
-    )
-    for f in generated:
-        click.echo(f"   ✅ {out_dir / f}")
-    for f in skipped:
-        click.echo(f"   ⏭  {out_dir / f} (already exists)")
-    if generated:
-        click.echo("\n💡 Next steps:")
-        click.echo("   1. Fill in ASSERTs in generated files")
-        click.echo("   2. Run: sumd scan . --fix   (to embed scenarios in SUMD.md)")
-        click.echo(f"   3. Run: testql run {out_dir}/")
+    _print_scaffold_summary(generated, skipped, out_dir)
 
 
 @cli.command(name="map")
@@ -914,6 +944,52 @@ def map_cmd(project: Path, output: Optional[Path], force: bool, stdout: bool):
     click.echo("\n💡 Next: sumd scan . --fix  (to embed map in SUMD.md)")
 
 
+async def _execute_dsl_command(shell, command: str) -> None:
+    """Execute a single DSL command and print the result."""
+    result = await shell.execute_command(command)
+    if result is not None:
+        if isinstance(result, (list, dict)):
+            click.echo(json.dumps(result, indent=2))
+        else:
+            click.echo(result)
+
+
+def _should_run_interactive(interactive: bool, command: Optional[str], script: Optional[Path]) -> bool:
+    """Determine if the interactive shell should be started."""
+    if interactive:
+        return True
+    if command:
+        return False
+    if script:
+        return False
+    return True
+
+
+async def _run_dsl_async(
+    directory: Path,
+    command: Optional[str],
+    script: Optional[Path],
+    interactive: bool,
+) -> None:
+    """Async implementation of the 'dsl' command."""
+    from sumd.dsl.shell import DSLShell
+
+    shell = DSLShell(working_directory=directory)
+    try:
+        if command:
+            await _execute_dsl_command(shell, command)
+        elif script:
+            await shell.execute_script(script)
+        
+        if _should_run_interactive(interactive, command, script):
+            await shell.run()
+    except KeyboardInterrupt:
+        click.echo("\nInterrupted.")
+    except Exception as e:
+        click.echo(f"Error: {e}", err=True)
+        sys.exit(1)
+
+
 @cli.command()
 @click.option(
     "--directory",
@@ -941,10 +1017,10 @@ def map_cmd(project: Path, output: Optional[Path], force: bool, stdout: bool):
 )
 def dsl(directory: Path, command: Optional[str], script: Optional[Path], interactive: bool):
     """SUMD DSL Shell - Domain Specific Language for SUMD operations.
-    
+
     Provides an interactive shell and scripting interface for SUMD operations
     with CQRS ES architecture support.
-    
+
     Examples:
         sumd dsl                           # Start interactive shell
         sumd dsl -c "scan('.')"            # Execute single command
@@ -952,37 +1028,7 @@ def dsl(directory: Path, command: Optional[str], script: Optional[Path], interac
         sumd dsl -d /path/to/project       # Set working directory
     """
     import asyncio
-    from sumd.dsl.shell import DSLShell
-    
-    async def run_dsl():
-        shell = DSLShell(working_directory=directory)
-        
-        try:
-            if command:
-                # Execute single command
-                result = await shell.execute_command(command)
-                if result is not None:
-                    if isinstance(result, (list, dict)):
-                        click.echo(json.dumps(result, indent=2))
-                    else:
-                        click.echo(result)
-            
-            elif script:
-                # Execute script
-                await shell.execute_script(script)
-            
-            if interactive or not (command or script):
-                # Run interactive shell
-                await shell.run()
-        
-        except KeyboardInterrupt:
-            click.echo("\nInterrupted.")
-        except Exception as e:
-            click.echo(f"Error: {e}", err=True)
-            sys.exit(1)
-    
-    # Run async function
-    asyncio.run(run_dsl())
+    asyncio.run(_run_dsl_async(directory, command, script, interactive))
 
 
 @cli.command("cqrs")
@@ -1075,6 +1121,60 @@ def cqrs_command(directory: Path, command_type: str, aggregate_id: str, data: Op
     asyncio.run(run_command())
 
 
+async def _execute_nlp_result(engine, result: dict, context, verbose: bool) -> None:
+    """Execute the DSL command resulting from NLP analysis."""
+    if verbose:
+        click.echo("⚡ Executing generated DSL command...")
+    exec_result = await engine.execute_text(result['dsl_command'], context)
+    if exec_result.success:
+        click.echo("✅ Command executed successfully!")
+        if exec_result.result:
+            click.echo(f"   Result: {exec_result.result}")
+    else:
+        click.echo(f"❌ Command execution failed: {exec_result.error}", err=True)
+        sys.exit(1)
+
+
+async def _run_nlp_async(
+    text: str, directory: Path, execute: bool, verbose: bool
+) -> None:
+    """Async implementation of the 'nlp' command."""
+    from .dsl.engine import DSLEngine, DSLContext
+    from .dsl.schema import DEFAULT_PROJECT_SCHEMA
+
+    try:
+        engine = DSLEngine(project_schema=DEFAULT_PROJECT_SCHEMA)
+        context = DSLContext(directory)
+
+        if verbose:
+            click.echo(f'🤖 Processing: "{text}"')
+            click.echo(f"📁 Directory: {directory}")
+            click.echo()
+
+        nlp_result = await engine.process_natural_language(text)
+
+        if not nlp_result.success:
+            click.echo(f"❌ NLP processing failed: {nlp_result.error}", err=True)
+            sys.exit(1)
+
+        result = nlp_result.result
+        click.echo("🧠 NLP Analysis:")
+        click.echo(f"   Original: \"{result['original_text']}\"")
+        click.echo(f"   Intent: {result['intent']}")
+        click.echo(f"   Entities: {result['entities']}")
+        click.echo(f"   Generated DSL: {result['dsl_command']}")
+        click.echo()
+
+        if execute:
+            await _execute_nlp_result(engine, result, context, verbose)
+        else:
+            click.echo('💡 To execute this command, use:')
+            click.echo(f'   sumd nlp "{text}" --execute')
+    except Exception as e:
+        click.echo(f"❌ Error: {e}", err=True)
+        sys.exit(1)
+
+
 @cli.command("nlp")
 @click.argument("text", type=str)
 @click.option(
@@ -1096,60 +1196,7 @@ def cqrs_command(directory: Path, command_type: str, aggregate_id: str, data: Op
 def nlp_command(text: str, directory: Path, execute: bool, verbose: bool):
     """Process natural language text and convert to DSL commands."""
     import asyncio
-    from .dsl.engine import DSLEngine, DSLContext
-    from .dsl.schema import DEFAULT_PROJECT_SCHEMA
-    
-    async def run_nlp():
-        try:
-            # Initialize DSL engine with NLP
-            engine = DSLEngine(project_schema=DEFAULT_PROJECT_SCHEMA)
-            context = DSLContext(directory)
-            
-            if verbose:
-                click.echo(f"🤖 Processing: \"{text}\"")
-                click.echo(f"📁 Directory: {directory}")
-                click.echo()
-            
-            # Process natural language
-            nlp_result = await engine.process_natural_language(text)
-            
-            if not nlp_result.success:
-                click.echo(f"❌ NLP processing failed: {nlp_result.error}", err=True)
-                sys.exit(1)
-            
-            result = nlp_result.result
-            
-            # Display results
-            click.echo("🧠 NLP Analysis:")
-            click.echo(f"   Original: \"{result['original_text']}\"")
-            click.echo(f"   Intent: {result['intent']}")
-            click.echo(f"   Entities: {result['entities']}")
-            click.echo(f"   Generated DSL: {result['dsl_command']}")
-            click.echo()
-            
-            if execute:
-                if verbose:
-                    click.echo("⚡ Executing generated DSL command...")
-                
-                # Execute the generated DSL command
-                exec_result = await engine.execute_text(result['dsl_command'], context)
-                
-                if exec_result.success:
-                    click.echo("✅ Command executed successfully!")
-                    if exec_result.result:
-                        click.echo(f"   Result: {exec_result.result}")
-                else:
-                    click.echo(f"❌ Command execution failed: {exec_result.error}", err=True)
-                    sys.exit(1)
-            else:
-                click.echo(f"💡 To execute this command, use:")
-                click.echo(f"   sumd nlp \"{text}\" --execute")
-        
-        except Exception as e:
-            click.echo(f"❌ Error: {e}", err=True)
-            sys.exit(1)
-    
-    asyncio.run(run_nlp())
+    asyncio.run(_run_nlp_async(text, directory, execute, verbose))
 
 
 def main():

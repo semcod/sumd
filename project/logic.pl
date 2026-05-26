@@ -1,5 +1,5 @@
 % ── Project Metadata ─────────────────────────────────────
-project_metadata('sumd', '0.3.53', 'python').
+project_metadata('sumd', '0.3.54', 'python').
 
 % ── Project Files ────────────────────────────────────────
 project_file('app.doql.less', 255, 'less').
@@ -29,7 +29,7 @@ project_file('sumd/dsl/__init__.py', 15, 'python').
 project_file('sumd/dsl/ast_nodes.py', 55, 'python').
 project_file('sumd/dsl/commands.py', 650, 'python').
 project_file('sumd/dsl/context_mixin.py', 18, 'python').
-project_file('sumd/dsl/engine.py', 538, 'python').
+project_file('sumd/dsl/engine.py', 527, 'python').
 project_file('sumd/dsl/lexer.py', 133, 'python').
 project_file('sumd/dsl/nlp.py', 448, 'python').
 project_file('sumd/dsl/parser.py', 172, 'python').
@@ -573,7 +573,8 @@ python_method('DSLEngine', '_execute_property_access', 2, 5, 5).
 python_method('DSLEngine', '_execute_comparison', 2, 4, 8).
 python_method('DSLEngine', '_execute_logical', 2, 9, 3).
 python_method('DSLEngine', '_execute_arithmetic', 2, 5, 5).
-python_method('DSLEngine', '_execute_pipeline', 2, 6, 4).
+python_method('DSLEngine', '_execute_pipeline_stage', 3, 4, 2).
+python_method('DSLEngine', '_execute_pipeline', 2, 3, 4).
 python_method('DSLEngine', '_execute_list', 2, 2, 2).
 python_method('DSLEngine', '_execute_dict', 2, 2, 3).
 python_method('DSLEngine', '_execute_block', 2, 2, 1).

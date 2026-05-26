@@ -6,7 +6,7 @@ flowchart TD
     sumd__cli_doql["sumd.cli_doql<br/>6 funcs"]
     sumd__cli_scan["sumd.cli_scan<br/>14 funcs"]
     sumd__cqrs["sumd.cqrs<br/>74 funcs"]
-    sumd__dsl["sumd.dsl<br/>179 funcs"]
+    sumd__dsl["sumd.dsl<br/>180 funcs"]
     sumd__extractor["sumd.extractor<br/>63 funcs"]
     sumd__mcp_server["sumd.mcp_server<br/>18 funcs"]
     sumd__parser["sumd.parser<br/>9 funcs"]
@@ -20,18 +20,15 @@ flowchart TD
     examples__llm ==>|11| test
     sumd__mcp_server ==>|6| sumd__parser
     sumd__toon_parser ==>|4| sumd__dsl
-    sumd__cli ==>|4| sumd__parser
-    sumd__cli ==>|4| sumd__cli_scan
     sumd__cqrs ==>|4| sumd__parser
     sumd__cqrs ==>|4| sumd__extractor
+    sumd__cli ==>|4| sumd__parser
+    sumd__cli ==>|4| sumd__cli_scan
     sumd__dsl -->|3| sumd__parser
     examples__llm -->|2| sumd__parser
     sumd__cli_scan -->|2| sumd__cli_doql
     sumd__cli_scan -->|2| sumd__extractor
     sumd__cqrs -->|2| sumd__validator
-    sumd__validator -->|1| sumd__extractor
-    sumd__cli -->|1| sumd__validator
-    sumd__cli -->|1| sumd__extractor
     sumd__extractor -->|1| sumd__toon_parser
     sumd__cli_scan -->|1| sumd__validator
     sumd__cli_scan -->|1| sumd__parser
@@ -39,3 +36,6 @@ flowchart TD
     sumd__pipeline -->|1| sumd__toon_parser
     sumd__dsl -->|1| sumd__extractor
     sumd__dsl -->|1| sumd__validator
+    sumd__validator -->|1| sumd__extractor
+    sumd__cli -->|1| sumd__validator
+    sumd__cli -->|1| sumd__extractor

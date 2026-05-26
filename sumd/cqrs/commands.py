@@ -5,8 +5,8 @@ from __future__ import annotations
 import uuid
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional
-from datetime import datetime
+from datetime import datetime, timezone
+from typing import Any, Callable, Dict, List, Optional
 
 from .events import Event, EventStore
 
@@ -17,7 +17,7 @@ class Command:
     command_id: str = field(default_factory=lambda: str(uuid.uuid4()))
     command_type: str = ""
     aggregate_id: str = ""
-    timestamp: datetime = field(default_factory=datetime.utcnow)
+    timestamp: datetime = field(default_factory=lambda: datetime.now(tz=timezone.utc))
     data: Dict[str, Any] = field(default_factory=dict)
     metadata: Dict[str, Any] = field(default_factory=dict)
 
@@ -158,108 +158,89 @@ class ExecuteDslCommand(Command):
 
 # SUMD Command Handlers
 class SumdCommandHandler(CommandHandler):
-    """Base handler for SUMD commands."""
-    
-    def __init__(self, event_store: EventStore):
+    """Handler for SUMD commands using a dispatch table."""
+
+    def __init__(self, event_store: EventStore) -> None:
         self._event_store = event_store
-    
-    def can_handle(self, command_type: str) -> bool:
-        """Check if this handler can handle SUMD commands."""
-        sumd_commands = {
-            "create_sumd_document",
-            "update_sumd_document", 
-            "add_sumd_section",
-            "remove_sumd_section",
-            "validate_sumd_document",
-            "scan_project",
-            "generate_map",
-            "execute_dsl_command",
+        self._dispatch: Dict[str, Callable[[Command], List[Event]]] = {
+            "create_sumd_document": self._handle_create_sumd_document,
+            "update_sumd_document": self._handle_update_sumd_document,
+            "add_sumd_section": self._handle_add_sumd_section,
+            "remove_sumd_section": self._handle_remove_sumd_section,
+            "validate_sumd_document": self._handle_validate_sumd_document,
+            "scan_project": self._handle_generic,
+            "generate_map": self._handle_generic,
+            "execute_dsl_command": self._handle_generic,
         }
-        return command_type in sumd_commands
-    
+
+    def can_handle(self, command_type: str) -> bool:
+        return command_type in self._dispatch
+
     async def handle(self, command: Command) -> List[Event]:
-        """Handle SUMD commands."""
-        from .events import (
-            SumdDocumentCreated,
-            SumdDocumentUpdated,
-            SumdSectionAdded,
-            SumdSectionRemoved,
-            SumdDocumentValidated,
-            SumdCommandExecuted,
+        """Dispatch to specific handler, then append execution audit event."""
+        from .events import SumdCommandExecuted
+
+        fn = self._dispatch.get(command.command_type)
+        events: List[Event] = []
+        if fn is not None:
+            events = await fn(command)
+
+        events.append(
+            SumdCommandExecuted(
+                aggregate_id=command.aggregate_id,
+                data={
+                    "command": command.command_type,
+                    "args": command.data,
+                    "result": "success",
+                    "duration_ms": 0,
+                },
+            )
         )
-        
-        events = []
-        
-        if command.command_type == "create_sumd_document":
-            event = SumdDocumentCreated(
-                aggregate_id=command.aggregate_id,
-                data=command.data,
-            )
-            events.append(event)
-        
-        elif command.command_type == "update_sumd_document":
-            event = SumdDocumentUpdated(
-                aggregate_id=command.aggregate_id,
-                data=command.data,
-            )
-            events.append(event)
-        
-        elif command.command_type == "add_sumd_section":
-            event = SumdSectionAdded(
-                aggregate_id=command.aggregate_id,
-                data=command.data,
-            )
-            events.append(event)
-        
-        elif command.command_type == "remove_sumd_section":
-            event = SumdSectionRemoved(
-                aggregate_id=command.aggregate_id,
-                data=command.data,
-            )
-            events.append(event)
-        
-        elif command.command_type == "validate_sumd_document":
-            # Actually validate the document
-            from ..parser import validate_sumd_file
-            file_path = command.data.get("file_path")
-            
-            try:
-                result = validate_sumd_file(file_path, profile=command.data.get("profile", "rich"))
-                validation_result = "valid" if result["ok"] else "invalid"
-                errors = [str(e) for e in result.get("markdown", []) + result.get("codeblocks", [])]
-                
-                event = SumdDocumentValidated(
-                    aggregate_id=command.aggregate_id,
-                    data={
-                        "file_path": file_path,
-                        "validation_result": validation_result,
-                        "errors": errors,
-                        "warnings": [],
-                    },
-                )
-                events.append(event)
-            except Exception as e:
-                event = SumdDocumentValidated(
-                    aggregate_id=command.aggregate_id,
-                    data={
-                        "file_path": file_path,
-                        "validation_result": "error",
-                        "errors": [str(e)],
-                        "warnings": [],
-                    },
-                )
-                events.append(event)
-        
-        # Add command execution event for all commands
-        exec_event = SumdCommandExecuted(
-            aggregate_id=command.aggregate_id,
-            data={
-                "command": command.command_type,
-                "args": command.data,
-                "result": "success",
-                "duration_ms": 0,  # TODO: implement timing
-            },
-        )
-        events.append(exec_event)
-        
         return events
+
+    # --- individual command handlers ---
+
+    async def _handle_create_sumd_document(self, command: Command) -> List[Event]:
+        from .events import SumdDocumentCreated
+        return [SumdDocumentCreated(aggregate_id=command.aggregate_id, data=command.data)]
+
+    async def _handle_update_sumd_document(self, command: Command) -> List[Event]:
+        from .events import SumdDocumentUpdated
+        return [SumdDocumentUpdated(aggregate_id=command.aggregate_id, data=command.data)]
+
+    async def _handle_add_sumd_section(self, command: Command) -> List[Event]:
+        from .events import SumdSectionAdded
+        return [SumdSectionAdded(aggregate_id=command.aggregate_id, data=command.data)]
+
+    async def _handle_remove_sumd_section(self, command: Command) -> List[Event]:
+        from .events import SumdSectionRemoved
+        return [SumdSectionRemoved(aggregate_id=command.aggregate_id, data=command.data)]
+
+    async def _handle_validate_sumd_document(self, command: Command) -> List[Event]:
+        from ..parser import validate_sumd_file
+        from .events import SumdDocumentValidated
+
+        file_path = command.data.get("file_path")
+        try:
+            result = validate_sumd_file(file_path, profile=command.data.get("profile", "rich"))
+            validation_result = "valid" if result["ok"] else "invalid"
+            errors = [str(e) for e in result.get("markdown", []) + result.get("codeblocks", [])]
+        except Exception as exc:
+            validation_result = "error"
+            errors = [str(exc)]
+
+        return [
+            SumdDocumentValidated(
+                aggregate_id=command.aggregate_id,
+                data={
+                    "file_path": file_path,
+                    "validation_result": validation_result,
+                    "errors": errors,
+                    "warnings": [],
+                },
+            )
+        ]
+
+    async def _handle_generic(self, command: Command) -> List[Event]:
+        """Placeholder for commands that emit no domain events."""
+        return []

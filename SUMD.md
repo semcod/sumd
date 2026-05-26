@@ -25,7 +25,7 @@ SUMD - Structured Unified Markdown Descriptor for AI-aware project documentation
 ## Metadata
 
 - **name**: `sumd`
-- **version**: `0.3.53`
+- **version**: `0.3.54`
 - **python_requires**: `>=3.10`
 - **license**: {'text': 'Apache-2.0'}
 - **ai_model**: `openrouter/qwen/qwen3-coder-next`
@@ -45,7 +45,7 @@ SUMD (description) → DOQL/source (code) → taskfile (automation) → testql (
 
 app {
   name: sumd;
-  version: 0.3.53;
+  version: 0.3.54;
 }
 
 dependencies {
@@ -823,7 +823,7 @@ pipeline:
 ```yaml
 project:
   name: sumd
-  version: 0.3.53
+  version: 0.3.54
   env: local
 ```
 
@@ -910,7 +910,7 @@ pip install -e .[dev]
 ### `project/map.toon.yaml`
 
 ```toon markpact:analysis path=project/map.toon.yaml
-# sumd | 94f 17206L | python:85,shell:7,less:2 | 2026-05-22
+# sumd | 94f 17195L | python:85,shell:7,less:2 | 2026-05-22
 # stats: 314 func | 163 cls | 94 mod | CC̄=4.3 | critical:15 | cycles:0
 # alerts[5]: CC scan=14; CC _split_body_terms=14; CC to_term=13; CC run=11; CC main=11
 # hotspots[5]: cqrs_command fan=19; scan fan=18; scaffold fan=18; generate fan=15; to_term fan=15
@@ -944,7 +944,7 @@ M[94]:
   sumd/dsl/ast_nodes.py,55
   sumd/dsl/commands.py,650
   sumd/dsl/context_mixin.py,18
-  sumd/dsl/engine.py,538
+  sumd/dsl/engine.py,527
   sumd/dsl/lexer.py,133
   sumd/dsl/nlp.py,448
   sumd/dsl/parser.py,172
@@ -1174,7 +1174,7 @@ D:
   sumd/dsl/engine.py:
     e: DSLContext,DSLEngine
     DSLContext: __init__(1),register_function(2),get_function(1)  # Execution context for DSL expressions.
-    DSLEngine: __init__(3),execute(2),execute_text(2),_is_natural_language(1),process_natural_language(1),get_suggestions(1),_build_dispatch_table(0),_execute_expression(2),_execute_assignment(2),_resolve_schema_call(3),_evaluate_args(2),_execute_command(2),_execute_function_call(2),_execute_property_access(2),_execute_comparison(2),_execute_logical(2),_execute_arithmetic(2),_execute_pipeline(2),_execute_list(2),_execute_dict(2),_execute_block(2),_execute_sumd_command(3),_call_function(3),_initialize_builtin_functions(0),_builtin_print(2),_builtin_len(2),_builtin_str(2),_builtin_int(2),_builtin_float(2),_builtin_bool(2),_builtin_type(2),_builtin_write_file(3),_builtin_list_files(2),_builtin_cwd(1),_builtin_cd(2),_builtin_help(1)  # Engine for executing DSL expressions.
+    DSLEngine: __init__(3),execute(2),execute_text(2),_is_natural_language(1),process_natural_language(1),get_suggestions(1),_build_dispatch_table(0),_execute_expression(2),_execute_assignment(2),_resolve_schema_call(3),_evaluate_args(2),_execute_command(2),_execute_function_call(2),_execute_property_access(2),_execute_comparison(2),_execute_logical(2),_execute_arithmetic(2),_execute_pipeline_stage(3),_execute_pipeline(2),_execute_list(2),_execute_dict(2),_execute_block(2),_execute_sumd_command(3),_call_function(3),_initialize_builtin_functions(0),_builtin_print(2),_builtin_len(2),_builtin_str(2),_builtin_int(2),_builtin_float(2),_builtin_bool(2),_builtin_type(2),_builtin_write_file(3),_builtin_list_files(2),_builtin_cwd(1),_builtin_cd(2),_builtin_help(1)  # Engine for executing DSL expressions.
   sumd/dsl/lexer.py:
     e: DSLTokenType,DSLToken,DSLLexer
     DSLTokenType:  # Token types for DSL parsing.
@@ -1647,7 +1647,7 @@ D:
 
 ```prolog markpact:analysis path=project/logic.pl
 % ── Project Metadata ─────────────────────────────────────
-project_metadata('sumd', '0.3.53', 'python').
+project_metadata('sumd', '0.3.54', 'python').
 
 % ── Project Files ────────────────────────────────────────
 project_file('app.doql.less', 255, 'less').
@@ -1677,7 +1677,7 @@ project_file('sumd/dsl/__init__.py', 15, 'python').
 project_file('sumd/dsl/ast_nodes.py', 55, 'python').
 project_file('sumd/dsl/commands.py', 650, 'python').
 project_file('sumd/dsl/context_mixin.py', 18, 'python').
-project_file('sumd/dsl/engine.py', 538, 'python').
+project_file('sumd/dsl/engine.py', 527, 'python').
 project_file('sumd/dsl/lexer.py', 133, 'python').
 project_file('sumd/dsl/nlp.py', 448, 'python').
 project_file('sumd/dsl/parser.py', 172, 'python').
@@ -2221,7 +2221,8 @@ python_method('DSLEngine', '_execute_property_access', 2, 5, 5).
 python_method('DSLEngine', '_execute_comparison', 2, 4, 8).
 python_method('DSLEngine', '_execute_logical', 2, 9, 3).
 python_method('DSLEngine', '_execute_arithmetic', 2, 5, 5).
-python_method('DSLEngine', '_execute_pipeline', 2, 6, 4).
+python_method('DSLEngine', '_execute_pipeline_stage', 3, 4, 2).
+python_method('DSLEngine', '_execute_pipeline', 2, 3, 4).
 python_method('DSLEngine', '_execute_list', 2, 2, 2).
 python_method('DSLEngine', '_execute_dict', 2, 2, 3).
 python_method('DSLEngine', '_execute_block', 2, 2, 1).
@@ -3016,7 +3017,7 @@ class CodeBlockIssue:
 
 ## Call Graph
 
-*234 nodes · 224 edges · 33 modules · CC̄=3.6*
+*234 nodes · 224 edges · 33 modules · CC̄=3.7*
 
 ### Hubs (by degree)
 
@@ -3029,13 +3030,13 @@ class CodeBlockIssue:
 | `_collect` *(in sumd.pipeline.RenderPipeline)* | 3 | 0 | 31 | **31** |
 | `_render_call_graph` *(in sumd.sections.call_graph)* | 7 | 0 | 28 | **28** |
 | `generate_map_toon` *(in sumd.extractor)* | 5 | 3 | 24 | **27** |
-| `_handle_shell_command` *(in sumd.dsl.shell.DSLShell)* | 14 ⚠ | 0 | 24 | **24** |
+| `generate_project_logic` *(in sumd.extractor)* | 2 | 2 | 22 | **24** |
 
 ```toon markpact:analysis path=project/calls.toon.yaml
 # code2llm call graph | /home/tom/github/oqlos/sumd
-# generated in 0.12s
+# generated in 0.11s
 # nodes: 234 | edges: 224 | modules: 33
-# CC̄=3.6
+# CC̄=3.7
 
 HUBS[20]:
   test.print
@@ -3052,32 +3053,32 @@ HUBS[20]:
     CC=7  in:0  out:28  total:28
   sumd.extractor.generate_map_toon
     CC=5  in:3  out:24  total:27
-  sumd.dsl.shell.DSLShell._handle_shell_command
-    CC=14  in:0  out:24  total:24
   sumd.extractor.generate_project_logic
     CC=2  in:2  out:22  total:24
-  sumd.parser.SUMDParser.parse_file
-    CC=1  in:20  out:2  total:22
+  sumd.dsl.shell.DSLShell._handle_shell_command
+    CC=14  in:0  out:24  total:24
   sumd.extractor.extract_pyproject
     CC=3  in:5  out:17  total:22
   sumd.sections.quality._render_quality_parsed
     CC=9  in:1  out:21  total:22
+  sumd.parser.SUMDParser.parse_file
+    CC=1  in:20  out:2  total:22
   sumd.cli.lint
     CC=6  in:0  out:21  total:21
+  sumd.cli.map_cmd
+    CC=7  in:0  out:20  total:20
+  sumd.extractor._parse_doql_content
+    CC=6  in:1  out:19  total:20
+  sumd.sections.interfaces._render_interfaces_openapi
+    CC=6  in:1  out:19  total:20
   sumd.sections.dependencies._render_deps_runtime
     CC=6  in:1  out:19  total:20
   sumd.cli.analyze
     CC=7  in:0  out:20  total:20
-  sumd.sections.interfaces._render_interfaces_openapi
-    CC=6  in:1  out:19  total:20
-  sumd.extractor._parse_doql_content
-    CC=6  in:1  out:19  total:20
-  sumd.cli.map_cmd
-    CC=7  in:0  out:20  total:20
   sumd.extractor.extract_package_json
     CC=3  in:4  out:15  total:19
-  sumd.extractor._parse_doql_workflows
-    CC=7  in:1  out:18  total:19
+  sumd.extractor._extract_doql_workflows
+    CC=5  in:1  out:18  total:19
 
 MODULES:
   examples.llm.anthropic_example  [2 funcs]
@@ -3269,7 +3270,7 @@ MODULES:
     _check_required_sections  CC=7  out:6
     _check_unclosed_fences  CC=4  out:2
     _validate_markpact_meta  CC=5  out:9
-    validate_codeblocks  CC=9  out:17
+    validate_codeblocks  CC=11  out:17
     validate_markdown  CC=1  out:6
     validate_project_architecture  CC=8  out:15
     validate_sumd_file  CC=4  out:8
@@ -3298,39 +3299,39 @@ EDGES:
   sumd.toon_parser._parse_toon_file → sumd.toon_parser._parse_toon_block_performance
   sumd.toon_parser._parse_toon_file → sumd.toon_parser._parse_toon_block_navigate
   sumd.toon_parser.extract_testql_scenarios → sumd.toon_parser._parse_toon_file
-  sumd.validator.validate_codeblocks → sumd.validator._validate_markpact_meta
-  sumd.validator.validate_markdown → sumd.validator._check_empty_links
-  sumd.validator.validate_markdown → sumd.validator._check_unclosed_fences
-  sumd.validator.validate_markdown → sumd.validator._check_metadata_fields
-  sumd.validator.validate_markdown → sumd.validator._check_h1
-  sumd.validator.validate_markdown → sumd.validator._check_required_sections
-  sumd.validator.validate_project_architecture → sumd.extractor.generate_project_logic
-  sumd.validator.validate_sumd_file → sumd.validator.validate_markdown
-  sumd.validator.validate_sumd_file → sumd.validator.validate_codeblocks
-  sumd.validator.validate_sumd_file → sumd.validator.validate_project_architecture
-  sumd.cli.validate → sumd.parser.SUMDParser.parse_file
-  sumd.cli.export → sumd.parser.SUMDParser.parse_file
-  sumd.cli.info → sumd.parser.SUMDParser.parse_file
-  sumd.cli.extract → sumd.parser.SUMDParser.parse_file
-  sumd.cli.lint → sumd.cli._lint_collect_paths
-  sumd.cli.lint → sumd.validator.validate_sumd_file
-  sumd.cli._lint_print_result → sumd.cli._lint_classify_issues
-  sumd.cli._run_analyze_tool → sumd.cli._run_code2llm_formats
-  sumd.cli._run_analyze_tool → sumd.cli._run_tool_subprocess
-  sumd.cli.analyze → sumd.cli._setup_tools_venv
-  sumd.cli._scaffold_smoke_scenario → sumd.cli._scaffold_write
-  sumd.cli._scaffold_smoke_scenario → sumd.cli._api_scenario_template
-  sumd.cli._scaffold_crud_scenarios → sumd.cli._scaffold_write
-  sumd.cli._scaffold_crud_scenarios → sumd.cli._api_scenario_template
-  sumd.cli._scaffold_from_openapi → sumd.cli._scaffold_smoke_scenario
-  sumd.cli._scaffold_from_openapi → sumd.cli._scaffold_crud_scenarios
-  sumd.cli._scaffold_generic → sumd.cli._api_scenario_template
-  sumd.cli._scaffold_generic → sumd.cli._scaffold_write
-  sumd.cli.map_cmd → sumd.extractor.generate_map_toon
-  sumd.cli.main → sumd.cli.cli
-  sumd.cli.main_sumr → sumd.cli.cli
   sumd.extractor.extract_pyproject → sumd.extractor._read_toml
   sumd.extractor.extract_taskfile → sumd.extractor._first_task_cmd
+  sumd.extractor._parse_doql_content → sumd.extractor._parse_doql_interfaces
+  sumd.extractor._parse_doql_content → sumd.extractor._parse_doql_entities
+  sumd.extractor._parse_doql_content → sumd.extractor._parse_doql_workflows
+  sumd.extractor.extract_doql → sumd.extractor._parse_doql_content
+  sumd.extractor.extract_dockerfile → sumd.extractor._parse_dockerfile_line
+  sumd.extractor._analyse_py_top_funcs → sumd.extractor._fan_out
+  sumd.extractor._analyse_py_top_funcs → sumd.extractor._cc_estimate
+  sumd.extractor._analyse_class_methods → sumd.extractor._fan_out
+  sumd.extractor._analyse_class_methods → sumd.extractor._cc_estimate
+  sumd.extractor._analyse_py_top_classes → sumd.extractor._analyse_class_methods
+  sumd.extractor._analyse_py_module → sumd.extractor._try_radon_cc
+  sumd.extractor._analyse_py_module → sumd.extractor._analyse_py_top_funcs
+  sumd.extractor._analyse_py_module → sumd.extractor._analyse_py_top_classes
+  sumd.extractor._path_matches_pattern → sumd.extractor._match_regular_pattern
+  sumd.extractor._path_matches_pattern → sumd.extractor._match_dir_pattern
+  sumd.extractor._path_matches_pattern → sumd.extractor._match_absolute_pattern
+  sumd.extractor._path_matches_pattern → sumd.extractor._match_recursive_pattern
+  sumd.extractor._is_path_ignored → sumd.extractor._path_matches_pattern
+  sumd.extractor._collect_map_files → sumd.extractor._parse_ignore_file
+  sumd.extractor._collect_map_files → sumd.extractor._is_map_ignored_path
+  sumd.extractor._collect_map_files → sumd.extractor._is_path_ignored
+  sumd.extractor._collect_map_files → sumd.extractor._lang_of
+  sumd.extractor._render_map_detail → sumd.extractor._analyse_py_module
+  sumd.extractor.generate_map_toon → sumd.extractor._collect_map_files
+  sumd.extractor.generate_map_toon → sumd.extractor._render_map_detail
+  sumd.extractor.generate_map_toon → sumd.extractor._map_cc_stats
+  sumd.extractor._facts_project_metadata → sumd.extractor.extract_pyproject
+  sumd.extractor._facts_project_metadata → sumd.extractor.extract_package_json
+  sumd.extractor._facts_project_files → sumd.extractor._collect_map_files
+  sumd.extractor._facts_python_analysis → sumd.extractor._collect_map_files
+  sumd.extractor._facts_python_analysis → sumd.extractor._render_map_detail
 ```
 
 ## Test Contracts

@@ -88,30 +88,36 @@ def extract_taskfile(proj_dir: Path) -> list[dict[str, str]]:
         return []
 
 
+def _process_openapi_method(
+    method: str, spec: Any, path: str, seen: set[tuple], endpoints: list[dict]
+) -> None:
+    _HTTP_METHODS = {"get", "post", "put", "delete", "patch"}
+    if method not in _HTTP_METHODS or not isinstance(spec, dict):
+        return
+    key = (method.upper(), path)
+    if key in seen:
+        return
+    seen.add(key)
+    endpoints.append(
+        {
+            "method": method.upper(),
+            "path": path,
+            "operationId": spec.get("operationId", ""),
+            "summary": spec.get("summary", ""),
+            "tags": spec.get("tags", []),
+        }
+    )
+
+
 def _parse_openapi_endpoints(paths: dict) -> list[dict]:
     """Extract endpoint dicts from the paths section of an OpenAPI spec."""
-    _HTTP_METHODS = {"get", "post", "put", "delete", "patch"}
     endpoints: list[dict] = []
     seen: set[tuple] = set()
     for path, methods in paths.items():
         if not isinstance(methods, dict) or "://" in path:
             continue
         for method, spec in methods.items():
-            if method not in _HTTP_METHODS or not isinstance(spec, dict):
-                continue
-            key = (method.upper(), path)
-            if key in seen:
-                continue
-            seen.add(key)
-            endpoints.append(
-                {
-                    "method": method.upper(),
-                    "path": path,
-                    "operationId": spec.get("operationId", ""),
-                    "summary": spec.get("summary", ""),
-                    "tags": spec.get("tags", []),
-                }
-            )
+            _process_openapi_method(method, spec, path, seen, endpoints)
     return endpoints
 
 
@@ -343,6 +349,30 @@ def extract_goal(proj_dir: Path) -> dict[str, Any]:
         return {}
 
 
+def _parse_env_line(line_stripped: str, pending_comment: str, vars_: list[dict[str, str]]) -> str:
+    """Parse a single line from an env file and return the new pending_comment."""
+    if line_stripped.startswith("#"):
+        return line_stripped.lstrip("#").strip()
+    if "=" in line_stripped:
+        key, _, rest = line_stripped.partition("=")
+        if "  #" in rest:
+            val_part, inline_comment = rest.split("  #", 1)
+            comment = inline_comment.strip() or pending_comment
+        else:
+            val_part = rest
+            comment = pending_comment
+        val = val_part.strip()
+        vars_.append(
+            {
+                "key": key.strip(),
+                "default": val if val else "*(not set)*",
+                "comment": comment,
+            }
+        )
+        return ""
+    return ""
+
+
 def extract_env(proj_dir: Path) -> list[dict[str, str]]:
     """Parse .env.example — return list of {key, default, comment}."""
     for fname in (".env.example", ".env.sample", ".env.template"):
@@ -354,37 +384,22 @@ def extract_env(proj_dir: Path) -> list[dict[str, str]]:
     vars_: list[dict[str, str]] = []
     pending_comment = ""
     for line in env_path.read_text(encoding="utf-8").splitlines():
-        line_stripped = line.strip()
-        if line_stripped.startswith("#"):
-            pending_comment = line_stripped.lstrip("#").strip()
-        elif "=" in line_stripped:
-            key, _, rest = line_stripped.partition("=")
-            # split off inline comment: VALUE  # comment
-            if "  #" in rest:
-                val_part, inline_comment = rest.split("  #", 1)
-                comment = inline_comment.strip() or pending_comment
-            else:
-                val_part = rest
-                comment = pending_comment
-            val = val_part.strip()
-            vars_.append(
-                {
-                    "key": key.strip(),
-                    "default": val if val else "*(not set)*",
-                    "comment": comment,
-                }
-            )
-            pending_comment = ""
-        else:
-            pending_comment = ""
+        pending_comment = _parse_env_line(line.strip(), pending_comment, vars_)
     return vars_
+
+
+def _parse_dockerfile_labels(line: str, parsed: dict) -> None:
+    """Parse labels from Dockerfile line."""
+    for kv in re.findall(r'(\w[\w.-]*)=("(?:[^"\\]|\\.)*"|\S+)', line):
+        parsed["labels"][kv[0]] = kv[1].strip('"')
 
 
 def _parse_dockerfile_line(line: str, parsed: dict) -> None:
     """Update *parsed* dict in-place with one Dockerfile instruction."""
     upper = line.upper()
-    if upper.startswith("FROM ") and not parsed["from"]:
-        parsed["from"] = line[5:].strip()
+    if upper.startswith("FROM "):
+        if not parsed["from"]:
+            parsed["from"] = line[5:].strip()
     elif upper.startswith("EXPOSE "):
         parsed["ports"].extend(line[7:].strip().split())
     elif upper.startswith("ENTRYPOINT "):
@@ -392,8 +407,7 @@ def _parse_dockerfile_line(line: str, parsed: dict) -> None:
     elif upper.startswith("CMD "):
         parsed["cmd"] = line[4:].strip()
     elif upper.startswith("LABEL "):
-        for kv in re.findall(r'(\w[\w.-]*)=("(?:[^"\\]|\\.)*"|\S+)', line[6:]):
-            parsed["labels"][kv[0]] = kv[1].strip('"')
+        _parse_dockerfile_labels(line[6:], parsed)
 
 
 def extract_dockerfile(proj_dir: Path) -> dict[str, Any]:
@@ -416,6 +430,26 @@ def extract_dockerfile(proj_dir: Path) -> dict[str, Any]:
     }
 
 
+def _parse_docker_compose_service(svc_name: str, svc: Any, services: list) -> None:
+    """Parse a single service block from docker-compose."""
+    if not isinstance(svc, dict):
+        return
+    ports = [str(p).strip() for p in svc.get("ports", [])]
+    env_vars = (
+        list(svc.get("environment", {}).keys())
+        if isinstance(svc.get("environment"), dict)
+        else []
+    )
+    services.append(
+        {
+            "name": svc_name,
+            "image": svc.get("image", svc.get("build", "")),
+            "ports": ports,
+            "env_vars": env_vars,
+        }
+    )
+
+
 def extract_docker_compose(proj_dir: Path) -> dict[str, Any]:
     """Parse docker-compose*.yml — services with images, ports, environment."""
     candidates = sorted(
@@ -435,24 +469,7 @@ def extract_docker_compose(proj_dir: Path) -> dict[str, Any]:
         services_raw = data.get("services", {}) or {}
         services = []
         for svc_name, svc in services_raw.items():
-            if not isinstance(svc, dict):
-                continue
-            ports = []
-            for p in svc.get("ports", []):
-                ports.append(str(p).strip())
-            env_vars = (
-                list(svc.get("environment", {}).keys())
-                if isinstance(svc.get("environment"), dict)
-                else []
-            )
-            services.append(
-                {
-                    "name": svc_name,
-                    "image": svc.get("image", svc.get("build", "")),
-                    "ports": ports,
-                    "env_vars": env_vars,
-                }
-            )
+            _parse_docker_compose_service(svc_name, svc, services)
         return {"file": path.name, "services": services}
     except Exception:
         return {}
@@ -762,6 +779,22 @@ def _is_map_ignored_path(p: Path) -> bool:
     return False
 
 
+def _should_include_map_file(f: Path, proj_dir: Path, all_ignore_patterns: list[str]) -> str | None:
+    """Return language string if file should be included, else None."""
+    try:
+        rel_path = f.relative_to(proj_dir)
+    except ValueError:
+        return None
+    if _is_map_ignored_path(rel_path):
+        return None
+    if _is_path_ignored(f, proj_dir, all_ignore_patterns):
+        return None
+    lang = _lang_of(f)
+    if lang == "other" or lang not in _SOURCE_LANGS:
+        return None
+    return lang
+
+
 def _collect_map_files(
     proj_dir: Path,
 ) -> tuple[dict[str, int], list[tuple[Path, int, str]]]:
@@ -778,25 +811,16 @@ def _collect_map_files(
         if not f.is_file():
             continue
             
-        rel_path = f.relative_to(proj_dir)
-        
-        # Check hardcoded ignore patterns first
-        if _is_map_ignored_path(rel_path):
+        lang = _should_include_map_file(f, proj_dir, all_ignore_patterns)
+        if not lang:
             continue
-            
-        # Check .gitignore and .sumdignore patterns
-        if _is_path_ignored(f, proj_dir, all_ignore_patterns):
-            continue
-            
-        lang = _lang_of(f)
-        if lang == "other" or lang not in _SOURCE_LANGS:
-            continue
+
         try:
             lines = f.read_text(encoding="utf-8", errors="replace").count("\n") + 1
         except Exception:
             continue
         lang_counts[lang] = lang_counts.get(lang, 0) + 1
-        modules.append((rel_path, lines, lang))
+        modules.append((f.relative_to(proj_dir), lines, lang))
 
     return lang_counts, modules
 
@@ -1261,6 +1285,24 @@ def extract_source_snippets(proj_dir: Path, pkg_name: str) -> list[dict]:
     return results
 
 
+def _process_swop_manifest(
+    context_dir: Path, context_name: str, manifest_type: str, context_data: dict, sources: list
+) -> None:
+    """Parse a single SWOP manifest file and add to context_data."""
+    manifest_path = context_dir / manifest_type
+    if manifest_path.exists():
+        rel_path = f".swop/manifests/{context_name}/{manifest_type}"
+        try:
+            content = manifest_path.read_text(encoding="utf-8").rstrip()
+            context_data[manifest_type.replace(".yml", "")] = {
+                "file": rel_path,
+                "content": content,
+            }
+            sources.append(rel_path)
+        except Exception:
+            pass
+
+
 def extract_swop(proj_dir: Path) -> dict[str, Any]:
     """Extract SWOP manifest files from .swop/manifests/<context>/ directory.
 
@@ -1291,18 +1333,7 @@ def extract_swop(proj_dir: Path) -> dict[str, Any]:
         context_data: dict[str, dict[str, str]] = {}
 
         for manifest_type in ("commands.yml", "queries.yml", "events.yml"):
-            manifest_path = context_dir / manifest_type
-            if manifest_path.exists():
-                rel_path = f".swop/manifests/{context_name}/{manifest_type}"
-                try:
-                    content = manifest_path.read_text(encoding="utf-8").rstrip()
-                    context_data[manifest_type.replace(".yml", "")] = {
-                        "file": rel_path,
-                        "content": content,
-                    }
-                    sources.append(rel_path)
-                except Exception:
-                    pass
+            _process_swop_manifest(context_dir, context_name, manifest_type, context_data, sources)
 
         if context_data:
             contexts[context_name] = context_data

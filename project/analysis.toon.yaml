@@ -1,16 +1,16 @@
-# code2llm | 75f 16710L | python:65,shell:6,perl:4 | 2026-05-22
-# CC̄=3.7 | critical:0/542 | dups:0 | cycles:0
+# code2llm | 75f 16700L | python:65,shell:6,perl:4 | 2026-05-22
+# CC̄=3.7 | critical:0/543 | dups:0 | cycles:0
 
 HEALTH[0]: ok
 
 REFACTOR[0]: none needed
 
-PIPELINES[307]:
-  [1] Src [main]: main → ask → parse_file
+PIPELINES[308]:
+  [1] Src [main]: main → ask → build_context → parse_file
       PURITY: 100% pure
-  [2] Src [main]: main → run
+  [2] Src [main]: main → ask → parse_file
       PURITY: 100% pure
-  [3] Src [main]: main → ask → build_context → parse_file
+  [3] Src [main]: main → run
       PURITY: 100% pure
   [4] Src [parse]: parse
       PURITY: 100% pure
@@ -33,7 +33,7 @@ LAYERS:
   │ !! cli                       1212L  0C   29m  CC=14     ←0
   │ !! mcp_server                 714L  0C   18m  CC=5      ←0
   │ !! commands                   649L  2C   30m  CC=9      ←1
-  │ !! engine                     537L  2C   39m  CC=9      ←0
+  │ !! engine                     526L  2C   40m  CC=9      ←0
   │ !! schema_commands            517L  2C   33m  CC=10     ←0
   │ pipeline                   451L  1C   16m  CC=7      ←0
   │ nlp                        447L  3C   21m  CC=7      ←0
@@ -103,7 +103,7 @@ LAYERS:
   │ bootstrap.sh                69L  0C    0m  CC=0.0    ←0
   │
   project/                        CC̄=0.0    ←in:0  →out:0
-  │ !! logic.pl                  1194L  0C    0m  CC=0.0    ←0
+  │ !! logic.pl                  1195L  0C    0m  CC=0.0    ←0
   │
 
 COUPLING:

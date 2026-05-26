@@ -70,6 +70,22 @@ def is_variable(x: Any) -> bool:
 _ANON_COUNTER = 0
 
 
+def _parse_str_to_term(x: str) -> Any:
+    x = x.strip()
+    if x.startswith("\\+"):
+        return Term("\\+", to_term(x[2:].strip()))
+    if "\\=" in x:
+        left, right = x.split("\\=", 1)
+        return Term("\\=", to_term(left.strip()), to_term(right.strip()))
+    m = re.match(r"^([a-z_][a-zA-Z0-9_]*)\((.*)\)$", x)
+    if m:
+        op, args_str = m.group(1), m.group(2)
+        args = [to_term(a.strip()) for a in _split_body_terms(args_str) if a.strip()]
+        return Term(op, *args)
+    if x.startswith("'") and x.endswith("'") and len(x) >= 2:
+        x = x[1:-1].replace("\\'", "'")
+    return Term(x)
+
 def to_term(x: Any) -> Any:
     global _ANON_COUNTER
     if is_variable(x):
@@ -79,62 +95,56 @@ def to_term(x: Any) -> Any:
             var_name = f"_anon_{_ANON_COUNTER}"
         return Variable(var_name)
     if isinstance(x, str):
-        x = x.strip()
-        if x.startswith("\\+"):
-            inner_str = x[2:].strip()
-            return Term("\\+", to_term(inner_str))
-        if "\\=" in x:
-            left, right = x.split("\\=", 1)
-            return Term("\\=", to_term(left.strip()), to_term(right.strip()))
-
-        # Check if it has structure like f(x,y)
-        m = re.match(r"^([a-z_][a-zA-Z0-9_]*)\((.*)\)$", x)
-        if m:
-            op = m.group(1)
-            args_str = m.group(2)
-            args = [to_term(a.strip()) for a in _split_body_terms(args_str) if a.strip()]
-            return Term(op, *args)
-        if x.startswith("'") and x.endswith("'") and len(x) >= 2:
-            x = x[1:-1].replace("\\'", "'")
-        return Term(x)
+        return _parse_str_to_term(x)
     return x
 
 
+from dataclasses import dataclass
+
+@dataclass
+class _SplitState:
+    terms: List[str]
+    current_term: List[str]
+    paren_depth: int
+    in_quotes: bool
+
+def _handle_quotes_and_parens(char: str, prev_char: str, state: _SplitState) -> bool:
+    if char == "'" and prev_char != "\\":
+        state.in_quotes = not state.in_quotes
+        state.current_term.append(char)
+        return True
+    if state.in_quotes:
+        state.current_term.append(char)
+        return True
+    if char == "(":
+        state.paren_depth += 1
+        state.current_term.append(char)
+        return True
+    if char == ")":
+        if state.paren_depth > 0:
+            state.paren_depth -= 1
+        state.current_term.append(char)
+        return True
+    return False
+
+def _handle_split_char(char: str, prev_char: str, state: _SplitState) -> None:
+    if _handle_quotes_and_parens(char, prev_char, state):
+        return
+    if char == "," and state.paren_depth == 0:
+        state.terms.append("".join(state.current_term).strip())
+        state.current_term.clear()
+    else:
+        state.current_term.append(char)
+
 def _split_body_terms(body_str: str) -> List[str]:
-    """Splits comma-separated Prolog rule body into distinct term strings,
-    correctly preserving nested parenthesized terms on top-level commas.
-    """
-    terms = []
-    current_term = []
-    paren_depth = 0
-    in_quotes = False
-
-    i = 0
-    n = len(body_str)
-    while i < n:
-        char = body_str[i]
-        if char == "'" and (i == 0 or body_str[i-1] != "\\"):
-            in_quotes = not in_quotes
-            current_term.append(char)
-        elif in_quotes:
-            current_term.append(char)
-        elif char == "(":
-            paren_depth += 1
-            current_term.append(char)
-        elif char == ")":
-            if paren_depth > 0:
-                paren_depth -= 1
-            current_term.append(char)
-        elif char == "," and paren_depth == 0:
-            terms.append("".join(current_term).strip())
-            current_term = []
-        else:
-            current_term.append(char)
-        i += 1
-
-    if current_term:
-        terms.append("".join(current_term).strip())
-    return [t for t in terms if t]
+    """Splits comma-separated Prolog rule body into distinct term strings."""
+    state = _SplitState(terms=[], current_term=[], paren_depth=0, in_quotes=False)
+    for i, char in enumerate(body_str):
+        prev = body_str[i-1] if i > 0 else ""
+        _handle_split_char(char, prev, state)
+    if state.current_term:
+        state.terms.append("".join(state.current_term).strip())
+    return [t for t in state.terms if t]
 
 
 class PythonPrologDB:
@@ -167,11 +177,21 @@ class PythonPrologDB:
                 self.rules.append(Rule(to_term(c)))
 
 
+def _unify_terms(x: Term, y: Term, subst: Dict[Variable, Any]) -> Optional[Dict[Variable, Any]]:
+    if x.op != y.op or len(x.args) != len(y.args):
+        return None
+    new_subst = subst.copy()
+    for ax, ay in zip(x.args, y.args):
+        res = unify(ax, ay, new_subst)
+        if res is None:
+            return None
+        new_subst = res
+    return new_subst
+
 def unify(x: Any, y: Any, subst: Dict[Variable, Any]) -> Optional[Dict[Variable, Any]]:
     """Logical unification of x and y under substitution subst."""
     x = resolve_val(x, subst)
     y = resolve_val(y, subst)
-
     if x == y:
         return subst
     if isinstance(x, Variable):
@@ -179,15 +199,7 @@ def unify(x: Any, y: Any, subst: Dict[Variable, Any]) -> Optional[Dict[Variable,
     if isinstance(y, Variable):
         return extend_subst(y, x, subst)
     if isinstance(x, Term) and isinstance(y, Term):
-        if x.op != y.op or len(x.args) != len(y.args):
-            return None
-        new_subst = subst.copy()
-        for ax, ay in zip(x.args, y.args):
-            res = unify(ax, ay, new_subst)
-            if res is None:
-                return None
-            new_subst = res
-        return new_subst
+        return _unify_terms(x, y, subst)
     return None
 
 
@@ -279,46 +291,44 @@ class PythonPrologEngine:
         collect(term)
         return list(vars_set)
 
+    def _resolve_negation(self, first: Term, rest: List[Any], subst: Dict[Variable, Any]) -> Generator[Dict[Variable, Any], None, None]:
+        inner_goal = first.args[0]
+        if not list(self._resolve([inner_goal], subst)):
+            yield from self._resolve(rest, subst)
+
+    def _resolve_inequality(self, first: Term, rest: List[Any], subst: Dict[Variable, Any]) -> Generator[Dict[Variable, Any], None, None]:
+        left = resolve_val(first.args[0], subst)
+        right = resolve_val(first.args[1], subst)
+        left_str = str(left) if not isinstance(left, Variable) else left
+        right_str = str(right) if not isinstance(right, Variable) else right
+        if left_str != right_str:
+            yield from self._resolve(rest, subst)
+
+    def _resolve_rule_step(self, first: Any, rest: List[Any], rule: Rule, subst: Dict[Variable, Any]) -> Generator[Dict[Variable, Any], None, None]:
+        renamed_rule = rename_variables(rule, self._var_counter)
+        new_subst = unify(first, renamed_rule.head, subst)
+        if new_subst is not None:
+            yield from self._resolve(renamed_rule.body + rest, new_subst)
+
     def _resolve(self, goals: List[Any], subst: Dict[Variable, Any]) -> Generator[Dict[Variable, Any], None, None]:
         if not goals:
-            # Check if all goals are empty
             yield subst
             return
 
         first, rest = goals[0], goals[1:]
+        is_term = isinstance(first, Term)
 
-        # Built-in negation: \+ or not
-        if isinstance(first, Term) and first.op in ("\\+", "not"):
-            inner_goal = first.args[0]
-            # Try to resolve inner_goal under current subst
-            inner_results = list(self._resolve([inner_goal], subst))
-            if not inner_results:
-                # If inner goal fails, negation succeeds! Continue with rest
-                yield from self._resolve(rest, subst)
+        if is_term and first.op in ("\\+", "not"):
+            yield from self._resolve_negation(first, rest, subst)
             return
 
-        # Built-in inequality: \=, \\=, or \\==
-        if isinstance(first, Term) and first.op in ("\\=", "\\\\=", "\\\\==", "\\="):
-            left = resolve_val(first.args[0], subst)
-            right = resolve_val(first.args[1], subst)
-            left_str = str(left) if not isinstance(left, Variable) else left
-            right_str = str(right) if not isinstance(right, Variable) else right
-            if left_str != right_str:
-                yield from self._resolve(rest, subst)
+        if is_term and first.op in ("\\=", "\\\\=", "\\\\==", "\\="):
+            yield from self._resolve_inequality(first, rest, subst)
             return
 
         self._var_counter += 1
-
         for rule in self.db.rules:
-            # Rename variables in rule to avoid collision
-            renamed_rule = rename_variables(rule, self._var_counter)
-
-            # Try to unify first goal with rule head
-            new_subst = unify(first, renamed_rule.head, subst)
-            if new_subst is not None:
-                # Resolve rule body + remaining goals
-                new_goals = renamed_rule.body + rest
-                yield from self._resolve(new_goals, new_subst)
+            yield from self._resolve_rule_step(first, rest, rule, subst)
 
 
 # ─────────────────────────────────────────────────────────────
@@ -377,35 +387,18 @@ class HybridPrologEngine:
             cleaned.append(clean_r)
         return cleaned
 
-    def _query_subprocess(self, query_str: str) -> List[Dict[str, Any]]:
-        """Executes query by spawning a swipl process."""
-        # Extract variables from query_str
-        vars_found = list(set(re.findall(r"\b([A-Z][a-zA-Z0-9_]*)\b", query_str)))
-
-        if not vars_found:
-            # Boolean query
-            cmd = [
-                "swipl", "-q", "-f", str(self.path),
-                "-g", f"({query_str} -> write('true') ; write('false')), halt."
-            ]
-            res = subprocess.run(cmd, capture_output=True, text=True, timeout=5)
-            if res.stdout.strip() == "true":
-                return [{}]
-            return []
-
-        # Query containing variables: print as KV pairs
-        print_goals = []
-        for v in vars_found:
-            print_goals.append(f"format('~w:~w~n', ['{v}', {v}])")
-
-        goal_exec = f"forall({query_str}, ( {' , '.join(print_goals)} , format('---~n') )), halt."
-
-        cmd = ["swipl", "-q", "-f", str(self.path), "-g", goal_exec]
+    def _run_boolean_subprocess(self, query_str: str) -> List[Dict[str, Any]]:
+        cmd = [
+            "swipl", "-q", "-f", str(self.path),
+            "-g", f"({query_str} -> write('true') ; write('false')), halt."
+        ]
         res = subprocess.run(cmd, capture_output=True, text=True, timeout=5)
+        return [{}] if res.stdout.strip() == "true" else []
 
+    def _parse_swipl_output(self, stdout: str) -> List[Dict[str, Any]]:
         solutions = []
         current_sol = {}
-        for line in res.stdout.splitlines():
+        for line in stdout.splitlines():
             line = line.strip()
             if line == "---":
                 if current_sol:
@@ -414,11 +407,22 @@ class HybridPrologEngine:
             elif ":" in line:
                 k, v = line.split(":", 1)
                 current_sol[k] = v
-
         if current_sol:
             solutions.append(current_sol)
-
         return solutions
+
+    def _query_subprocess(self, query_str: str) -> List[Dict[str, Any]]:
+        """Executes query by spawning a swipl process."""
+        vars_found = list(set(re.findall(r"\b([A-Z][a-zA-Z0-9_]*)\b", query_str)))
+        if not vars_found:
+            return self._run_boolean_subprocess(query_str)
+
+        print_goals = [f"format('~w:~w~n', ['{v}', {v}])" for v in vars_found]
+        goal_exec = f"forall({query_str}, ( {' , '.join(print_goals)} , format('---~n') )), halt."
+        
+        cmd = ["swipl", "-q", "-f", str(self.path), "-g", goal_exec]
+        res = subprocess.run(cmd, capture_output=True, text=True, timeout=5)
+        return self._parse_swipl_output(res.stdout)
 
     def _query_python(self, query_str: str) -> List[Dict[str, Any]]:
         """Pure Python fallback logic query."""

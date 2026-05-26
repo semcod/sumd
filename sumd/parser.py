@@ -55,6 +55,13 @@ class SUMDParser:
         content = path.read_text(encoding="utf-8")
         return self.parse(content)
 
+    def _extract_description_from_next_lines(self, lines: List[str], start_idx: int) -> None:
+        """Look for description on the lines immediately following the header."""
+        for j in range(start_idx + 1, min(start_idx + 3, len(lines))):
+            if lines[j].strip() and not lines[j].startswith("#"):
+                self.current_document.description = lines[j].strip()
+                break
+
     def _parse_header(self, lines: List[str]) -> None:
         """Parse the project header (H1).
 
@@ -74,11 +81,7 @@ class SUMDParser:
                 if len(parts) > 1:
                     self.current_document.description = parts[1].strip()
                 else:
-                    # Look for description on next lines
-                    for j in range(i + 1, min(i + 3, len(lines))):
-                        if lines[j].strip() and not lines[j].startswith("#"):
-                            self.current_document.description = lines[j].strip()
-                            break
+                    self._extract_description_from_next_lines(lines, i)
                 break
 
     def _parse_sections(self, lines: List[str]) -> None:

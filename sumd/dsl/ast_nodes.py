@@ -37,18 +37,13 @@ class DSLExpression:
         if self.type == DSLExpressionType.COMMAND:
             args = " ".join(str(child) for child in self.children)
             return f"{self.value} {args}"
-        elif self.type == DSLExpressionType.FUNCTION_CALL:
+        if self.type == DSLExpressionType.FUNCTION_CALL:
             args = ", ".join(str(child) for child in self.children)
             return f"{self.value}({args})"
-        elif self.type == DSLExpressionType.PROPERTY_ACCESS:
+        if self.type == DSLExpressionType.PROPERTY_ACCESS:
             if self.children:
                 return f"{self.value}.{str(self.children[0])}"
             return str(self.value)
-        elif self.type == DSLExpressionType.LITERAL:
-            return str(self.value)
-        elif self.type == DSLExpressionType.IDENTIFIER:
-            return str(self.value)
-        elif self.type == DSLExpressionType.PIPELINE:
+        if self.type == DSLExpressionType.PIPELINE:
             return " | ".join(str(child) for child in self.children)
-        else:
-            return str(self.value)
+        return str(self.value)

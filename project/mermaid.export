@@ -1,10 +1,5 @@
 flowchart TD
-%% generated in 0.01s
-    subgraph README
-        README__print["print"]
-        README__scan["scan"]
-        README__validate["validate"]
-    end
+%% generated in 0.00s
     subgraph examples__llm
         examples__llm__anthropic_example__ask["ask"]
         examples__llm__anthropic_example__main["main"]
@@ -146,45 +141,6 @@ flowchart TD
         sumd__cqrs__queries__QueryBus____init__["__init__"]
     end
     subgraph sumd__dsl
-        sumd__dsl__engine__DSLContext____init__["__init__"]
-        sumd__dsl__engine__DSLContext__register_function["register_function"]
-        sumd__dsl__engine__DSLContext__get_function["get_function"]
-        sumd__dsl__engine__DSLEngine____init__["__init__"]
-        sumd__dsl__engine__DSLEngine__execute["execute"]
-        sumd__dsl__engine__DSLEngine__execute_text["execute_text"]
-        sumd__dsl__engine__DSLEngine___is_natural_language["_is_natural_language"]
-        sumd__dsl__engine__DSLEngine__process_natural_language["process_natural_language"]
-        sumd__dsl__engine__DSLEngine__get_suggestions["get_suggestions"]
-        sumd__dsl__engine__DSLEngine___build_dispatch_table["_build_dispatch_table"]
-        sumd__dsl__engine__DSLEngine___execute_expression["_execute_expression"]
-        sumd__dsl__engine__DSLEngine___execute_assignment["_execute_assignment"]
-        sumd__dsl__engine__DSLEngine___resolve_schema_call["_resolve_schema_call"]
-        sumd__dsl__engine__DSLEngine___evaluate_args["_evaluate_args"]
-        sumd__dsl__engine__DSLEngine___execute_command["_execute_command"]
-        sumd__dsl__engine__DSLEngine___execute_function_call["_execute_function_call"]
-        sumd__dsl__engine__DSLEngine___execute_property_access["_execute_property_access"]
-        sumd__dsl__engine__DSLEngine___execute_comparison["_execute_comparison"]
-        sumd__dsl__engine__DSLEngine___execute_logical("_execute_logical CC=9")
-        sumd__dsl__engine__DSLEngine___execute_arithmetic["_execute_arithmetic"]
-        sumd__dsl__engine__DSLEngine___execute_pipeline["_execute_pipeline"]
-        sumd__dsl__engine__DSLEngine___execute_list["_execute_list"]
-        sumd__dsl__engine__DSLEngine___execute_dict["_execute_dict"]
-        sumd__dsl__engine__DSLEngine___execute_block["_execute_block"]
-        sumd__dsl__engine__DSLEngine___execute_sumd_command["_execute_sumd_command"]
-        sumd__dsl__engine__DSLEngine___call_function["_call_function"]
-        sumd__dsl__engine__DSLEngine___initialize_builtin_functions["_initialize_builtin_functions"]
-        sumd__dsl__engine__DSLEngine___builtin_print["_builtin_print"]
-        sumd__dsl__engine__DSLEngine___builtin_len["_builtin_len"]
-        sumd__dsl__engine__DSLEngine___builtin_str["_builtin_str"]
-        sumd__dsl__engine__DSLEngine___builtin_int["_builtin_int"]
-        sumd__dsl__engine__DSLEngine___builtin_float["_builtin_float"]
-        sumd__dsl__engine__DSLEngine___builtin_bool["_builtin_bool"]
-        sumd__dsl__engine__DSLEngine___builtin_type["_builtin_type"]
-        sumd__dsl__engine__DSLEngine___builtin_write_file["_builtin_write_file"]
-        sumd__dsl__engine__DSLEngine___builtin_list_files["_builtin_list_files"]
-        sumd__dsl__engine__DSLEngine___builtin_cwd["_builtin_cwd"]
-        sumd__dsl__engine__DSLEngine___builtin_cd["_builtin_cd"]
-        sumd__dsl__engine__DSLEngine___builtin_help["_builtin_help"]
         sumd__dsl__schema__DSLContext__register_function["register_function"]
         sumd__dsl__lexer__DSLLexer____init__["__init__"]
         sumd__dsl__lexer__DSLLexer__tokenize["tokenize"]
@@ -206,6 +162,45 @@ flowchart TD
         sumd__dsl__commands___cmd_sumd_validate["_cmd_sumd_validate"]
         sumd__dsl__commands___cmd_sumd_info["_cmd_sumd_info"]
         sumd__dsl__commands___cmd_find["_cmd_find"]
+        sumd__dsl__commands___cmd_grep("_cmd_grep CC=9")
+        sumd__dsl__commands___cmd_echo["_cmd_echo"]
+        sumd__dsl__commands___cmd_pwd["_cmd_pwd"]
+        sumd__dsl__commands___cmd_cd["_cmd_cd"]
+        sumd__dsl__commands___cmd_help["_cmd_help"]
+        sumd__dsl__commands___cmd_clear["_cmd_clear"]
+        sumd__dsl__commands___cmd_set["_cmd_set"]
+        sumd__dsl__commands___cmd_get["_cmd_get"]
+        sumd__dsl__commands___cmd_unset["_cmd_unset"]
+        sumd__dsl__commands___cmd_vars["_cmd_vars"]
+        sumd__dsl__commands___cmd_exists["_cmd_exists"]
+        sumd__dsl__commands___cmd_read_file["_cmd_read_file"]
+        sumd__dsl__parser__DSLParser__parse["parse"]
+        sumd__dsl__parser__DSLParser___looks_like_command["_looks_like_command"]
+        sumd__dsl__parser__DSLParser___peek_next_type["_peek_next_type"]
+        sumd__dsl__parser__DSLParser___is_command_boundary["_is_command_boundary"]
+        sumd__dsl__parser__DSLParser___collect_command_args["_collect_command_args"]
+        sumd__dsl__parser__DSLParser___build_pipeline_or_cmd["_build_pipeline_or_cmd"]
+        sumd__dsl__parser__DSLParser___try_parse_command["_try_parse_command"]
+        sumd__dsl__parser__DSLParser___parse_statement["_parse_statement"]
+        sumd__dsl__parser__DSLParser___parse_pipeline["_parse_pipeline"]
+        sumd__dsl__parser__DSLParser___parse_assignment["_parse_assignment"]
+        sumd__dsl__parser__parse_dsl["parse_dsl"]
+        sumd__dsl__context_mixin__VariableMixin__set_variable["set_variable"]
+        sumd__dsl__context_mixin__VariableMixin__get_variable["get_variable"]
+        sumd__dsl__parser_base__DSLParserBase____init__["__init__"]
+        sumd__dsl__parser_base__DSLParserBase___is_at_end["_is_at_end"]
+        sumd__dsl__parser_base__DSLParserBase___peek["_peek"]
+        sumd__dsl__parser_base__DSLParserBase___previous["_previous"]
+        sumd__dsl__parser_base__DSLParserBase___advance["_advance"]
+        sumd__dsl__parser_base__DSLParserBase___check["_check"]
+        sumd__dsl__parser_base__DSLParserBase___check_next["_check_next"]
+        sumd__dsl__parser_base__DSLParserBase___match["_match"]
+        sumd__dsl__parser_base__DSLParserBase___consume["_consume"]
+        sumd__dsl__parser_primary__DSLPrimaryParser___parse_paren_or_collection["_parse_paren_or_collection"]
+        sumd__dsl__parser_primary__DSLPrimaryParser___parse_identifier_command["_parse_identifier_command"]
+        sumd__dsl__parser_primary__DSLPrimaryParser___parse_identifier_forms["_parse_identifier_forms"]
+        sumd__dsl__parser_primary__DSLPrimaryParser___parse_literal_value["_parse_literal_value"]
+        sumd__dsl__parser_primary__DSLPrimaryParser___parse_primary["_parse_primary"]
     end
     subgraph sumd__extractor
         sumd__extractor___read_toml["_read_toml"]
@@ -436,7 +431,7 @@ flowchart TD
         sumd__validator___validate_bash_body["_validate_bash_body"]
         sumd__validator___validate_deps_body["_validate_deps_body"]
         sumd__validator___validate_markpact_meta["_validate_markpact_meta"]
-        sumd__validator__validate_codeblocks("validate_codeblocks CC=9")
+        sumd__validator__validate_codeblocks("validate_codeblocks CC=11")
         sumd__validator___check_h1["_check_h1"]
         sumd__validator___check_required_sections["_check_required_sections"]
         sumd__validator___check_metadata_fields("_check_metadata_fields CC=9")
@@ -479,42 +474,6 @@ flowchart TD
     sumd__toon_parser___parse_toon_file --> sumd__toon_parser___parse_toon_block_navigate
     sumd__toon_parser___parse_toon_file --> sumd__toon_parser___parse_toon_block_gui
     sumd__toon_parser__extract_testql_scenarios --> sumd__toon_parser___parse_toon_file
-    sumd__validator__validate_codeblocks --> sumd__validator___validate_markpact_meta
-    sumd__validator__validate_markdown --> sumd__validator___check_empty_links
-    sumd__validator__validate_markdown --> sumd__validator___check_unclosed_fences
-    sumd__validator__validate_markdown --> sumd__validator___check_metadata_fields
-    sumd__validator__validate_markdown --> sumd__validator___check_h1
-    sumd__validator__validate_markdown --> sumd__validator___check_required_sections
-    sumd__validator__validate_project_architecture --> sumd__extractor__generate_project_logic
-    sumd__validator__validate_sumd_file --> sumd__validator__validate_markdown
-    sumd__validator__validate_sumd_file --> sumd__validator__validate_codeblocks
-    sumd__validator__validate_sumd_file --> sumd__validator__validate_project_architecture
-    sumd__cli__validate --> sumd__parser__SUMDParser__parse_file
-    sumd__cli__export --> sumd__parser__SUMDParser__parse_file
-    sumd__cli__info --> sumd__parser__SUMDParser__parse_file
-    sumd__cli__extract --> sumd__parser__SUMDParser__parse_file
-    sumd__cli__lint --> sumd__cli___lint_collect_paths
-    sumd__cli__lint --> sumd__validator__validate_sumd_file
-    sumd__cli__lint --> sumd__cli___lint_classify_issues
-    sumd__cli__lint --> sumd__cli___lint_print_result
-    sumd__cli___lint_print_result --> sumd__cli___lint_classify_issues
-    sumd__cli___run_analyze_tool --> sumd__cli___run_code2llm_formats
-    sumd__cli___run_analyze_tool --> sumd__cli___run_tool_subprocess
-    sumd__cli__analyze --> sumd__cli___setup_tools_venv
-    sumd__cli__analyze --> sumd__cli___run_analyze_tool
-    sumd__cli___scaffold_smoke_scenario --> sumd__cli___scaffold_write
-    sumd__cli___scaffold_smoke_scenario --> sumd__cli___api_scenario_template
-    sumd__cli___scaffold_crud_scenarios --> sumd__cli___scaffold_write
-    sumd__cli___scaffold_crud_scenarios --> sumd__cli___api_scenario_template
-    sumd__cli___scaffold_from_openapi --> sumd__cli___scaffold_smoke_scenario
-    sumd__cli___scaffold_from_openapi --> sumd__cli___scaffold_crud_scenarios
-    sumd__cli___scaffold_generic --> sumd__cli___api_scenario_template
-    sumd__cli___scaffold_generic --> sumd__cli___scaffold_write
-    sumd__cli__scaffold --> sumd__cli___scaffold_from_openapi
-    sumd__cli__scaffold --> sumd__cli___scaffold_generic
-    sumd__cli__map_cmd --> sumd__extractor__generate_map_toon
-    sumd__cli__main --> sumd__cli__cli
-    sumd__cli__main_sumr --> sumd__cli__cli
     sumd__extractor__extract_pyproject --> sumd__extractor___read_toml
     sumd__extractor__extract_taskfile --> sumd__extractor___first_task_cmd
     sumd__extractor__extract_openapi --> sumd__extractor___parse_openapi_endpoints
@@ -687,8 +646,6 @@ flowchart TD
     sumd__cqrs__queries__SumdQueryHandler___handle_get_project_info --> sumd__extractor__extract_pyproject
     sumd__cqrs__queries__SumdQueryHandler___handle_get_project_info --> sumd__extractor__extract_readme_title
     sumd__cqrs__queries__SumdQueryHandler___handle_get_validation_results --> sumd__validator__validate_sumd_file
-    sumd__dsl__engine__DSLEngine__execute_text --> sumd__dsl__parser__parse_dsl
-    sumd__dsl__engine__DSLEngine___builtin_print --> test__print
     sumd__dsl__commands___cmd_sumd_map --> sumd__extractor__generate_map_toon
     sumd__dsl__commands___cmd_sumd_validate --> sumd__validator__validate_sumd_file
     sumd__dsl__commands___cmd_sumd_info --> sumd__parser__SUMDParser__parse_file
@@ -708,7 +665,45 @@ flowchart TD
     sumd__dsl__schema_commands__SchemaBasedCommands___cmd_sumd_info --> sumd__parser__SUMDParser__parse_file
     sumd_logic_validator__sumd_logic_validator__cli__query --> sumd_logic_validator__sumd_logic_validator__cli__get_engine
     sumd_logic_validator__sumd_logic_validator__cli__shell --> sumd_logic_validator__sumd_logic_validator__cli__get_engine
+    sumd__validator__validate_codeblocks --> sumd__validator___validate_markpact_meta
+    sumd__validator__validate_markdown --> sumd__validator___check_empty_links
+    sumd__validator__validate_markdown --> sumd__validator___check_unclosed_fences
+    sumd__validator__validate_markdown --> sumd__validator___check_metadata_fields
+    sumd__validator__validate_markdown --> sumd__validator___check_h1
+    sumd__validator__validate_markdown --> sumd__validator___check_required_sections
+    sumd__validator__validate_project_architecture --> sumd__extractor__generate_project_logic
+    sumd__validator__validate_sumd_file --> sumd__validator__validate_markdown
+    sumd__validator__validate_sumd_file --> sumd__validator__validate_codeblocks
+    sumd__validator__validate_sumd_file --> sumd__validator__validate_project_architecture
+    sumd__cli__validate --> sumd__parser__SUMDParser__parse_file
+    sumd__cli__export --> sumd__parser__SUMDParser__parse_file
+    sumd__cli__info --> sumd__parser__SUMDParser__parse_file
+    sumd__cli__extract --> sumd__parser__SUMDParser__parse_file
+    sumd__cli__lint --> sumd__cli___lint_collect_paths
+    sumd__cli__lint --> sumd__validator__validate_sumd_file
+    sumd__cli__lint --> sumd__cli___lint_classify_issues
+    sumd__cli__lint --> sumd__cli___lint_print_result
+    sumd__cli___lint_print_result --> sumd__cli___lint_classify_issues
+    sumd__cli___run_analyze_tool --> sumd__cli___run_code2llm_formats
+    sumd__cli___run_analyze_tool --> sumd__cli___run_tool_subprocess
+    sumd__cli__analyze --> sumd__cli___setup_tools_venv
+    sumd__cli__analyze --> sumd__cli___run_analyze_tool
+    sumd__cli___scaffold_smoke_scenario --> sumd__cli___scaffold_write
+    sumd__cli___scaffold_smoke_scenario --> sumd__cli___api_scenario_template
+    sumd__cli___scaffold_crud_scenarios --> sumd__cli___scaffold_write
+    sumd__cli___scaffold_crud_scenarios --> sumd__cli___api_scenario_template
+    sumd__cli___scaffold_from_openapi --> sumd__cli___scaffold_smoke_scenario
+    sumd__cli___scaffold_from_openapi --> sumd__cli___scaffold_crud_scenarios
+    sumd__cli___scaffold_generic --> sumd__cli___api_scenario_template
+    sumd__cli___scaffold_generic --> sumd__cli___scaffold_write
+    sumd__cli__scaffold --> sumd__cli___scaffold_from_openapi
+    sumd__cli__scaffold --> sumd__cli___scaffold_generic
+    sumd__cli__map_cmd --> sumd__extractor__generate_map_toon
+    sumd__cli__main --> sumd__cli__cli
+    sumd__cli__main_sumr --> sumd__cli__cli
+    sumd__dsl__engine__DSLEngine__execute_text --> sumd__dsl__parser__parse_dsl
+    sumd__dsl__engine__DSLEngine___builtin_print --> test__print
 
     classDef highCC fill:#ff6b6b,stroke:#c92a2a,color:#fff
     classDef medCC fill:#ffd43b,stroke:#f08c00,color:#000
-    class examples__mcp__mcp_client__run,sumd__toon_parser___parse_toon_block_config,sumd__validator__validate_codeblocks,sumd__validator___check_metadata_fields,sumd__validator__validate_project_architecture,sumd__cli__export,sumd__cli__generate,sumd__cli__scan,sumd__cli__scaffold,sumd__cli__main,sumd__extractor___parse_openapi_endpoints,sumd__extractor__extract_env,sumd__extractor___parse_dockerfile_line,sumd__extractor__extract_docker_compose,sumd__extractor___collect_map_files,sumd__extractor___map_cc_stats,sumd__extractor__extract_swop,sumd__parser__SUMDParser___parse_header,sumd__cli_scan___is_project_dir,sumd__cli_scan___walk_projects,sumd__cli_scan___finalize_scan,sumd__cli_scan___scan_one_project,sumd__cli_doql___detect_project_type,sumd__sections__quality___render_quality_parsed,sumd__sections__deployment___render_deployment_docker,sumd__sections__code_analysis___render_code_analysis,sumd__sections__call_graph___parse_calls_hubs,sumd__sections__source_snippets___render_source_snippets,sumd__sections__swop___render_swop_section,sumd__sections__api_stubs___render_api_stubs medCC
+    class examples__mcp__mcp_client__run,sumd__toon_parser___parse_toon_block_config,sumd__extractor___parse_openapi_endpoints,sumd__extractor__extract_env,sumd__extractor___parse_dockerfile_line,sumd__extractor__extract_docker_compose,sumd__extractor___collect_map_files,sumd__extractor___map_cc_stats,sumd__extractor__extract_swop,sumd__parser__SUMDParser___parse_header,sumd__cli_scan___is_project_dir,sumd__cli_scan___walk_projects,sumd__cli_scan___finalize_scan,sumd__cli_scan___scan_one_project,sumd__cli_doql___detect_project_type,sumd__sections__quality___render_quality_parsed,sumd__sections__deployment___render_deployment_docker,sumd__sections__code_analysis___render_code_analysis,sumd__sections__call_graph___parse_calls_hubs,sumd__sections__source_snippets___render_source_snippets,sumd__sections__swop___render_swop_section,sumd__sections__api_stubs___render_api_stubs,sumd__sections__environment___render_goal_section,sumd__utils__prolog_core__to_term,sumd__utils__prolog_core___split_body_terms,sumd__utils__prolog_core__unify,sumd__utils__prolog_core__PythonPrologEngine___resolve,sumd__utils__prolog_core__HybridPrologEngine___query_subprocess,sumd__cqrs__commands__SumdCommandHandler__handle,sumd__cqrs__queries__SumdQueryHandler__handle medCC

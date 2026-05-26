@@ -1,8 +1,8 @@
-# sumd | 553 func | 58f | 20759L | python | 2026-05-21
+# sumd | 551 func | 57f | 27596L | python | 2026-05-22
 # generated in 0.00s
 
 HEALTH:
-  CC̄=3.6  critical=20 (limit:10)  dup=3  cycles=0
+  CC̄=3.7  critical=21 (limit:10)  dup=3  cycles=0
 
 ALERTS[20]:
   !!! high_fan_out     RenderPipeline._collect = 23 (limit:10)
@@ -13,26 +13,26 @@ ALERTS[20]:
   !!  high_fan_out     generate = 17 (limit:10)
   !!  high_fan_out     _parse_doql_content = 15 (limit:10)
   !!  high_fan_out     extract_docker_compose = 15 (limit:10)
-  !   high_fan_out     dsl = 14 (limit:10)
   !   high_fan_out     _parse_doql_workflows = 14 (limit:10)
+  !   high_fan_out     dsl = 14 (limit:10)
 
-MODULES[125] (top by size):
+MODULES[128] (top by size):
+  M[deps.json] 6478L C:0 F:0 CC↑0 D:0 (json)
   M[sumd/extractor.py] 1344L C:0 F:63 CC↑10 D:8 (python)
   M[sumd_logic_validator/sumd_logic_validator/logic/rules.pl] 1234L C:0 F:0 CC↑0 D:0 (perl)
   M[sumd/cli.py] 1212L C:0 F:29 CC↑14 D:0 (python)
-  M[CHANGELOG.md] 1064L C:0 F:0 CC↑0 D:0 (md)
+  M[CHANGELOG.md] 1121L C:0 F:0 CC↑0 D:0 (md)
   M[sumd/mcp_server.py] 714L C:0 F:18 CC↑5 D:0 (python)
   M[sumd/dsl/commands.py] 649L C:2 F:30 CC↑9 D:1 (python)
   M[docs/README.md] 560L C:0 F:0 CC↑0 D:0 (md)
-  M[README.md] 550L C:0 F:3 CC↑0 D:0 (md)
-  M[sumd/dsl/engine.py] 537L C:2 F:39 CC↑9 D:0 (python)
+  M[README.md] 550L C:0 F:0 CC↑0 D:0 (md)
+  M[sumd/dsl/engine.py] 526L C:2 F:40 CC↑9 D:0 (python)
   M[sumd/dsl/schema_commands.py] 517L C:2 F:33 CC↑10 D:0 (python)
   M[goal.yaml] 511L C:0 F:0 CC↑0 D:0 (yaml)
   M[docs/USAGE.md] 494L C:0 F:0 CC↑0 D:0 (md)
   M[sumd/pipeline.py] 451L C:1 F:16 CC↑7 D:0 (python)
   M[sumd/dsl/nlp.py] 447L C:3 F:21 CC↑7 D:0 (python)
-  M[sumd/cli_doql.py] 439L C:0 F:6 CC↑8 D:1 (python)
-  LANGS: python:66/md:15/yaml:11/shell:7/json:7/yml:6/dsl:4/other:3/toml:3/perl:2/txt:1
+  LANGS: python:66/md:15/yaml:13/json:8/yml:6/shell:6/dsl:4/other:3/toml:3/perl:2/txt:2
 
 HOTSPOTS[10]:
   ★ RenderPipeline._collect fan=23  // Extract all project data and build RenderContext.
@@ -47,12 +47,12 @@ COMMAND_TYPE: Type of command to execut
 
 Detect
 
-REFACTOR[14]:
+REFACTOR[15]:
   [1] H/H Split god module sumd/cli.py (1212L, 0 classes)
   [2] H/H Split god module sumd/dsl/schema_commands.py (517L, 2 classes)
   [3] H/H Split god module sumd/extractor.py (1344L, 0 classes)
   [4] H/H Split god module sumd/dsl/commands.py (649L, 2 classes)
-  [5] H/H Split god module sumd/dsl/engine.py (537L, 2 classes)
+  [5] H/H Split god module sumd/dsl/engine.py (526L, 2 classes)
 
 EVOLUTION:
-  2026-05-21 CC̄=3.6 crit=20 20759L // Automated analysis
+  2026-05-22 CC̄=3.7 crit=21 27596L // Automated analysis

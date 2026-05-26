@@ -255,28 +255,28 @@ class DSLEngine:
             raise ValueError(f"Unknown comparison operator: {operator}")
         return op_fn(left, right)
     
+    async def _execute_not_logical(self, expression: DSLExpression, context: DSLContext) -> bool:
+        if len(expression.children) != 1:
+            raise ValueError("not requires exactly 1 operand")
+        operand = await self._execute_expression(expression.children[0], context)
+        return not operand
+
+    async def _execute_and_or_logical(self, operator: str, expression: DSLExpression, context: DSLContext) -> bool:
+        if len(expression.children) != 2:
+            raise ValueError(f"{operator} requires exactly 2 operands")
+        left = await self._execute_expression(expression.children[0], context)
+        right = await self._execute_expression(expression.children[1], context)
+        if operator == "and":
+            return left and right
+        return left or right
+
     async def _execute_logical(self, expression: DSLExpression, context: DSLContext) -> bool:
         """Execute logical expression."""
         operator = expression.value
-        
         if operator == "not":
-            if len(expression.children) != 1:
-                raise ValueError("not requires exactly 1 operand")
-            operand = await self._execute_expression(expression.children[0], context)
-            return not operand
-        
+            return await self._execute_not_logical(expression, context)
         elif operator in ["and", "or"]:
-            if len(expression.children) != 2:
-                raise ValueError(f"{operator} requires exactly 2 operands")
-            
-            left = await self._execute_expression(expression.children[0], context)
-            right = await self._execute_expression(expression.children[1], context)
-            
-            if operator == "and":
-                return left and right
-            elif operator == "or":
-                return left or right
-        
+            return await self._execute_and_or_logical(operator, expression, context)
         else:
             raise ValueError(f"Unknown logical operator: {operator}")
     

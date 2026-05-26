@@ -322,22 +322,24 @@ async def _cmd_cat(context: DSLContext, args: List[str]) -> str:
     return file_path.read_text(encoding="utf-8")
 
 
-async def _cmd_ls(context: DSLContext, args: List[str]) -> List[str]:
-    """List directory contents."""
+def _parse_ls_args(context: DSLContext, args: List[str]) -> tuple[Path, str]:
     path = context.working_directory
     pattern = "*"
-    
     if args:
         if len(args) == 1:
-            # Could be path or pattern
             test_path = context.working_directory / args[0]
             if test_path.exists() and test_path.is_dir():
                 path = test_path
             else:
                 pattern = args[0]
-        elif len(args) == 2:
+        elif len(args) >= 2:
             path = context.working_directory / args[0]
             pattern = args[1]
+    return path, pattern
+
+async def _cmd_ls(context: DSLContext, args: List[str]) -> List[str]:
+    """List directory contents."""
+    path, pattern = _parse_ls_args(context, args)
     
     if not path.exists():
         raise ValueError(f"Path not found: {path}")
@@ -510,6 +512,19 @@ async def _cmd_find(context: DSLContext, args: List[str]) -> List[str]:
     return sorted(files)
 
 
+def _grep_file(file_path: Path, pattern: str, context: DSLContext, results: List[Dict[str, Any]]) -> None:
+    try:
+        content = file_path.read_text(encoding="utf-8")
+        for line_num, line in enumerate(content.splitlines(), 1):
+            if pattern in line:
+                results.append({
+                    "file": str(file_path.relative_to(context.working_directory)),
+                    "line": line_num,
+                    "content": line.strip(),
+                })
+    except Exception:
+        pass
+
 async def _cmd_grep(context: DSLContext, args: List[str]) -> List[Dict[str, Any]]:
     """Search for text in files."""
     if not args:
@@ -523,19 +538,7 @@ async def _cmd_grep(context: DSLContext, args: List[str]) -> List[Dict[str, Any]
     for file_pattern in file_patterns:
         for file_path in context.working_directory.glob(file_pattern):
             if file_path.is_file():
-                try:
-                    content = file_path.read_text(encoding="utf-8")
-                    lines = content.splitlines()
-                    
-                    for line_num, line in enumerate(lines, 1):
-                        if pattern in line:
-                            results.append({
-                                "file": str(file_path.relative_to(context.working_directory)),
-                                "line": line_num,
-                                "content": line.strip(),
-                            })
-                except Exception:
-                    continue
+                _grep_file(file_path, pattern, context, results)
     
     return results
 

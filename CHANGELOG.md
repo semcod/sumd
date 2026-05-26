@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.55] - 2026-05-26
+
+### Docs
+- Update README.md
+- Update SUMD.md
+- Update SUMR.md
+- Update docs/README.md
+- Update project/README.md
+- Update project/context.md
+
+### Other
+- Update .code2llm_cache/CHANGELOG_1779470163249410643_26124.pkl
+- Update .code2llm_cache/README_1779470163049949172_21853.pkl
+- Update .code2llm_cache/__init___1779470163050382060_771.pkl
+- Update .code2llm_cache/__init___1779470163153375344_65.pkl
+- Update .code2llm_cache/cli_1779396140628039187_40014.pkl
+- Update .code2llm_cache/deps_1779391133025628998_249192.pkl
+- Update .code2llm_cache/engine_1779469706030621179_21678.pkl
+- Update .code2llm_cache/pyproject_1779470163038228923_2355.pkl
+- Update .code2llm_cache/regix_1779391094629692715_1542.pkl
+- Update .code2llm_cache/sumd-cli.testql.toon_1779469275607031456_1423.pkl
+- ... and 42 more files
+
 ## [0.3.54] - 2026-05-22
 
 ### Docs

@@ -16,20 +16,29 @@ from sumd.sections.utils.should_render import has_attr
 # ---------------------------------------------------------------------------
 
 
-def _render_scenario_contract(sc: dict, a) -> None:
-    """Append contract lines for a single scenario to the output via *a*."""
-    a(f"**`{sc['name']}`**")
+def _render_sc_endpoints(sc: dict, a) -> None:
     if sc.get("endpoints"):
         for ep in sc["endpoints"][:3]:
             status = ep.get("status", "")
             op = f" — `{ep['operationId']}`" if ep.get("operationId") else ""
             a(f"- `{ep['method']} {ep['path']}` → `{status}`{op}")
+
+def _render_sc_asserts(sc: dict, a) -> None:
     if sc.get("asserts"):
         for ass in sc["asserts"][:3]:
             a(f"- assert `{ass['field']} {ass['op']} {ass['expected']}`")
+
+def _render_sc_performance(sc: dict, a) -> None:
     if sc.get("performance"):
         for p in sc["performance"][:2]:
             a(f"- perf `{p['metric']} < {p['threshold']}`")
+
+def _render_scenario_contract(sc: dict, a) -> None:
+    """Append contract lines for a single scenario to the output via *a*."""
+    a(f"**`{sc['name']}`**")
+    _render_sc_endpoints(sc, a)
+    _render_sc_asserts(sc, a)
+    _render_sc_performance(sc, a)
     if sc.get("detectors"):
         a(f"- detectors: {sc['detectors']}")
     a("")

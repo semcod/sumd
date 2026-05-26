@@ -15,6 +15,28 @@ from sumd.sections.utils.render import call_with_ctx
 # ---------------------------------------------------------------------------
 
 
+def _group_endpoints_by_tag(endpoints: list[dict]) -> dict[str, list[dict]]:
+    by_tag: dict[str, list[dict]] = {}
+    for ep in endpoints:
+        tag = ep["tags"][0] if ep.get("tags") else "default"
+        by_tag.setdefault(tag, []).append(ep)
+    return by_tag
+
+def _render_endpoint_groups(by_tag: dict[str, list[dict]], a) -> None:
+    a("```python markpact:openapi path=openapi.yaml")
+    for tag, eps in by_tag.items():
+        a(f"# {tag}")
+        for ep in eps:
+            op_id = (
+                ep.get("operationId")
+                or f"{ep['method'].lower()}_{ep['path'].replace('/', '_').strip('_')}"
+            )
+            summary = f"  # {ep['summary']}" if ep.get("summary") else ""
+            a(f"def {op_id}() -> Response:{summary}")
+            a(f'    "{ep["method"]} {ep["path"]}"')
+        a("")
+    a("```")
+
 def _render_api_stubs(openapi: dict) -> list[str]:
     """Render OpenAPI endpoints as Python-like typed stubs for LLM orientation."""
     endpoints = openapi.get("endpoints", [])
@@ -31,25 +53,8 @@ def _render_api_stubs(openapi: dict) -> list[str]:
         a(f"*{title} v{version} — auto-generated stubs from `openapi.yaml`.*")
         a("")
 
-    # Group by tag for structure
-    by_tag: dict[str, list[dict]] = {}
-    for ep in endpoints:
-        tag = ep["tags"][0] if ep.get("tags") else "default"
-        by_tag.setdefault(tag, []).append(ep)
-
-    a("```python markpact:openapi path=openapi.yaml")
-    for tag, eps in by_tag.items():
-        a(f"# {tag}")
-        for ep in eps:
-            op_id = (
-                ep.get("operationId")
-                or f"{ep['method'].lower()}_{ep['path'].replace('/', '_').strip('_')}"
-            )
-            summary = f"  # {ep['summary']}" if ep.get("summary") else ""
-            a(f"def {op_id}() -> Response:{summary}")
-            a(f'    "{ep["method"]} {ep["path"]}"')
-        a("")
-    a("```")
+    by_tag = _group_endpoints_by_tag(endpoints)
+    _render_endpoint_groups(by_tag, a)
     a("")
     if schemas:
         a("**Schemas**: " + ", ".join(f"`{s}`" for s in schemas))

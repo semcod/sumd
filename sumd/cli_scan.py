@@ -86,6 +86,30 @@ def _is_project_dir(d: Path) -> bool:
     return False
 
 
+def _should_skip_dir(d: Path) -> bool:
+    """Return True if directory should be skipped during project walk."""
+    if not d.is_dir():
+        return True
+    if d.name.startswith("."):
+        return True
+    if d.name in _SKIP_DIRS:
+        return True
+    return False
+
+
+def _process_walk_entry(d: Path, projects: list[Path], max_depth: int | None, depth: int) -> None:
+    """Process a single directory entry during project walk."""
+    if _should_skip_dir(d):
+        return
+    try:
+        if _is_project_dir(d):
+            projects.append(d)
+        else:
+            _walk_projects(d, projects, max_depth, depth + 1)
+    except PermissionError:
+        pass
+
+
 def _walk_projects(
     path: Path, projects: list[Path], max_depth: int | None, depth: int
 ) -> None:
@@ -97,15 +121,7 @@ def _walk_projects(
     except PermissionError:
         return
     for d in entries:
-        if not d.is_dir() or d.name.startswith(".") or d.name in _SKIP_DIRS:
-            continue
-        try:
-            if _is_project_dir(d):
-                projects.append(d)
-            else:
-                _walk_projects(d, projects, max_depth, depth + 1)
-        except PermissionError:
-            continue
+        _process_walk_entry(d, projects, max_depth, depth)
 
 
 def _detect_projects(workspace: Path, max_depth: int | None = None) -> list[Path]:
@@ -292,6 +308,28 @@ def _maybe_generate_testql(proj_dir: Path) -> None:
         click.echo(f"   ⚠️  testql generate error: {exc}")
 
 
+def _run_doql_sync(proj_dir: Path, doql_sync: bool) -> None:
+    """Run DOQL sync if enabled and required files exist."""
+    if not doql_sync:
+        return
+    has_less = (proj_dir / "app.doql.less").exists()
+    has_css = (proj_dir / "app.doql.css").exists()
+    if not (has_less or has_css):
+        return
+    
+    click.echo("   ⚙️  Syncing DOQL...")
+    r = subprocess.run(
+        ["doql", "sync"],
+        cwd=str(proj_dir),
+        capture_output=True,
+        text=True,
+    )
+    if r.returncode == 0:
+        click.echo("   ✅ DOQL sync complete")
+    else:
+        click.echo(f"   ⚠️  DOQL sync failed: {r.stderr.strip() or r.stdout.strip()}", err=True)
+
+
 def _finalize_scan(
     proj_dir: Path,
     doc,
@@ -314,18 +352,7 @@ def _finalize_scan(
         _run_analysis_tools(proj_dir, tool_list)
         click.echo(f"   ✅ Analysis complete → {proj_dir / 'project'}/")
 
-    if doql_sync and ((proj_dir / "app.doql.less").exists() or (proj_dir / "app.doql.css").exists()):
-        click.echo("   ⚙️  Syncing DOQL...")
-        r = subprocess.run(
-            ["doql", "sync"],
-            cwd=str(proj_dir),
-            capture_output=True,
-            text=True,
-        )
-        if r.returncode == 0:
-            click.echo("   ✅ DOQL sync complete")
-        else:
-            click.echo(f"   ⚠️  DOQL sync failed: {r.stderr.strip() or r.stdout.strip()}", err=True)
+    _run_doql_sync(proj_dir, doql_sync)
 
     return {
         "status": "OK",
@@ -335,6 +362,20 @@ def _finalize_scan(
         "path": str(sumd_path),
         "warnings": [c.message for c in cb_warnings],
     }
+
+
+def _handle_scan_errors(proj_dir: Path, sumd_path: Path, doc, sources: list, md_issues: list, cb_errors: list) -> dict | None:
+    """Format and return error dict if any issues are found, otherwise None."""
+    all_errors = md_issues + [c.message for c in cb_errors]
+    if not all_errors:
+        return None
+
+    click.echo(
+        f"  \u274c {proj_dir.name:<18} {'invalid':<10} {len(doc.sections):<10} {', '.join(sources)}"
+    )
+    for e in all_errors:
+        click.echo(f"       \u2193 {e}")
+    return {"status": "INVALID", "errors": all_errors, "path": str(sumd_path)}
 
 
 def _scan_one_project(
@@ -371,15 +412,10 @@ def _scan_one_project(
         doc, md_issues, cb_errors, cb_warnings, sources = _render_write_validate(
             proj_dir, sumd_path, raw, profile
         )
-        all_errors = md_issues + [c.message for c in cb_errors]
-
-        if all_errors:
-            click.echo(
-                f"  \u274c {proj_dir.name:<18} {'invalid':<10} {len(doc.sections):<10} {', '.join(sources)}"
-            )
-            for e in all_errors:
-                click.echo(f"       \u2193 {e}")
-            return {"status": "INVALID", "errors": all_errors, "path": str(sumd_path)}
+        
+        error_result = _handle_scan_errors(proj_dir, sumd_path, doc, sources, md_issues, cb_errors)
+        if error_result:
+            return error_result
 
         return _finalize_scan(
             proj_dir, doc, sources, cb_warnings,

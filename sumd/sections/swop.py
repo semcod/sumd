@@ -6,6 +6,30 @@ from sumd.sections.base import RenderContext, Section
 from sumd.sections.utils.render import call_with_ctx
 
 
+def _render_raw_swop_context(context_name: str, context_data: dict, a) -> None:
+    a(f"### Context: `{context_name}`")
+    a("")
+    for manifest_type in ("commands", "queries", "events"):
+        if manifest_type in context_data:
+            manifest = context_data[manifest_type]
+            file_path = manifest["file"]
+            content = manifest["content"]
+            a(f"#### {manifest_type.capitalize()} (`{file_path}`)")
+            a("")
+            a(f"```yaml markpact:swop path={file_path}")
+            a(content)
+            a("```")
+            a("")
+
+def _render_parsed_swop_context(context_name: str, context_data: dict, a) -> None:
+    a(f"### Context: `{context_name}`")
+    a("")
+    for manifest_type in ("commands", "queries", "events"):
+        if manifest_type in context_data:
+            file_path = context_data[manifest_type]["file"]
+            a(f"- **{manifest_type.capitalize()}**: `{file_path}`")
+    a("")
+
 def _render_swop_section(swop: dict, raw_sources: bool) -> list[str]:
     """Render SWOP manifest section."""
     L: list[str] = []
@@ -15,7 +39,6 @@ def _render_swop_section(swop: dict, raw_sources: bool) -> list[str]:
         return L
 
     contexts = swop["contexts"]
-    sources = swop.get("sources", [])
 
     a("## SWOP")
     a("")
@@ -23,33 +46,11 @@ def _render_swop_section(swop: dict, raw_sources: bool) -> list[str]:
     a("")
 
     if raw_sources:
-        # Render raw YAML files
         for context_name, context_data in sorted(contexts.items()):
-            a(f"### Context: `{context_name}`")
-            a("")
-
-            for manifest_type in ("commands", "queries", "events"):
-                if manifest_type in context_data:
-                    manifest = context_data[manifest_type]
-                    file_path = manifest["file"]
-                    content = manifest["content"]
-                    a(f"#### {manifest_type.capitalize()} (`{file_path}`)")
-                    a("")
-                    a(f"```yaml markpact:swop path={file_path}")
-                    a(content)
-                    a("```")
-                    a("")
+            _render_raw_swop_context(context_name, context_data, a)
     else:
-        # Render parsed/structured view
         for context_name, context_data in sorted(contexts.items()):
-            a(f"### Context: `{context_name}`")
-            a("")
-
-            for manifest_type in ("commands", "queries", "events"):
-                if manifest_type in context_data:
-                    file_path = context_data[manifest_type]["file"]
-                    a(f"- **{manifest_type.capitalize()}**: `{file_path}`")
-            a("")
+            _render_parsed_swop_context(context_name, context_data, a)
 
     return L
 

@@ -1,9 +1,9 @@
-# vallm batch | 162f | 89✓ 8⚠ 13✗ | 2026-05-21
+# vallm batch | 211f | 114✓ 6⚠ 13✗ | 2026-05-22
 
 SUMMARY:
-  scanned: 162  passed: 89 (54.9%)  warnings: 8  errors: 13  unsupported: 57
+  scanned: 211  passed: 114 (54.0%)  warnings: 6  errors: 13  unsupported: 81
 
-WARNINGS[8]{path,score}:
+WARNINGS[6]{path,score}:
   /home/tom/github/oqlos/sumd/project/logic.pl,0.78
     issues[1]{rule,severity,message,line}:
       syntax.unsupported,warning,Could not parse perl: maximum recursion depth exceeded,
@@ -13,21 +13,12 @@ WARNINGS[8]{path,score}:
   /home/tom/github/oqlos/sumd/sumd_logic_validator/sumd_logic_validator/logic/rules.pl,0.78
     issues[1]{rule,severity,message,line}:
       syntax.unsupported,warning,Could not parse perl: maximum recursion depth exceeded,
-  /home/tom/github/oqlos/sumd/sumd/dsl/parser.py,0.93
-    issues[4]{rule,severity,message,line}:
-      complexity.cyclomatic,warning,_parse_statement has cyclomatic complexity 23 (max: 15),213
-      complexity.cyclomatic,warning,_parse_primary has cyclomatic complexity 22 (max: 15),411
-      complexity.lizard_cc,warning,_parse_statement: CC=23 exceeds limit 15,213
-      complexity.lizard_cc,warning,_parse_primary: CC=22 exceeds limit 15,411
   /home/tom/github/oqlos/sumd/sumd/dsl/commands.py,0.97
     issues[1]{rule,severity,message,line}:
       complexity.lizard_length,warning,create_builtin_registry: 177 lines exceeds limit 100,104
   /home/tom/github/oqlos/sumd/sumd/dsl/nlp.py,0.97
     issues[1]{rule,severity,message,line}:
       complexity.lizard_length,warning,_initialize_default_intents: 106 lines exceeds limit 100,32
-  /home/tom/github/oqlos/sumd/sumd/dsl/engine.py,0.98
-    issues[1]{rule,severity,message,line}:
-      complexity.maintainability,warning,Low maintainability index: 19.9 (threshold: 20),
   /home/tom/github/oqlos/sumd/sumd/dsl/schema_commands.py,0.98
     issues[1]{rule,severity,message,line}:
       complexity.maintainability,warning,Low maintainability index: 19.3 (threshold: 20),
@@ -49,9 +40,6 @@ ERRORS[13]{path,score}:
   /home/tom/github/oqlos/sumd/tests/test_architectural_logic.py,0.91
     issues[1]{rule,severity,message,line}:
       python.import.resolvable,error,Module 'pytest' not found,1
-  /home/tom/github/oqlos/sumd/tests/test_cli.py,0.93
-    issues[1]{rule,severity,message,line}:
-      python.import.resolvable,error,Module 'pytest' not found,7
   /home/tom/github/oqlos/sumd/tests/test_dogfood.py,0.93
     issues[1]{rule,severity,message,line}:
       python.import.resolvable,error,Module 'pytest' not found,17
@@ -67,20 +55,23 @@ ERRORS[13]{path,score}:
   /home/tom/github/oqlos/sumd/sumd/extractor.py,0.96
     issues[1]{rule,severity,message,line}:
       python.import.resolvable,error,Module 'toml' not found,26
+  /home/tom/github/oqlos/sumd/tests/test_cli.py,0.96
+    issues[1]{rule,severity,message,line}:
+      python.import.resolvable,error,Module 'pytest' not found,7
   /home/tom/github/oqlos/sumd/tests/test_mcp_server.py,0.96
     issues[1]{rule,severity,message,line}:
       python.import.resolvable,error,Module 'pytest' not found,8
-  /home/tom/github/oqlos/sumd/sumd/cli.py,0.97
-    issues[2]{rule,severity,message,line}:
-      python.import.resolvable,error,Module 'toml' not found,589
-      python.import.resolvable,error,Module 'toml' not found,527
   /home/tom/github/oqlos/sumd/tests/test_mcp_cqrs_dsl.py,0.97
     issues[1]{rule,severity,message,line}:
       python.import.resolvable,error,Module 'pytest' not found,3
+  /home/tom/github/oqlos/sumd/sumd/cli.py,0.98
+    issues[2]{rule,severity,message,line}:
+      python.import.resolvable,error,Module 'toml' not found,185
+      python.import.resolvable,error,Module 'toml' not found,123
 
 UNSUPPORTED[5]{bucket,count}:
-  *.md,24
+  *.md,25
   Dockerfile*,1
-  *.txt,3
+  *.txt,5
   *.yml,6
-  other,23
+  other,44

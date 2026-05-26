@@ -5,21 +5,21 @@ flowchart TD
     classDef entry fill:#4dabf7,stroke:#1971c2,color:#fff
 
     subgraph CLI
-        sumd__cli__cli["cli"]
-        sumd__cli__validate["validate"]
-        sumd__cli__export["export"]
-        sumd__cli__info["info"]
-        sumd__cli__generate["generate"]
-        sumd__cli__extract["extract"]
-        sumd__cli__scan["scan"]
-        sumd__cli__lint["lint"]
-        sumd__cli___lint_classify_issues["_lint_classify_issues"]
-        sumd__cli___lint_collect_paths["_lint_collect_paths"]
-        sumd__cli___lint_print_result["_lint_print_result"]
-        sumd__cli___setup_tools_venv["_setup_tools_venv"]
-        sumd__cli___run_code2llm_formats["_run_code2llm_formats"]
-        sumd__cli___run_tool_subprocess["_run_tool_subprocess"]
-        sumd__cli___run_analyze_tool["_run_analyze_tool"]
+        sumd__cli_scan___is_project_dir["_is_project_dir"]
+        sumd__cli_scan___walk_projects["_walk_projects"]
+        sumd__cli_scan___detect_projects["_detect_projects"]
+        sumd__cli_scan___ensure_venv["_ensure_venv"]
+        sumd__cli_scan___tool_bin["_tool_bin"]
+        sumd__cli_scan___run_one_tool["_run_one_tool"]
+        sumd__cli_scan___run_analysis_tools["_run_analysis_tools"]
+        sumd__cli_scan___export_sumd_json["_export_sumd_json"]
+        sumd__cli_scan___render_write_validate["_render_write_validate"]
+        sumd__cli_scan___echo_scan_result["_echo_scan_result"]
+        sumd__cli_scan___maybe_generate_doql["_maybe_generate_doql"]
+        sumd__cli_scan___maybe_generate_testql["_maybe_generate_testql"]
+        sumd__cli_scan___finalize_scan["_finalize_scan"]
+        sumd__cli_scan___scan_one_project["_scan_one_project"]
+        sumd__cli_doql___detect_project_type["_detect_project_type"]
         ...["+34 more"]
     end
 
@@ -29,21 +29,21 @@ flowchart TD
         script__write_file["write_file"]
         simple_script__print["print"]
         simple_script__write_file["write_file"]
-        README__print["print"]
-        README__scan["scan"]
-        README__validate["validate"]
-        sumd__validator___validate_yaml_body["_validate_yaml_body"]
-        sumd__validator___validate_less_css_body["_validate_less_css_body"]
-        sumd__validator___validate_mermaid_body["_validate_mermaid_body"]
-        sumd__validator___validate_toon_body["_validate_toon_body"]
-        sumd__validator___validate_bash_body["_validate_bash_body"]
-        sumd__validator___validate_deps_body["_validate_deps_body"]
-        sumd__validator__validate_project_architecture("validate_project_architecture CC=8")
-        ...["+315 more"]
+        sumd__extractor___fan_out["_fan_out"]
+        sumd__extractor___analyse_class_methods["_analyse_class_methods"]
+        sumd__extractor___analyse_py_top_classes["_analyse_py_top_classes"]
+        sumd__extractor___analyse_py_module["_analyse_py_module"]
+        sumd__extractor___render_map_detail["_render_map_detail"]
+        sumd__extractor___facts_python_analysis["_facts_python_analysis"]
+        sumd__extractor__generate_project_logic["generate_project_logic"]
+        sumd__parser__SUMDParser__parse["parse"]
+        sumd__parser__SUMDParser___parse_header["_parse_header"]
+        sumd__parser__SUMDParser___parse_sections["_parse_sections"]
+        ...["+313 more"]
     end
 
     subgraph Exporters
         sumd__mcp_server___tool_export_sumd["_tool_export_sumd"]
     end
 
-    class working_script__print,script__print,script__write_file,simple_script__print,simple_script__write_file,README__print,README__scan,README__validate,sumd__validator___validate_yaml_body,sumd__validator___validate_less_css_body entry
+    class working_script__print,script__print,script__write_file,simple_script__print,simple_script__write_file,sumd__parser__SUMDParser__parse,sumd__parser__SUMDParser___parse_header,sumd__parser__SUMDParser___parse_sections,sumd__parser__SUMDParser__validate,sumd__parser__parse_file entry

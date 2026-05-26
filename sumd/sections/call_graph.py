@@ -64,6 +64,9 @@ def _process_in_hubs_line(line: str, hubs: list, current_hub: dict) -> dict:
     return current_hub
 
 
+def _is_end_of_hubs(in_hubs: bool, line: str) -> bool:
+    return in_hubs and bool(line) and not line.startswith(" ")
+
 def _parse_calls_hubs(lines: list[str]) -> list[dict]:
     """Parse HUBS section into list of hub dicts."""
     hubs: list[dict] = []
@@ -73,7 +76,7 @@ def _parse_calls_hubs(lines: list[str]) -> list[dict]:
         if line.startswith("HUBS["):
             in_hubs = True
             continue
-        if in_hubs and line and not line.startswith(" "):
+        if _is_end_of_hubs(in_hubs, line):
             in_hubs = False
         if in_hubs:
             current_hub = _process_in_hubs_line(line, hubs, current_hub)

@@ -165,6 +165,48 @@ def _validate_markpact_meta(
         )
 
 
+def _extract_group(m: re.Match, name: str) -> str:
+    """Safely extract and strip a regex group."""
+    val = m.group(name)
+    return val.strip() if val else ""
+
+
+def _check_one_codeblock(
+    m: re.Match, content: str, source: str
+) -> list[CodeBlockIssue]:
+    """Validate a single fenced code block match. Returns zero or more issues."""
+    issues: list[CodeBlockIssue] = []
+    lang = _extract_group(m, "lang")
+    meta = _extract_group(m, "meta")
+    body = _extract_group(m, "body")
+    line_no = content[: m.start()].count("\n") + 1
+    ctx = f"{source}:{line_no}"
+
+    # ── markpact annotation checks ──────────────────────────────────
+    mp = _MARKPACT_META_RE.search(meta)
+    if mp:
+        _validate_markpact_meta(mp, line_no, lang, meta, issues)
+
+    # ── body emptiness ──────────────────────────────────────────────
+    if not body:
+        issues.append(
+            CodeBlockIssue(line_no, lang, "warning", f"empty code block (lang={lang!r})", meta)
+        )
+        return issues
+
+    # ── language-specific body validation ───────────────────────────
+    if lang == "toon":
+        if "markpact:testql" in meta:
+            return issues
+
+    validator = _LANG_VALIDATORS.get(lang)
+    if validator:
+        for msg in validator(body, ctx):
+            issues.append(CodeBlockIssue(line_no, lang, "error", msg, meta))
+
+    return issues
+
+
 def validate_codeblocks(content: str, source: str = "SUMD.md") -> list[CodeBlockIssue]:
     """Validate all fenced code blocks in *content*.
 
@@ -174,37 +216,8 @@ def validate_codeblocks(content: str, source: str = "SUMD.md") -> list[CodeBlock
     - non-empty bodies
     """
     issues: list[CodeBlockIssue] = []
-
     for m in _CODEBLOCK_RE.finditer(content):
-        lang = (m.group("lang") or "").strip()
-        meta = (m.group("meta") or "").strip()
-        body = (m.group("body") or "").strip()
-        line_no = content[: m.start()].count("\n") + 1
-        ctx = f"{source}:{line_no}"
-
-        # ── markpact annotation checks ──────────────────────────────────
-        mp = _MARKPACT_META_RE.search(meta)
-        if mp:
-            _validate_markpact_meta(mp, line_no, lang, meta, issues)
-
-        # ── body emptiness ──────────────────────────────────────────────
-        if not body:
-            issues.append(
-                CodeBlockIssue(
-                    line_no, lang, "warning", f"empty code block (lang={lang!r})", meta
-                )
-            )
-            continue
-
-        # ── language-specific body validation ───────────────────────────
-        if lang == "toon" and "markpact:testql" in meta:
-            continue
-            
-        validator = _LANG_VALIDATORS.get(lang)
-        if validator:
-            for msg in validator(body, ctx):
-                issues.append(CodeBlockIssue(line_no, lang, "error", msg, meta))
-
+        issues.extend(_check_one_codeblock(m, content, source))
     return issues
 
 
@@ -311,6 +324,42 @@ def validate_markdown(
 # ---------------------------------------------------------------------------
 
 
+def _is_project_root_for_validation(proj_dir: Path) -> bool:
+    """Return False for dummy / partial directories used in dogfood tests."""
+    return any(
+        (proj_dir / marker).exists()
+        for marker in ("app.doql.less", "Makefile", "Taskfile.yml")
+    )
+
+
+def _load_prolog_db(proj_dir: Path):
+    """Build and return a loaded PrologDB or None if rules file is missing."""
+    from sumd.extractor import generate_project_logic
+    from sumd.prolog_engine import PythonPrologDB
+
+    facts_text = generate_project_logic(proj_dir)
+    rules_path = Path(__file__).parent / "rules.pl"
+    if not rules_path.exists():
+        return None
+    rules_text = rules_path.read_text(encoding="utf-8")
+    db = PythonPrologDB()
+    db.parse_and_load(facts_text)
+    db.parse_and_load(rules_text)
+    return db
+
+
+def _query_prolog_violations(db) -> list[str]:
+    """Run invalid(Error) query and return formatted violation strings."""
+    from sumd.prolog_engine import PythonPrologEngine
+
+    engine = PythonPrologEngine(db)
+    return sorted(
+        f"architecture inconsistency: {r['Error']}"
+        for r in engine.query("invalid(Error)")
+        if r.get("Error")
+    )
+
+
 def validate_project_architecture(proj_dir: Path) -> list[str]:
     """Run Prolog-based architectural consistency checks on the project.
 
@@ -318,40 +367,12 @@ def validate_project_architecture(proj_dir: Path) -> list[str]:
         list[str]: list of logic-based consistency errors.
     """
     try:
-        from sumd.extractor import generate_project_logic
-        from sumd.prolog_engine import PythonPrologDB, PythonPrologEngine
-
-        # If it's a dummy/partial directory (like in dogfood tests where SUMD.md is isolated),
-        # skip architectural validation.
-        if not (proj_dir / "app.doql.less").exists() and not (proj_dir / "Makefile").exists() and not (proj_dir / "Taskfile.yml").exists():
+        if not _is_project_root_for_validation(proj_dir):
             return []
-
-        # 1. Generate latest facts
-        facts_text = generate_project_logic(proj_dir)
-
-        # 2. Load rules
-        rules_path = Path(__file__).parent / "rules.pl"
-        if not rules_path.exists():
+        db = _load_prolog_db(proj_dir)
+        if db is None:
             return []
-        rules_text = rules_path.read_text(encoding="utf-8")
-
-        # 3. Initialize DB and Engine
-        db = PythonPrologDB()
-        db.parse_and_load(facts_text)
-        db.parse_and_load(rules_text)
-
-        engine = PythonPrologEngine(db)
-
-        # 4. Query invalid(Error)
-        results = engine.query("invalid(Error)")
-
-        # 5. Format results
-        errors = []
-        for r in results:
-            err = r.get("Error")
-            if err:
-                errors.append(f"architecture inconsistency: {err}")
-        return sorted(errors)
+        return _query_prolog_violations(db)
     except Exception as e:
         return [f"failed to execute architectural logic validation: {e}"]
 

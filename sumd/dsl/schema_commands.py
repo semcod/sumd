@@ -50,6 +50,20 @@ class SchemaCommandRegistry:
             commands = [cmd for cmd in commands if cmd.command_type == command_type]
         return commands
     
+    def _validate_param_presence(self, command: DSLCommandSchema, args: Dict[str, Any]) -> Optional[str]:
+        for param in command.parameters:
+            if param.required and param.name not in args:
+                return f"Missing required parameter: {param.name}"
+        return None
+
+    def _validate_param_types(self, command: DSLCommandSchema, args: Dict[str, Any]) -> Optional[str]:
+        for param in command.parameters:
+            if param.name in args:
+                value = args[param.name]
+                if not self._validate_parameter_type(value, param.data_type):
+                    return f"Invalid type for parameter {param.name}: expected {param.data_type}"
+        return None
+
     def validate_command_call(self, command_name: str, args: Dict[str, Any]) -> DSLCommandResult:
         """Validate command call against schema."""
         command = self.get_command(command_name)
@@ -60,25 +74,13 @@ class SchemaCommandRegistry:
                 execution_time=0.0,
             )
         
-        # Validate required parameters
-        for param in command.parameters:
-            if param.required and param.name not in args:
-                return DSLCommandResult(
-                    success=False,
-                    error=f"Missing required parameter: {param.name}",
-                    execution_time=0.0,
-                )
-        
-        # Validate parameter types
-        for param in command.parameters:
-            if param.name in args:
-                value = args[param.name]
-                if not self._validate_parameter_type(value, param.data_type):
-                    return DSLCommandResult(
-                        success=False,
-                        error=f"Invalid type for parameter {param.name}: expected {param.data_type}",
-                        execution_time=0.0,
-                    )
+        err = self._validate_param_presence(command, args) or self._validate_param_types(command, args)
+        if err:
+            return DSLCommandResult(
+                success=False,
+                error=err,
+                execution_time=0.0,
+            )
         
         return DSLCommandResult(success=True, execution_time=0.0)
     
@@ -117,11 +119,26 @@ class SchemaBasedCommands:
         self.registry = registry
         self.nlp_model = SimpleNLPModel()
     
+    async def _dispatch_command(self, command: DSLCommandSchema, args: Dict[str, Any]) -> Any:
+        if command.command_type == DSLCommandType.SUMD:
+            return await self._execute_sumd_command(command, args)
+        elif command.command_type == DSLCommandType.FILE:
+            return await self._execute_file_command(command, args)
+        elif command.command_type == DSLCommandType.SEARCH:
+            return await self._execute_search_command(command, args)
+        elif command.command_type == DSLCommandType.UTILITY:
+            return await self._execute_utility_command(command, args)
+        elif command.command_type == DSLCommandType.NLP:
+            return await self._execute_nlp_command(command, args)
+        elif command.command_type == DSLCommandType.SCHEMA:
+            return await self._execute_schema_command(command, args)
+        else:
+            return {"error": f"Unsupported command type: {command.command_type}"}
+
     async def execute_command(self, command_name: str, args: Dict[str, Any]) -> DSLCommandResult:
         """Execute a schema-based command."""
         start_time = time.time()
         
-        # Validate command
         validation = self.registry.validate_command_call(command_name, args)
         if not validation.success:
             return validation
@@ -135,35 +152,17 @@ class SchemaBasedCommands:
             )
         
         try:
-            # Execute command based on type
-            if command.command_type == DSLCommandType.SUMD:
-                result = await self._execute_sumd_command(command, args)
-            elif command.command_type == DSLCommandType.FILE:
-                result = await self._execute_file_command(command, args)
-            elif command.command_type == DSLCommandType.SEARCH:
-                result = await self._execute_search_command(command, args)
-            elif command.command_type == DSLCommandType.UTILITY:
-                result = await self._execute_utility_command(command, args)
-            elif command.command_type == DSLCommandType.NLP:
-                result = await self._execute_nlp_command(command, args)
-            elif command.command_type == DSLCommandType.SCHEMA:
-                result = await self._execute_schema_command(command, args)
-            else:
-                result = {"error": f"Unsupported command type: {command.command_type}"}
-            
-            execution_time = time.time() - start_time
+            result = await self._dispatch_command(command, args)
             return DSLCommandResult(
                 success=True,
                 result=result,
-                execution_time=execution_time,
+                execution_time=time.time() - start_time,
             )
-        
         except Exception as e:
-            execution_time = time.time() - start_time
             return DSLCommandResult(
                 success=False,
                 error=str(e),
-                execution_time=execution_time,
+                execution_time=time.time() - start_time,
             )
     
     async def _execute_sumd_command(self, command: DSLCommandSchema, args: Dict[str, Any]) -> Any:

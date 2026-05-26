@@ -24,30 +24,39 @@ def _render_quality_raw(proj_dir: Path, L: list[str]) -> None:
         a("")
 
 
+def _render_metrics(pyqual: dict, a) -> None:
+    if not pyqual.get("metrics"): return
+    a("### Metrics / Thresholds")
+    a("")
+    for k, v in pyqual["metrics"].items():
+        a(f"- `{k}`: `{v}`")
+    a("")
+
+def _render_stages(pyqual: dict, a) -> None:
+    if not pyqual.get("stages"): return
+    a("### Stages")
+    a("")
+    for s in pyqual["stages"]:
+        opt = " *(optional)*" if s.get("optional") else ""
+        a(f"- **{s['name']}**: `{s['tool']}`{opt}")
+    a("")
+
+def _render_loop(pyqual: dict, a) -> None:
+    if not pyqual.get("loop"): return
+    a("### Loop Behavior")
+    a("")
+    for k, v in pyqual["loop"].items():
+        a(f"- `{k}`: `{v}`")
+    a("")
+
 def _render_quality_parsed(pyqual: dict, L: list[str]) -> None:
     a = L.append
     if pyqual.get("name"):
         a(f"**Pipeline**: `{pyqual['name']}`")
         a("")
-    if pyqual.get("metrics"):
-        a("### Metrics / Thresholds")
-        a("")
-        for k, v in pyqual["metrics"].items():
-            a(f"- `{k}`: `{v}`")
-        a("")
-    if pyqual.get("stages"):
-        a("### Stages")
-        a("")
-        for s in pyqual["stages"]:
-            opt = " *(optional)*" if s.get("optional") else ""
-            a(f"- **{s['name']}**: `{s['tool']}`{opt}")
-        a("")
-    if pyqual.get("loop"):
-        a("### Loop Behavior")
-        a("")
-        for k, v in pyqual["loop"].items():
-            a(f"- `{k}`: `{v}`")
-        a("")
+    _render_metrics(pyqual, a)
+    _render_stages(pyqual, a)
+    _render_loop(pyqual, a)
 
 
 def _render_quality(pyqual: dict, proj_dir: Path, raw_sources: bool) -> list[str]:

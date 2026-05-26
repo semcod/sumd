@@ -1,7 +1,7 @@
 <!-- code2docs:start --># sumd
 
-![version](https://img.shields.io/badge/version-0.1.0-blue) ![python](https://img.shields.io/badge/python-%3E%3D3.10-blue) ![coverage](https://img.shields.io/badge/coverage-unknown-lightgrey) ![functions](https://img.shields.io/badge/functions-553-green)
-> **553** functions | **104** classes | **126** files | CC̄ = 3.7
+![version](https://img.shields.io/badge/version-0.1.0-blue) ![python](https://img.shields.io/badge/python-%3E%3D3.10-blue) ![coverage](https://img.shields.io/badge/coverage-unknown-lightgrey) ![functions](https://img.shields.io/badge/functions-551-green)
+> **551** functions | **107** classes | **133** files | CC̄ = 3.7
 
 > Auto-generated project documentation from source code analysis.
 
@@ -74,12 +74,15 @@ docs = generate_docs("./my-project", config=config)
 ```
 sumd/
 ├── swop
+├── deps
 ├── goal
+├── regix
 ├── test
 ├── TODO
 ├── Makefile
 ├── working_script
 ├── koru
+├── wup
     ├── pre-commit-config
     ├── guards
 ├── script
@@ -178,10 +181,13 @@ sumd/
     ├── dsl/
         ├── parser
         ├── context_mixin
+        ├── parser_base
+        ├── parser_primary
         ├── shell
         ├── schema_commands
         ├── ast_nodes
         ├── nlp
+        ├── parser_expr
     ├── install_testql_autoloop
     ├── bootstrap
             ├── toon
@@ -296,6 +302,8 @@ sumd/
 - **`DSLCommandRegistry`** — Registry for DSL commands.
 - **`DSLParser`** — Parser for DSL expressions.
 - **`VariableMixin`** — Mixin providing set_variable / get_variable helpers.
+- **`DSLParserBase`** — Base parser class with token traversal utilities.
+- **`DSLPrimaryParser`** — Primary expression parsing methods for literals, identifiers, lists, dicts.
 - **`DSLShell`** — Interactive shell for SUMD DSL.
 - **`DSLShellServer`** — Server for DSL shell operations (for MCP integration).
 - **`SchemaCommandRegistry`** — Registry for schema-based DSL commands.
@@ -305,6 +313,7 @@ sumd/
 - **`NLPProcessor`** — Natural Language Processor for DSL commands.
 - **`NLPIntegration`** — NLP integration for DSL engine.
 - **`SimpleNLPModel`** — Simple NLP model implementation for basic functionality.
+- **`DSLExpressionParser`** — Expression parsing methods for math and logic operations.
 
 ### Functions
 
@@ -314,9 +323,6 @@ sumd/
 - `write_file()` — —
 - `print()` — —
 - `write_file()` — —
-- `print()` — —
-- `scan()` — —
-- `validate()` — —
 - `ask(sumd_path, question, model)` — —
 - `main()` — —
 - `build_context(sumd_path)` — Return a focused context string from SUMD.md.
@@ -400,11 +406,12 @@ sumd/
 📄 `.pre-commit-config`
 📄 `CHANGELOG`
 📄 `Makefile`
-📄 `README` (4 functions)
+📄 `README`
 📄 `SPEC`
 📄 `TODO`
 📄 `Taskfile`
 📄 `Taskfile.guards`
+📄 `deps`
 📄 `docs.README`
 📄 `docs.TESTQL_AUTOLOOP_ONBOARDING`
 📄 `docs.USAGE`
@@ -444,6 +451,7 @@ sumd/
 📄 `project`
 📄 `pyproject`
 📄 `pyqual`
+📄 `regix`
 📄 `script` (19 functions)
 📄 `scripts.bootstrap`
 📄 `scripts.install_testql_autoloop` (2 functions)
@@ -463,10 +471,13 @@ sumd/
 📄 `sumd.dsl.ast_nodes` (1 functions, 2 classes)
 📄 `sumd.dsl.commands` (30 functions, 2 classes)
 📄 `sumd.dsl.context_mixin` (2 functions, 1 classes)
-📄 `sumd.dsl.engine` (39 functions, 2 classes)
+📄 `sumd.dsl.engine` (40 functions, 2 classes)
 📄 `sumd.dsl.lexer` (2 functions, 3 classes)
 📄 `sumd.dsl.nlp` (21 functions, 3 classes)
-📄 `sumd.dsl.parser` (36 functions, 1 classes)
+📄 `sumd.dsl.parser` (11 functions, 1 classes)
+📄 `sumd.dsl.parser_base` (9 functions, 1 classes)
+📄 `sumd.dsl.parser_expr` (6 functions, 1 classes)
+📄 `sumd.dsl.parser_primary` (10 functions, 1 classes)
 📄 `sumd.dsl.schema` (1 functions, 14 classes)
 📄 `sumd.dsl.schema_commands` (33 functions, 2 classes)
 📄 `sumd.dsl.shell` (14 functions, 2 classes)
@@ -519,6 +530,7 @@ sumd/
 📄 `testql-scenarios.sumd-cli.testql.toon`
 📄 `tree`
 📄 `working_script` (12 functions)
+📄 `wup`
 
 ## Requirements
 
@@ -529,6 +541,7 @@ sumd/
 
 **Contributors:**
 - Tom Softreck <tom@sapletta.com>
+- Koru Agent <agent@coru.dev>
 - Tom Sapletta <tom-sapletta-com@users.noreply.github.com>
 
 We welcome contributions! Open an issue or pull request to get started.

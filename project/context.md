@@ -6,10 +6,10 @@
 - **Primary Language**: python
 - **Languages**: python: 68, shell: 9, perl: 4
 - **Analysis Mode**: static
-- **Total Functions**: 542
+- **Total Functions**: 543
 - **Total Classes**: 107
 - **Modules**: 81
-- **Entry Points**: 360
+- **Entry Points**: 361
 
 ## Architecture by Module
 
@@ -18,7 +18,7 @@
 - **File**: `extractor.py`
 
 ### sumd.dsl.engine
-- **Functions**: 39
+- **Functions**: 40
 - **Classes**: 2
 - **File**: `engine.py`
 
@@ -180,13 +180,13 @@ Provides an interactive shell and scripting interface for SUMD operations
 with CQRS ES
 - **Calls**: cli.command, click.option, click.option, click.option, click.option, asyncio.run, DSLShell, run_dsl
 
-### sumd.cqrs.commands.SumdCommandHandler.handle
-> Handle SUMD commands.
-- **Calls**: SumdCommandExecuted, events.append, SumdDocumentCreated, events.append, SumdDocumentUpdated, events.append, SumdSectionAdded, events.append
-
 ### sumd.dsl.shell.main
 > Main entry point for DSL shell.
 - **Calls**: argparse.ArgumentParser, parser.add_argument, parser.add_argument, parser.add_argument, parser.add_argument, parser.parse_args, DSLShell, Path
+
+### sumd.cqrs.commands.SumdCommandHandler.handle
+> Handle SUMD commands.
+- **Calls**: SumdCommandExecuted, events.append, SumdDocumentCreated, events.append, SumdDocumentUpdated, events.append, SumdSectionAdded, events.append
 
 ### sumd.cli.analyze
 > Run analysis tools (code2llm, redup, vallm) on a project.
@@ -327,7 +327,7 @@ _handle_shell_command [sumd.dsl.shell.DSLShell]
 
 ### sumd.dsl.engine.DSLEngine
 > Engine for executing DSL expressions.
-- **Methods**: 36
+- **Methods**: 37
 - **Key Methods**: sumd.dsl.engine.DSLEngine.__init__, sumd.dsl.engine.DSLEngine.execute, sumd.dsl.engine.DSLEngine.execute_text, sumd.dsl.engine.DSLEngine._is_natural_language, sumd.dsl.engine.DSLEngine.process_natural_language, sumd.dsl.engine.DSLEngine.get_suggestions, sumd.dsl.engine.DSLEngine._build_dispatch_table, sumd.dsl.engine.DSLEngine._execute_expression, sumd.dsl.engine.DSLEngine._execute_assignment, sumd.dsl.engine.DSLEngine._resolve_schema_call
 
 ### sumd.dsl.schema_commands.SchemaBasedCommands
@@ -628,8 +628,8 @@ Functions exposed as public API (no underscore prefix):
 - `sumd.extractor.generate_project_logic` - 22 calls
 - `sumd.cli.lint` - 21 calls
 - `sumd.cli.dsl` - 21 calls
-- `sumd.cqrs.commands.SumdCommandHandler.handle` - 21 calls
 - `sumd.dsl.shell.main` - 21 calls
+- `sumd.cqrs.commands.SumdCommandHandler.handle` - 21 calls
 - `sumd.cli.analyze` - 20 calls
 - `sumd.cli.map_cmd` - 20 calls
 - `sumd.validator.validate_codeblocks` - 17 calls
