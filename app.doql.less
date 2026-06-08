@@ -2,19 +2,36 @@
 
 app {
   name: sumd;
-  version: 0.3.54;
+  version: 0.3.55;
+  description: "SUMD - Structured Unified Markdown Descriptor for AI-aware project documentation";
+  license: Apache-2.0;
+  authors: "Tom Sapletta <tom@sapletta.com>";
+  keywords: "sumd, markdown, documentation, llm, project-descriptor";
+  homepage: https://github.com/tom/statement;
+  repository: https://github.com/tom/statement;
 }
 
 dependencies {
   runtime: "click>=8.4.0, pyyaml>=6.0.3, toml>=0.10.2, goal>=2.1.190, costs>=0.1.51, pfix>=0.1.73, mcp>=1.27.1";
+  mcp: mcp>=1.27.1;
   dev: "pytest>=9.0.3, pytest-asyncio>=0.21.0, pytest-cov>=7.1.0, ruff>=0.15.11, build>=1.4.4, twine>=6.2.0, pyqual>=0.1.143, goal>=2.1.190, costs>=0.1.51, pfix>=0.1.73, mcp>=1.27.1";
+}
+
+interface[type="mcp"] {
+  framework: stdio;
+}
+interface[type="mcp"] page[name="sumd-mcp"] {
+  entry: sumd.mcp_server:main;
 }
 
 interface[type="cli"] {
   framework: click;
 }
 interface[type="cli"] page[name="sumd"] {
-
+  entry: sumd.cli:main;
+}
+interface[type="cli"] page[name="sumr"] {
+  entry: sumd.cli:main_sumr;
 }
 
 workflow[name="install"] {
@@ -243,6 +260,14 @@ workflow[name="help"] {
   step-1: run cmd=task --list;
 }
 
+tests {
+  import: testql-scenarios/**/*.testql.toon.yaml;
+}
+
+env_vars {
+  keys: OPENROUTER_API_KEY, LLM_MODEL, PFIX_AUTO_APPLY, PFIX_AUTO_INSTALL_DEPS, PFIX_AUTO_RESTART, PFIX_MAX_RETRIES, PFIX_DRY_RUN, PFIX_ENABLED, PFIX_GIT_COMMIT, PFIX_GIT_PREFIX, PFIX_CREATE_BACKUPS;
+}
+
 deploy {
   target: docker;
 }
@@ -250,5 +275,9 @@ deploy {
 environment[name="local"] {
   runtime: docker-compose;
   env_file: .env;
+  template_file: .env.example;
   python_version: >=3.10;
+  vars: LLM_MODEL, OPENROUTER_API_KEY, PFIX_AUTO_APPLY, PFIX_AUTO_INSTALL_DEPS, PFIX_AUTO_RESTART, PFIX_CREATE_BACKUPS, PFIX_DRY_RUN, PFIX_ENABLED, PFIX_GIT_COMMIT, PFIX_GIT_PREFIX, PFIX_MAX_RETRIES;
+  runtime_llm: OPENROUTER_API_KEY;
+  runtime_pfix: PFIX_AUTO_APPLY, PFIX_AUTO_INSTALL_DEPS, PFIX_AUTO_RESTART, PFIX_CREATE_BACKUPS, PFIX_DRY_RUN, PFIX_ENABLED, PFIX_GIT_COMMIT, PFIX_GIT_PREFIX, PFIX_MAX_RETRIES;
 }
