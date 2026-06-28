@@ -699,7 +699,7 @@ async def call_tool(name: str, arguments: dict[str, Any]) -> list[types.TextCont
 # ---------------------------------------------------------------------------
 
 
-async def main():
+async def _run_server() -> None:
     async with mcp.server.stdio.stdio_server() as (read_stream, write_stream):
         await server.run(
             read_stream,
@@ -708,7 +708,11 @@ async def main():
         )
 
 
-if __name__ == "__main__":
+def main() -> None:
     import asyncio
 
-    asyncio.run(main())
+    asyncio.run(_run_server())
+
+
+if __name__ == "__main__":
+    main()
