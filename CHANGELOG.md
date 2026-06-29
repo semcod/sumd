@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.56] - 2026-06-29
+
+### Docs
+- Update README.md
+
+### Test
+- Update tests/test_mcp_server.py
+
+### Other
+- Update sumd_logic_validator/sumd_logic_validator/__init__.py
+
 ## [0.3.55] - 2026-05-26
 
 ### Docs
