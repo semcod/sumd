@@ -1,0 +1,12 @@
+# local.dev.txt — locally developed dependencies of this project (generated 2026-07-04)
+# by ~/github/local.dev.sh — DO NOT EDIT; see ~/github/local.dev.md
+# project: sumd-logic-validator 0.1.0 (python) at /home/tom/github/semcod/sumd/sumd_logic_validator
+# deps declared: 8 | with local source: 4
+
+## LOCAL DEPS  (dep | required | local source (version) | installed | status)
+costs | >=0.1.20 | /home/tom/github/semcod/costs (0.1.53) | 0.1.51 non-editable | STALE-INSTALL (local 0.1.53) -> fix: pip install -e /home/tom/github/semcod/costs  [pyproject.toml[dev]]
+goal | >=2.1.0 | /home/tom/github/semcod/goal (2.1.266) | 2.1.262 non-editable | STALE-INSTALL (local 2.1.266) -> fix: pip install -e /home/tom/github/semcod/goal  [pyproject.toml[dev]]
+pfix | >=0.1.60 | /home/tom/github/semcod/pfix (0.1.76) | 0.1.73 non-editable | STALE-INSTALL (local 0.1.76) -> fix: pip install -e /home/tom/github/semcod/pfix  [pyproject.toml[dev]]
+sumd | @ file:.. | /home/tom/github/semcod/sumd (0.3.56) | 0.3.55 editable | OK-EDITABLE  [pyproject.toml]
+
+## EXTERNAL DEPS (no local source, 4): click, pyswip, pytest, rich

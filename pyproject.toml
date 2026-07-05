@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "sumd"
-version = "0.3.56"
+version = "0.3.57"
 description = "SUMD - Structured Unified Markdown Descriptor for AI-aware project documentation"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -29,9 +29,7 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
 ]
-
-[project.license]
-text = "Apache-2.0"
+license = "Apache-2.0"
 
 [project.optional-dependencies]
 mcp = [

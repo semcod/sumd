@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import ast
 import fnmatch
+import os
 import re
 from datetime import date
 from pathlib import Path
@@ -807,10 +808,23 @@ def _collect_map_files(
     sumdignore_patterns = _parse_ignore_file(proj_dir / ".sumdignore")
     all_ignore_patterns = gitignore_patterns + sumdignore_patterns
 
-    for f in sorted(proj_dir.rglob("*")):
-        if not f.is_file():
-            continue
-            
+    # Prune ignored directories before descending instead of walking the
+    # full tree (including venv/node_modules) and filtering afterward.
+    all_files: list[Path] = []
+    for dirpath, dirnames, filenames in os.walk(proj_dir, topdown=True):
+        current_dir = Path(dirpath)
+        kept = []
+        for d in dirnames:
+            dir_path = current_dir / d
+            rel_dir = dir_path.relative_to(proj_dir)
+            if _is_map_ignored_path(rel_dir) or _is_path_ignored(dir_path, proj_dir, all_ignore_patterns):
+                continue
+            kept.append(d)
+        dirnames[:] = kept
+        for filename in filenames:
+            all_files.append(current_dir / filename)
+
+    for f in sorted(all_files):
         lang = _should_include_map_file(f, proj_dir, all_ignore_patterns)
         if not lang:
             continue

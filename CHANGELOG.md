@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- `_collect_map_files()` used `proj_dir.rglob("*")`, collecting every file (including
+  everything inside a populated virtualenv) before ignore patterns were applied. Rewrote to
+  walk with `os.walk` and prune ignored directories (`.gitignore`/`.sumdignore` patterns and
+  `_IGNORE_DIRS`) before descending into them, avoiding a full stat of venv/node_modules trees.
+
+## [0.3.57] - 2026-07-05
+
+### Docs
+- Update CHANGELOG.md
+- Update README.md
+
+### Other
+- Update examples/basic/sample-project/local.dev.txt
+- Update local.dev.txt
+- Update sumd/extractor.py
+- Update sumd_logic_validator/local.dev.txt
+- Update sumd_logic_validator/pyproject.toml
+
 ## [0.3.56] - 2026-06-29
 
 ### Docs
