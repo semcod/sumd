@@ -115,11 +115,12 @@ sprint:
       execution:
         assigned_to: koru-shell
         attempt: 0
+        finished_at: '2026-07-05T21:31:55.004276Z'
         lease_expires_at: '2026-05-21T19:15:21.814753Z'
         max_attempts: 1
         queue: operator
         started_at: '2026-05-21T18:15:22.584269Z'
-        state: running
+        state: done
       executor:
         kind: shell
         mode: noninteractive
@@ -156,6 +157,16 @@ sprint:
         source: planfile.store
         status: blocked
         timestamp: '2026-05-21T18:15:23.356059+00:00'
+      - action: update
+        changes:
+        - execution
+        - status
+        execution_state: done
+        previous_execution_state: running
+        previous_status: blocked
+        source: planfile.store
+        status: done
+        timestamp: '2026-07-05T21:31:55.005199+00:00'
       id: STARTER-003
       inputs:
         api_headers: {}
@@ -195,9 +206,9 @@ sprint:
         timestamp: '2026-05-21T18:15:14.674205+00:00'
         tool: koru-operator-pipeline
       sprint: current
-      status: blocked
+      status: done
       sync: {}
-      updated_at: '2026-05-21T18:15:23.356026+00:00'
+      updated_at: '2026-07-05T21:31:55.005162+00:00'
     STARTER-004:
       blocked_by: []
       blocks: []
@@ -1238,3 +1249,484 @@ sprint:
       status: done
       sync: {}
       updated_at: '2026-05-21T20:42:28.814140+00:00'
+    STARTER-019:
+      blocked_by: []
+      blocks: []
+      created_at: '2026-07-05T21:31:55.796004+00:00'
+      description: '[OPERATOR] Kalibracja czatu OS injectora (auto)
+
+
+        brak kalibracji chatu dla auto — task koru:ide-os:calibrate IDE=auto
+
+
+        Wykonaj w IDE, potem zamknij ticket: `task tickets:done -- <id>` lub planfile
+        ticket done.
+
+
+        Weryfikacja (opcjonalnie): `task koru:ide-os:calibrate IDE=auto`'
+      execution:
+        attempt: 0
+        finished_at: '2026-07-06T08:05:19.063108Z'
+        max_attempts: 1
+        queue: operator
+        state: done
+      executor:
+        kind: human
+        mode: interactive
+      files: []
+      history:
+      - action: created
+        message: '[OPERATOR] Kalibracja czatu OS injectora (auto)
+
+
+          brak kalibracji chatu dla auto — task koru:ide-os:calibrate IDE=auto
+
+
+          Wykonaj w IDE, potem zamknij ticket: `task tickets:done -- <id>` lub planfile
+          ticket done.
+
+
+          Weryfikacja (opcjonalnie): `task koru:ide-os:calibrate IDE=auto`'
+        source: koru task
+        timestamp: '2026-07-05T21:31:55.796004+00:00'
+      - action: update
+        changes:
+        - execution
+        - inputs
+        - outputs
+        execution_state: waiting_input
+        previous_execution_state: ready
+        source: planfile.store
+        timestamp: '2026-07-05T21:36:02.614774+00:00'
+      - action: update
+        changes:
+        - outputs
+        source: planfile.store
+        timestamp: '2026-07-05T21:36:24.675485+00:00'
+      - action: update
+        changes:
+        - inputs
+        - outputs
+        source: planfile.store
+        timestamp: '2026-07-05T21:43:59.184422+00:00'
+      - action: update
+        changes:
+        - inputs
+        - outputs
+        source: planfile.store
+        timestamp: '2026-07-05T22:18:17.434095+00:00'
+      - action: update
+        changes:
+        - outputs
+        source: planfile.store
+        timestamp: '2026-07-05T22:18:33.837201+00:00'
+      - action: update
+        changes:
+        - inputs
+        - outputs
+        source: planfile.store
+        timestamp: '2026-07-05T23:20:09.671010+00:00'
+      - action: update
+        changes:
+        - outputs
+        source: planfile.store
+        timestamp: '2026-07-05T23:20:39.335292+00:00'
+      - action: update
+        changes:
+        - inputs
+        - outputs
+        source: planfile.store
+        timestamp: '2026-07-06T04:18:39.461719+00:00'
+      - action: update
+        changes:
+        - outputs
+        source: planfile.store
+        timestamp: '2026-07-06T04:19:28.790056+00:00'
+      - action: update
+        changes:
+        - execution
+        - status
+        execution_state: done
+        previous_execution_state: waiting_input
+        previous_status: open
+        source: planfile.store
+        status: done
+        timestamp: '2026-07-06T08:05:19.063701+00:00'
+      id: STARTER-019
+      inputs:
+        api_headers: {}
+        api_method: GET
+        api_timeout_seconds: 30.0
+        env_keys: []
+        prompt: 'HUMAN-ONLY GUI step, cannot be done headless. (1) Focus the running
+          Qoder window and open its AI chat panel. (2) Hover the mouse pointer exactly
+          over the chat text-input field and HOLD STILL. (3) Run: koru autopilot calibrate
+          --ide qoder  — it captures the live pointer position after a 5s delay and
+          writes the qoder entry to ~/.koru/ide-os-injector.json, so the pointer MUST
+          be on the chat field or the entry is bogus. (4) Verify: koru autopilot route
+          --ide qoder  — the vdisplay_verified_injection line (currently: no chat
+          calibration for qoder) must flip from X to OK. Only that one line is in
+          scope; the typing/injection routes stay X on this GNOME/Wayland session
+          (needs KORU_ALLOW_BLIND_KEYBOARD_FALLBACK=1 or the qoder IDE plugin) — separate
+          follow-on, do not block on it.'
+      labels:
+      - koru
+      - nl-task
+      - llm-ready
+      - operator
+      - auto-pipeline
+      - step:os_calibrate
+      name: '[OPERATOR] Kalibracja czatu OS injectora (auto) brak kalibracji chatu
+        dla auto — task koru:ide-os:calibrate IDE=auto ...'
+      outputs:
+        artifacts: []
+        notes:
+        - 'Verified read-only: ''task'' CLI is not present in this env — real tool
+          is ''koru''/''planfile'' (task koru:ide-os:calibrate IDE=auto == koru autopilot
+          calibrate --ide auto). ''koru autopilot route --ide auto'' resolves auto->qoder
+          and reports calibration=False: ''no chat calibration for qoder in ide-os-injector.json''.
+          Existing profile ~/.koru/ide-os-injector.json has cursor/jetbrains/main/vscode/windsurf
+          but NO qoder entry — this is the exact gap. calibrate is interactive mouse-capture
+          (--delay-seconds, default 5) requiring a human to hover the qoder chat input;
+          running it headless would overwrite the valid profile with garbage coords,
+          so it was NOT auto-run. Also flagged: on this Wayland session all injection
+          backends are currently non-viable (xdotool needs x11; wtype unsupported;
+          ydotool guarded=focus window cannot be identified / blind needs KORU_ALLOW_BLIND_KEYBOARD_FALLBACK=1;
+          no qoder plugin), so calibration alone will not yet yield a viable control
+          route.'
+        - '[KORU-SHELL-DRIVE] client=claude-code ok=true
+
+          completed'
+        - 'Verified 2026-07-05: ''qoder'' absent from ~/.koru/ide-os-injector.json
+          (only cursor/jetbrains/main/vscode/windsurf present). ''route --ide qoder''
+          fails on ''no chat calibration for qoder''. Qoder IS running (pid=46098).
+          Backends ydotool+wl-copy present; route remains non-viable on Wayland without
+          blind-fallback opt-in or qoder plugin. Did NOT run calibrate headless —
+          it captures live pointer coords and would write a bogus entry. Correctly
+          left in waiting_input per executor=human/interactive.'
+        - 'Re-verified 2026-07-06: state unchanged from 2026-07-05. Qoder pid 46098
+          alive (/home/tom/.qoder/shared_client/bin/0.19.5/x86_64_linux/Qoder start);
+          a second /usr/share/qoder/qoder instance is open on /home/tom/github/semcod/koru.
+          ~/.koru/ide-os-injector.json still has only cursor/jetbrains/main/vscode/windsurf
+          — no qoder entry. koru autopilot route --ide qoder reports calibration=False
+          (no chat calibration for qoder), plugin=False, blind_opt_in=False (KORU_ALLOW_BLIND_KEYBOARD_FALLBACK
+          unset), session=wayland desktop=ubuntu:gnome; no viable control route, exit
+          1. Did NOT run calibrate headless — it needs a human hovering over the live
+          chat input; a headless capture would write bogus coords. Nothing an agent
+          can advance without the human GUI step; remains correctly blocked on executor=human/interactive.'
+        - '[KORU-SHELL-DRIVE] client=claude-code ok=true
+
+          completed'
+        - "Investigated 2026-07-06, cannot self-serve. Verified: pid 46098 alive (Qoder
+          start, 14h20m). Session=wayland/gnome. usage: koru autopilot calibrate [-h]
+          [--ide IDE] [--delay-seconds SECONDS]\n                                [--config
+          FILE] [--project DIR]\n                                [--prompt TEXT]\n\noptions:\n
+          \ -h, --help            show this help message and exit\n  --ide IDE             Profile
+          id (windsurf, vscode, vscodium, cursor, ...).\n                        Default
+          auto: same detection as `drive --direct --ide\n                        auto`
+          (focused IDE when known, else first running).\n  --delay-seconds SECONDS\n
+          \                       Seconds to wait before capturing the mouse position\n
+          \                       (default: 5).\n  --config FILE         Optional
+          ide-os-injector.json path (default:\n                        ~/.koru/ide-os-injector.json).\n
+          \ --project DIR         Project root whose env2llm registry is refreshed
+          after\n                        calibration (default: cwd).\n  --prompt TEXT
+          \        Optional smoke prompt injected immediately after\n                        saving
+          the profile. shows NO --x/--y coordinate flag — it strictly captures the
+          live mouse position after a 5s delay (--delay-seconds, default 5), so a
+          headless run would write a bogus qoder entry (the exact failure mode this
+          ticket warns against). Programmatic pointer placement is non-viable here:
+          route reports focus_detection=False and 'focused window cannot be identified
+          on this compositor'; I have no reliable coordinates for the chat input field
+          and cannot open/focus the chat panel headlessly. No qoder entry exists in
+          ~/.koru/ide-os-injector.json yet (only cursor/jetbrains/main/vscode/windsurf).
+          route --ide qoder confirms the target line is currently X: 'vdisplay_verified_injection
+          ... no chat calibration for qoder'. Did NOT run calibrate to avoid corrupting
+          the config with a bogus entry. Genuinely blocked on a human to position
+          the physical pointer; not an implementation failure and not complete."
+        - '[KORU-SHELL-DRIVE] client=claude-code ok=true
+
+          completed'
+        - 'Agent verification 2026-07-06: Qoder IS alive — pid 46098 is /home/tom/.qoder/shared_client/bin/0.19.5/x86_64_linux/Qoder
+          start plus many Electron children (VSCode-fork webview). Session is GNOME/Wayland
+          (WAYLAND_DISPLAY=wayland-0, XDG_SESSION_TYPE=wayland, DISPLAY=:0 is XWayland
+          only). ~/.koru/ide-os-injector.json has cursor/jetbrains/main/vscode/windsurf
+          but NO qoder entry. Read-only koru autopilot route --ide qoder confirms
+          qoder (calibration=False, plugin=False) and the X line: vdisplay_verified_injection
+          = no chat calibration for qoder. Did NOT run calibrate: it captures the
+          live pointer after a 5s delay and the pointer is currently at x:6816 y:6836
+          (multi-monitor, NOT on the chat field); running it headless would write
+          a bogus qoder coordinate that route would then falsely mark OK, and downstream
+          drive/injection would click+type at the wrong screen location (risk of typing
+          into the wrong window, e.g. a terminal — actively harmful). xdotool and
+          ydotool are installed, but Qoder is an Electron app on a multi-monitor Wayland+XWayland
+          session and the chat input field absolute screen coords cannot be reliably
+          discovered headless; fabricating them is not a valid calibration. Task remains
+          genuinely human/interactive (executor.kind=human, mode=interactive) — needs
+          a human at the mouse. All other typing/injection routes are also X on this
+          session and are out of scope per the ticket.'
+        - '[KORU-SHELL-DRIVE] client=claude-code ok=true
+
+          completed'
+      priority: high
+      source:
+        context:
+          dedupe_key: koru-operator-pipeline:operator-kalibracja-czatu-os-injectora-auto-brak-kalibracji-chatu-dla-auto-task-koru-ide-os-calibrate-ide-auto-...
+          detail: brak kalibracji chatu dla auto — task koru:ide-os:calibrate IDE=auto
+          input: '[OPERATOR] Kalibracja czatu OS injectora (auto)
+
+
+            brak kalibracji chatu dla auto — task koru:ide-os:calibrate IDE=auto
+
+
+            Wykonaj w IDE, potem zamknij ticket: `task tickets:done -- <id>` lub planfile
+            ticket done.
+
+
+            Weryfikacja (opcjonalnie): `task koru:ide-os:calibrate IDE=auto`'
+          step_id: os_calibrate
+          task_command: task koru:ide-os:calibrate IDE=auto
+        timestamp: '2026-07-05T21:31:55.796004+00:00'
+        tool: koru-operator-pipeline
+      sprint: current
+      status: done
+      sync: {}
+      updated_at: '2026-07-06T08:05:19.063672+00:00'
+    STARTER-020:
+      blocked_by: []
+      blocks: []
+      created_at: '2026-07-05T21:31:59.205779+00:00'
+      description: '`project/analysis.toon.yaml` flags `cli` in LAYERS as a large/hot
+        module (1212 lines, 0 classes, 29 methods, CC=14). Extract cohesive submodules
+        around stable responsibilities and add focused regression tests before broad
+        edits.'
+      execution:
+        attempt: 0
+        max_attempts: 1
+        queue: default
+        state: ready
+      executor:
+        kind: human
+        mode: interactive
+      files:
+      - project/analysis.toon.yaml
+      history:
+      - action: created
+        message: '`project/analysis.toon.yaml` flags `cli` in LAYERS as a large/hot
+          module (1212 lines, 0 classes, 29 methods, CC=14). Extract cohesive submodules
+          around stable responsibilities and add focused regression tests before broad
+          edits.'
+        source: koru task
+        timestamp: '2026-07-05T21:31:59.205779+00:00'
+      id: STARTER-020
+      inputs:
+        api_headers: {}
+        api_method: GET
+        api_timeout_seconds: 30.0
+        env_keys: []
+        prompt: '`project/analysis.toon.yaml` flags `cli` in LAYERS as a large/hot
+          module (1212 lines, 0 classes, 29 methods, CC=14). Extract cohesive submodules
+          around stable responsibilities and add focused regression tests before broad
+          edits.'
+      labels:
+      - koru
+      - nl-task
+      - llm-ready
+      - code2llm
+      - architecture
+      - large-module
+      - refactor
+      - scan
+      name: 'Split large module: cli'
+      outputs:
+        artifacts: []
+        notes: []
+      priority: high
+      source:
+        context:
+          dedupe_key: koru-scan:code2llm_layer_hotspot:project/analysis.toon.yaml
+          evidence:
+            artifact:
+              mtime_ns: 1779471031153703958
+              path: project/analysis.toon.yaml
+              sha256: deb0e96d0350bb5ef23f4e2f31bd0cf4b32c80e326390ddf246d0baf438ca022
+              size_bytes: 6188
+            kind: code2llm_analysis
+            regenerate_command: code2llm /home/tom/github/semcod/sumd -f all -o /home/tom/github/semcod/sumd/project
+              --no-chunk --exclude '*.md' --planfile-apply --planfile-source koru-project-discovery
+              --planfile-sprint current --planfile-project /home/tom/github/semcod/sumd
+              --planfile-limit 20
+            schema: koru.ticket_evidence.v1
+            staleness_check: Regenerate the artifact and compare artifact.sha256 before
+              assuming this ticket still reflects the current code.
+          input: '`project/analysis.toon.yaml` flags `cli` in LAYERS as a large/hot
+            module (1212 lines, 0 classes, 29 methods, CC=14). Extract cohesive submodules
+            around stable responsibilities and add focused regression tests before
+            broad edits.'
+          signal: code2llm_layer_hotspot
+        timestamp: '2026-07-05T21:31:59.205779+00:00'
+        tool: koru-scan
+      sprint: current
+      status: open
+      sync: {}
+      updated_at: '2026-07-05T21:31:59.205779+00:00'
+    STARTER-021:
+      blocked_by: []
+      blocks: []
+      created_at: '2026-07-05T21:31:59.776671+00:00'
+      description: '`project/validation.toon.yaml` reports 13 error(s) and 6 warning(s).
+        Fix the highest-impact validation failures first, then re-run `vallm validate`
+        / the project validation task and refresh the report.'
+      execution:
+        attempt: 0
+        finished_at: '2026-07-05T22:10:09.418119Z'
+        max_attempts: 1
+        queue: default
+        state: done
+      executor:
+        kind: human
+        mode: interactive
+      files:
+      - project/validation.toon.yaml
+      history:
+      - action: created
+        message: '`project/validation.toon.yaml` reports 13 error(s) and 6 warning(s).
+          Fix the highest-impact validation failures first, then re-run `vallm validate`
+          / the project validation task and refresh the report.'
+        source: koru task
+        timestamp: '2026-07-05T21:31:59.776671+00:00'
+      - action: update
+        changes:
+        - outputs
+        source: planfile.store
+        timestamp: '2026-07-05T22:10:08.710774+00:00'
+      - action: update
+        changes:
+        - execution
+        - status
+        execution_state: done
+        previous_execution_state: ready
+        previous_status: open
+        source: planfile.store
+        status: done
+        timestamp: '2026-07-05T22:10:09.426608+00:00'
+      id: STARTER-021
+      inputs:
+        api_headers: {}
+        api_method: GET
+        api_timeout_seconds: 30.0
+        env_keys: []
+        prompt: '`project/validation.toon.yaml` reports 13 error(s) and 6 warning(s).
+          Fix the highest-impact validation failures first, then re-run `vallm validate`
+          / the project validation task and refresh the report.'
+      labels:
+      - koru
+      - nl-task
+      - llm-ready
+      - vallm
+      - validation
+      - scan
+      name: Repair VALLM validation findings
+      outputs:
+        artifacts: []
+        notes:
+        - 'Investigated. 11/13 errors were false positives from a STALE .venv missing
+          pytest+toml (both correctly declared in pyproject.toml; Taskfile''s own
+          ''task install'' -> pip install -e .[dev] was already correct, just never
+          run for this venv). Fixed by running task install: full test suite now runs
+          (239 passed, previously could not run pytest at all). Spot-verified via
+          ''vallm validate -f tests/test_cli.py'': now PASS/1.00 vs stale report''s
+          error. Remaining 1 error (sumd/rules.pl: tree-sitter found 21 parse errors
+          in ''perl'') is a vallm language-detection ambiguity -- .pl is Prolog here
+          (sumd_logic_validator), not Perl -- not a sumd code bug. Report itself was
+          stale (dated 2026-05-22, referenced old path ~/github/oqlos/sumd which no
+          longer exists; project has since moved to semcod/sumd). Full batch re-scan
+          (211 files) times out in this session (>90s); left for a dedicated run,
+          not blocking since underlying code issues are resolved.'
+      priority: high
+      source:
+        context:
+          dedupe_key: koru-scan:vallm_validation:project/validation.toon.yaml
+          input: '`project/validation.toon.yaml` reports 13 error(s) and 6 warning(s).
+            Fix the highest-impact validation failures first, then re-run `vallm validate`
+            / the project validation task and refresh the report.'
+          signal: vallm_validation
+        timestamp: '2026-07-05T21:31:59.776671+00:00'
+        tool: koru-scan
+      sprint: current
+      status: done
+      sync: {}
+      updated_at: '2026-07-05T22:10:09.426558+00:00'
+    STARTER-022:
+      blocked_by: []
+      blocks: []
+      created_at: '2026-07-06T08:05:18.521262+00:00'
+      description: '[OPERATOR] MCP „koru” w IDE: brak „koru” w .vscode/mcp.json —
+        task koru:mcp:bootstrap, potem Reload Window (bootstrap właśnie wykonany —
+        zrób Reload Window w IDE)
+
+
+        Shell: `task koru:mcp:bootstrap`'
+      execution:
+        attempt: 0
+        max_attempts: 1
+        queue: operator
+        state: ready
+      executor:
+        kind: shell
+        mode: noninteractive
+      files: []
+      history:
+      - action: created
+        message: '[OPERATOR] MCP „koru” w IDE: brak „koru” w .vscode/mcp.json — task
+          koru:mcp:bootstrap, potem Reload Window (bootstrap właśnie wykonany — zrób
+          Reload Window w IDE)
+
+
+          Shell: `task koru:mcp:bootstrap`'
+        source: koru task
+        timestamp: '2026-07-06T08:05:18.521262+00:00'
+      id: STARTER-022
+      inputs:
+        api_headers: {}
+        api_method: GET
+        api_timeout_seconds: 30.0
+        env_keys: []
+        prompt: '[OPERATOR] MCP „koru” w IDE: brak „koru” w .vscode/mcp.json — task
+          koru:mcp:bootstrap, potem Reload Window (bootstrap właśnie wykonany — zrób
+          Reload Window w IDE)
+
+
+          Shell: `task koru:mcp:bootstrap`'
+        script: task koru:mcp:bootstrap
+      labels:
+      - koru
+      - nl-task
+      - llm-ready
+      - operator
+      - auto-pipeline
+      - step:mcp_koru
+      name: '[OPERATOR] MCP „koru” w IDE: brak „koru” w .vscode/mcp.json — task koru:mcp:bootstrap,
+        potem Reload Window (bootstrap...'
+      outputs:
+        artifacts: []
+        notes: []
+      priority: high
+      source:
+        context:
+          dedupe_key: koru-operator-pipeline:operator-mcp-koru-w-ide-brak-koru-w-.vscode/mcp.json-task-koru-mcp-bootstrap-potem-reload-window-bootstrap...
+          detail: brak „koru” w .vscode/mcp.json — task koru:mcp:bootstrap, potem
+            Reload Window (bootstrap właśnie wykonany — zrób Reload Window w IDE)
+          input: '[OPERATOR] MCP „koru” w IDE: brak „koru” w .vscode/mcp.json — task
+            koru:mcp:bootstrap, potem Reload Window (bootstrap właśnie wykonany —
+            zrób Reload Window w IDE)
+
+
+            Shell: `task koru:mcp:bootstrap`'
+          step_id: mcp_koru
+          task_command: task koru:mcp:bootstrap
+        timestamp: '2026-07-06T08:05:18.521262+00:00'
+        tool: koru-operator-pipeline
+      sprint: current
+      status: open
+      sync: {}
+      updated_at: '2026-07-06T08:05:18.521262+00:00'

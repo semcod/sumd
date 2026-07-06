@@ -48,7 +48,7 @@ web:
 
 # BEGIN WUP MONITORING MANIFEST (auto-generated — do not edit; run: wup sync-testql --write)
 monitoring:
-  generated_at: '2026-05-22T11:41:29Z'
+  generated_at: '2026-07-06T08:04:25Z'
   generated_by: wup sync-testql --write (or wup watch startup)
   how_to_refresh: wup sync-testql . --write
   probe_interval_s: 60
@@ -58,6 +58,9 @@ monitoring:
   scenario_dir: testql-scenarios
   service_map_globs: []
   docker_compose_files: []
+  semcod_tools:
+    enabled: false
+    tools: {}
   wup_services: {}
   docker_not_mapped_to_wup: []
   troubleshooting:
