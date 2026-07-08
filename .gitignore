@@ -250,3 +250,14 @@ swop-drift.log
 
 # koru runtime artefacts (generated)
 .planfile/.koru/
+.code2llm_cache/
+.cursor/
+.github/
+.koru/
+.nlp2dsl/
+.planfile/
+.pyqual/
+.redeploy/
+.sumd-tools/
+.windsurf/
+.wup/
