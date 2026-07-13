@@ -13,6 +13,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   walk with `os.walk` and prune ignored directories (`.gitignore`/`.sumdignore` patterns and
   `_IGNORE_DIRS`) before descending into them, avoiding a full stat of venv/node_modules trees.
 
+## [0.3.60] - 2026-07-13
+
+### Docs
+- Update README.md
+
 ## [0.3.59] - 2026-07-13
 
 ### Docs

@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "sumd-logic-validator"
-version = "0.3.59"
+version = "0.3.60"
 description = "A Python-Prolog hybrid logic execution package."
 readme = "README.md"
 requires-python = ">=3.10"
