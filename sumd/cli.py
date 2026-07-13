@@ -43,6 +43,31 @@ from sumd.cli_scan import (
     _scan_one_project,
 )
 
+from sumd.cli_lint import (
+    _lint_classify_issues,
+    _lint_collect_paths,
+    _lint_print_result,
+)
+
+from sumd.cli_analyze import (
+    _setup_tools_venv,
+    _run_code2llm_formats,
+    _run_tool_subprocess,
+    _TOOL_LABELS,
+    _run_analyze_tool,
+)
+
+from sumd.cli_scaffold import (
+    _api_scenario_template,
+    _scaffold_write,
+    _scaffold_smoke_scenario,
+    _scaffold_crud_scenarios,
+    _scaffold_from_openapi,
+    _scaffold_generic,
+    _scaffold_openapi_flow,
+    _print_scaffold_summary,
+)
+
 
 
 @click.group()
@@ -494,156 +519,6 @@ def lint(files: tuple[Path, ...], workspace: Optional[Path], as_json: bool, stri
     sys.exit(0 if total_errors == 0 else 1)
 
 
-def _lint_classify_issues(r: dict, strict: bool) -> tuple[list[str], list[str]]:
-    """Classify issues into (errors, warnings) based on strict mode."""
-    errors: list[str] = r["markdown"] + [
-        c.message for c in r["codeblocks"] if c.kind == "error"
-    ]
-    warnings: list[str] = [c.message for c in r["codeblocks"] if c.kind == "warning"]
-    logic = r.get("logic", [])
-    if strict:
-        errors += logic
-    else:
-        warnings += logic
-    return errors, warnings
-
-
-def _lint_collect_paths(
-    files: tuple[Path, ...], workspace: Optional[Path]
-) -> list[Path]:
-    """Collect SUMD.md paths from explicit files and/or workspace."""
-    paths: list[Path] = list(files)
-    if workspace:
-        ws = workspace.resolve()
-        paths += sorted(
-            d / "SUMD.md"
-            for d in ws.iterdir()
-            if d.is_dir() and not d.name.startswith(".") and (d / "SUMD.md").exists()
-        )
-    return paths
-
-
-def _lint_print_result(path: Path, r: dict, strict: bool) -> None:
-    """Print lint result for a single file."""
-    errors, warnings = _lint_classify_issues(r, strict)
-    status = "✅" if r["ok"] else "❌"
-    cb_count = len(r["codeblocks"])
-    click.echo(
-        f"{status} {path}  ({cb_count} blocks, {len(errors)} errors, {len(warnings)} warnings)"
-    )
-    for issue in r["markdown"]:
-        click.echo(f"    [markdown] ❌ {issue}")
-    for issue in r.get("logic", []):
-        click.echo(f"    [logic] ❌ {issue}")
-    for cb in r["codeblocks"]:
-        icon = "❌" if cb.kind == "error" else "⚠"
-        click.echo(f"    [codeblock L{cb.line} {cb.lang}] {icon} {cb.message}")
-
-
-def _setup_tools_venv(venv_dir: Path, tool_list: list[str], force: bool) -> Path:
-    """Create .sumd-tools venv and install tools if needed. Returns bin_dir."""
-    tools_dir = venv_dir.parent
-    if not venv_dir.exists() or force:
-        click.echo("📁 Setting up tools environment...")
-        tools_dir.mkdir(exist_ok=True)
-        result = subprocess.run(
-            [sys.executable, "-m", "venv", str(venv_dir)],
-            capture_output=True,
-            text=True,
-        )
-        if result.returncode != 0:
-            click.echo(f"❌ Failed to create venv: {result.stderr}", err=True)
-            sys.exit(1)
-        pip_path = venv_dir / "bin" / "pip"
-        if not pip_path.exists():
-            pip_path = venv_dir / "Scripts" / "pip.exe"
-        for pkg in tool_list:
-            click.echo(f"   📥 Installing {pkg}...")
-            subprocess.run([str(pip_path), "install", "-q", pkg], capture_output=True)
-    else:
-        click.echo(f"📁 Using existing venv: {venv_dir}")
-    bin_dir = venv_dir / "bin"
-    return bin_dir if bin_dir.exists() else venv_dir / "Scripts"
-
-
-def _run_code2llm_formats(bin_dir: Path, project: Path, project_output: Path) -> bool:
-    """Run code2llm for each format. Returns True if all succeeded."""
-    code2llm = bin_dir / "code2llm"
-    if not code2llm.exists():
-        code2llm = bin_dir / "code2llm.exe"
-    formats = [
-        ("toon", "analysis.toon.yaml"),
-        ("evolution", "evolution.toon.yaml"),
-        ("context", "context.md"),
-        ("calls_toon", "calls.toon.yaml"),
-        ("mermaid", "flow.mmd, compact_flow.mmd"),
-    ]
-    all_ok = True
-    for fmt, output_files in formats:
-        extra = ["--no-png"] if fmt in ("mermaid", "calls") else []
-        r = subprocess.run(
-            [str(code2llm), "./", "-f", fmt, "-o", str(project_output)] + extra,
-            capture_output=True,
-            text=True,
-            cwd=str(project),
-        )
-        if r.returncode != 0:
-            click.echo(f"   ⚠️  code2llm -f {fmt} failed", err=True)
-            all_ok = False
-        else:
-            click.echo(f"   ✅ code2llm -f {fmt} → {output_files}")
-    return all_ok
-
-
-def _run_tool_subprocess(bin_dir: Path, tool: str, cmd_args: list[str]) -> bool:
-    """Run a single analysis tool subprocess. Returns True on success."""
-    exe = bin_dir / tool
-    if not exe.exists():
-        exe = bin_dir / f"{tool}.exe"
-    r = subprocess.run([str(exe)] + cmd_args, capture_output=True, text=True)
-    if r.returncode == 0:
-        click.echo(f"   ✅ {tool} complete")
-        return True
-    click.echo(f"   ⚠️  {tool} failed", err=True)
-    return False
-
-
-_TOOL_LABELS: dict[str, str] = {
-    "code2llm": "🔬 Running code2llm...",
-    "redup": "🔍 Running redup...",
-    "vallm": "✅ Running vallm...",
-}
-
-
-def _run_analyze_tool(
-    tool: str, bin_dir: Path, project: Path, project_output: Path
-) -> bool:
-    """Run a single analysis tool. Returns True on success."""
-    if tool == "code2llm":
-        return _run_code2llm_formats(bin_dir, project, project_output)
-    if tool == "redup":
-        return _run_tool_subprocess(
-            bin_dir,
-            "redup",
-            ["scan", str(project), "--format", "toon", "--output", str(project_output)],
-        )
-    if tool == "vallm":
-        return _run_tool_subprocess(
-            bin_dir,
-            "vallm",
-            [
-                "batch",
-                str(project),
-                "--recursive",
-                "--format",
-                "toon",
-                "--output",
-                str(project_output),
-            ],
-        )
-    return False
-
-
 def analyze(project: Path, tools: str, force: bool):
     """Run analysis tools (code2llm, redup, vallm) on a project.
 
@@ -681,172 +556,6 @@ def analyze(project: Path, tools: str, force: bool):
     )
     click.echo(f"📁 Output: {project_output}/")
     sys.exit(0 if success_count == len(tool_list) else 1)
-
-
-def _api_scenario_template(
-    name: str, scenario_type: str, endpoints_block: str, base_path: str = "/api/v1"
-) -> str:
-    n_ep = endpoints_block.strip().count("\n  ") + 1
-    return (
-        f"# SCENARIO: {name}.testql.toon.yaml — {name.replace('-', ' ')}\n"
-        f"# TYPE: {scenario_type}\n"
-        f"# VERSION: 1.0\n"
-        f"# GENERATED: true\n"
-        f"\n"
-        f"# ── Konfiguracja ──────────────────────────────────────\n"
-        f"CONFIG[1]{{key, value}}:\n"
-        f"  base_path,  {base_path}\n"
-        f"\n"
-        f"# ── Wywołania API ─────────────────────────────────────\n"
-        f"API[{n_ep}]{{method, endpoint, status}}:\n"
-        f"{endpoints_block}\n"
-        f"# ── Asercje ───────────────────────────────────────────\n"
-        f"# ASSERT[0]{{field, op, expected}}:\n"
-        f"#   NOTE: fill in assertions\n"
-    )
-
-
-def _scaffold_write(
-    path: Path, content: str, force: bool, generated: list[str], skipped: list[str]
-) -> None:
-    if path.exists() and not force:
-        skipped.append(path.name)
-    else:
-        path.write_text(content, encoding="utf-8")
-        generated.append(path.name)
-
-
-def _scaffold_smoke_scenario(
-    paths: dict,
-    base: str,
-    out_dir: Path,
-    force: bool,
-    generated: list[str],
-    skipped: list[str],
-) -> None:
-    health_paths = [
-        p for p in paths if any(k in p.lower() for k in ("health", "ping", "status"))
-    ]
-    ep_block = (
-        "\n".join(f"  GET,  {p},  200" for p in health_paths[:5])
-        if health_paths
-        else "  GET,  /health,  200  # NOTE: adjust path"
-    )
-    _scaffold_write(
-        out_dir / "smoke-health.testql.toon.yaml",
-        _api_scenario_template("smoke-health", "smoke", ep_block, base),
-        force,
-        generated,
-        skipped,
-    )
-
-
-def _scaffold_crud_scenarios(
-    groups: dict,
-    base: str,
-    out_dir: Path,
-    force: bool,
-    generated: list[str],
-    skipped: list[str],
-) -> None:
-    for resource, eps in sorted(groups.items()):
-        if resource in ("health", "ping", "status"):
-            continue
-        safe_resource = re.sub(r"[^\w\-]", "_", resource).strip("_")
-        ep_lines = [f"  {method},  {path},  200" for method, path in eps[:8]]
-        if not ep_lines:
-            continue
-        _scaffold_write(
-            out_dir / f"api-{safe_resource}.testql.toon.yaml",
-            _api_scenario_template(
-                f"api-{safe_resource}", "api", "\n".join(ep_lines), base
-            ),
-            force,
-            generated,
-            skipped,
-        )
-
-
-def _scaffold_from_openapi(
-    spec: dict,
-    out_dir: Path,
-    scenario_type: str,
-    force: bool,
-    generated: list[str],
-    skipped: list[str],
-) -> int:
-    """Generate scenarios from OpenAPI spec into out_dir. Returns number of path entries."""
-    paths = spec.get("paths", {})
-    groups: dict[str, list[tuple[str, str]]] = {}
-    for path, methods in paths.items():
-        segment = path.strip("/").split("/")[0] or "root"
-        for method in methods:
-            if method.lower() in ("get", "post", "put", "delete", "patch"):
-                groups.setdefault(segment, []).append((method.upper(), path))
-
-    base = spec.get("servers", [{}])[0].get("url", "/api/v1").rstrip("/")
-
-    if scenario_type in ("smoke", "all"):
-        _scaffold_smoke_scenario(paths, base, out_dir, force, generated, skipped)
-
-    if scenario_type in ("crud", "api", "all"):
-        _scaffold_crud_scenarios(groups, base, out_dir, force, generated, skipped)
-
-    return len(paths)
-
-
-def _scaffold_generic(
-    out_dir: Path, force: bool, generated: list[str], skipped: list[str]
-) -> None:
-    click.echo("⚠️  No openapi.yaml found — generating generic smoke scaffold")
-    content = _api_scenario_template(
-        "smoke-generic",
-        "smoke",
-        "  GET,  /health,  200  # NOTE: adjust\n  GET,  /,  200       # NOTE: adjust",
-        "/api/v1  # NOTE: adjust base_path",
-    )
-    _scaffold_write(
-        out_dir / "smoke-generic.testql.toon.yaml", content, force, generated, skipped
-    )
-
-
-def _scaffold_openapi_flow(
-    openapi_path: Path, out_dir: Path, scenario_type: str, force: bool, generated: list[str], skipped: list[str]
-) -> None:
-    """Parse openapi.yaml and generate scaffolded scenarios."""
-    import yaml as _yaml
-    click.echo(f"📖 Reading {openapi_path.name}...")
-    try:
-        spec = _yaml.safe_load(openapi_path.read_text(encoding="utf-8"))
-    except Exception as e:
-        click.echo(f"❌ Failed to parse openapi.yaml: {e}", err=True)
-        sys.exit(1)
-    n_paths = _scaffold_from_openapi(
-        spec, out_dir, scenario_type, force, generated, skipped
-    )
-    groups_count = len(
-        {
-            (path.strip("/").split("/")[0] or "root")
-            for path in spec.get("paths", {})
-        }
-    )
-    click.echo(f"   📋 {n_paths} paths → {groups_count} resource groups")
-
-
-def _print_scaffold_summary(generated: list[str], skipped: list[str], out_dir: Path) -> None:
-    """Print the final summary of scaffolded files."""
-    click.echo(
-        f"\n📊 scaffold: {len(generated)} generated | {len(skipped)} skipped (use --force to overwrite)"
-    )
-    for f in generated:
-        click.echo(f"   ✅ {out_dir / f}")
-    for f in skipped:
-        click.echo(f"   ⏭  {out_dir / f} (already exists)")
-    if generated:
-        click.echo("\n💡 Next steps:")
-        click.echo("   1. Fill in ASSERTs in generated files")
-        click.echo("   2. Run: sumd scan . --fix   (to embed scenarios in SUMD.md)")
-        click.echo(f"   3. Run: testql run {out_dir}/")
 
 
 @cli.command()

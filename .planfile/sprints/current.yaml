@@ -1668,9 +1668,10 @@ sprint:
         Shell: `task koru:mcp:bootstrap`'
       execution:
         attempt: 0
+        finished_at: '2026-07-10T10:48:56.837361Z'
         max_attempts: 1
         queue: operator
-        state: ready
+        state: done
       executor:
         kind: shell
         mode: noninteractive
@@ -1685,6 +1686,16 @@ sprint:
           Shell: `task koru:mcp:bootstrap`'
         source: koru task
         timestamp: '2026-07-06T08:05:18.521262+00:00'
+      - action: status_change
+        changes:
+        - execution
+        - status
+        execution_state: done
+        previous_execution_state: ready
+        previous_status: open
+        source: planfile.store
+        status: done
+        timestamp: '2026-07-10T10:48:56.838665+00:00'
       id: STARTER-022
       inputs:
         api_headers: {}
@@ -1727,6 +1738,6 @@ sprint:
         timestamp: '2026-07-06T08:05:18.521262+00:00'
         tool: koru-operator-pipeline
       sprint: current
-      status: open
+      status: done
       sync: {}
-      updated_at: '2026-07-06T08:05:18.521262+00:00'
+      updated_at: '2026-07-10T10:48:56.838628+00:00'

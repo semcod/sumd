@@ -13,6 +13,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   walk with `os.walk` and prune ignored directories (`.gitignore`/`.sumdignore` patterns and
   `_IGNORE_DIRS`) before descending into them, avoiding a full stat of venv/node_modules trees.
 
+## [0.3.58] - 2026-07-13
+
+### Docs
+- Update README.md
+
+### Test
+- Update tests/test_cli_helpers.py
+
+### Other
+- Update .koru/event-store.jsonl
+- Update .koru/events/observability.jsonl
+- Update .nlp2dsl/environment.doql.less
+- Update .nlp2dsl/registry/environment.doql.less
+- Update .planfile/sprints/current.yaml
+- Update .planfile/sprints/current.yaml.fast.json
+- Update sumd/cli.py
+- Update sumd/cli_analyze.py
+- Update sumd/cli_lint.py
+- Update sumd/cli_scaffold.py
+- ... and 1 more files
+
 ## [0.3.57] - 2026-07-05
 
 ### Docs
