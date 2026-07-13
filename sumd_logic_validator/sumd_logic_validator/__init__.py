@@ -1,3 +1,3 @@
 """SUMD Logic Validator logic runner."""
 
-__version__ = "0.3.58"
+__version__ = "0.3.59"
