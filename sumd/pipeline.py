@@ -23,6 +23,7 @@ ACCEPTANCE (Faza 1 complete):
 
 from __future__ import annotations
 
+import re
 import subprocess
 from pathlib import Path
 
@@ -53,11 +54,24 @@ from sumd.sections.base import RenderContext
 from sumd.toon_parser import extract_testql_scenarios
 
 
+def _map_module_count(text: str) -> int:
+    """Extract the module count from a map.toon.yaml `M[<n>]:` header line, or -1 if absent."""
+    m = re.search(r"^M\[(\d+)\]:", text, re.MULTILINE)
+    return int(m.group(1)) if m else -1
+
+
 def _refresh_map_toon(proj_dir: Path) -> None:
     """Regenerate project/map.toon.yaml and project/logic.pl from current source before embedding.
 
     Called automatically by RenderPipeline._collect() so that every
     `sumd scan` / `sumd .` / `sumr .` embeds up-to-date analysis and Prolog logic files.
+
+    generate_map_toon() only introspects Python modules in depth (via `ast`);
+    other languages are listed but not analysed for imports/exports/functions.
+    A richer map.toon.yaml may already be on disk (e.g. written by `code2llm`
+    just before sumd runs in the same pipeline) — never regress that file to
+    one covering fewer modules, since that would silently drop information
+    instead of refreshing it.
 
     Silently skips if generation fails.
     """
@@ -65,8 +79,13 @@ def _refresh_map_toon(proj_dir: Path) -> None:
         content = generate_map_toon(proj_dir)
         if content:
             map_path = proj_dir / "project" / "map.toon.yaml"
-            map_path.parent.mkdir(parents=True, exist_ok=True)
-            map_path.write_text(content, encoding="utf-8")
+            regresses = False
+            if map_path.exists():
+                existing = map_path.read_text(encoding="utf-8", errors="ignore")
+                regresses = _map_module_count(existing) > _map_module_count(content)
+            if not regresses:
+                map_path.parent.mkdir(parents=True, exist_ok=True)
+                map_path.write_text(content, encoding="utf-8")
     except Exception:  # noqa: BLE001
         pass
 
